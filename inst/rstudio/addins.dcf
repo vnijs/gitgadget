@@ -1,0 +1,4 @@
+Name: Git Gadget
+Description: Rstudio addin for version control and assignment management using git
+Binding: gitgadget
+Interactive: true
