@@ -11,7 +11,7 @@ if (rstudioapi::isAvailable()) {
 #' export
 gitgadget <- function() {
   ui <- miniPage(
-    gadgetTitleBar("GIT gadget"),
+    gadgetTitleBar("GITGADGET"),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
     miniTabstripPanel(
       miniTabPanel("Introduce", icon = icon("hand-paper-o"),
@@ -107,6 +107,8 @@ gitgadget <- function() {
     })
 
     .ssh_exists <- reactive({
+      ## update after pressing the intro_ssh button
+      input$intro_ssh
       os_type <- Sys.info()["sysname"]
       if (os_type == "Windows") {
         home <- file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH"))
@@ -137,7 +139,7 @@ gitgadget <- function() {
 
         if (length(email) == 0) {
           cat("Make sure you have an email address and user name set before generating the SSH key")
-          return(invisible())
+          return(NULL)
         }
 
         if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
