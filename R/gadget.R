@@ -144,7 +144,7 @@ gitgadget <- function() {
 
         if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
 
-        paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/id_rsa -P ''") %>%
+        paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/id_rsa -N ''") %>%
           system(.)
 
         key <- readLines("~/.ssh/id_rsa.pub")
