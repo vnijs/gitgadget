@@ -2,16 +2,20 @@
 # shell(paste0("setx PATH \"", Sys.getenv("RS_RPOSTBACK_PATH") %>% gsub("rpostback","postback",.), "\""))
 # shell("PATH")
 
-if (rstudioapi::isAvailable()) {
-  projdir <- rstudioapi::getActiveProject()
-  basedir <- normalizePath(file.path(projdir, ".."))
-} else {
-  projdir <- getwd()
-  basedir <- normalizePath(file.path(projdir,".."))
-}
-
 #' export
 gitgadget <- function() {
+
+  ## points to gitgadget project unfortunately
+  # if (rstudioapi::isAvailable()) {
+  #   projdir <- rstudioapi::getActiveProject()
+  #   basedir <- normalizePath(file.path(projdir, ".."))
+  # } else {
+  #   projdir <- getwd()
+  #   basedir <- normalizePath(file.path(projdir,".."))
+  # }
+
+  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(),".."))))
+
   ui <- miniPage(
     gadgetTitleBar("GITGADGET"),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
@@ -245,6 +249,7 @@ gitgadget <- function() {
     output$createoutput <- renderPrint({
       input$create
       ret <- create()
+      cat("Create process complete. Check the console for messages")
     })
 
     clone <- eventReactive(input$clone, {
