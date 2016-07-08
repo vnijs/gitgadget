@@ -1,4 +1,3 @@
-printf <- function(...) cat(paste0(sprintf(...), collapse = "\n"))
 checkerr <- function(code) floor(code/100) == 2
 
 connect <- function(username, password, server = "https://gitlab.com/api/v3/") {
@@ -13,9 +12,6 @@ connect <- function(username, password, server = "https://gitlab.com/api/v3/") {
 }
 
 groupID <- function(name, path, token, server) {
-  # name <- course_name
-  # path <- name
-
   h <- new_handle()
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "groups")
@@ -61,15 +57,11 @@ userID <- function(username, token, server) {
   }
 }
 
-groupr <- function(group_name, path, token, server) {
-
-  # server <- SERVER
-  # group_name <- course_name
-
+groupr <- function(groupname, path, token, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl <- paste0(server, "groups?name=", group_name, "&path=", path, "&visibility_level=0")
+  murl <- paste0(server, "groups?name=", groupname, "&path=", path, "&visibility_level=0")
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE)
     return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
@@ -79,15 +71,12 @@ groupr <- function(group_name, path, token, server) {
 }
 
 add_users <- function(user_ids, group_id, token, permission, server) {
-  # group_id <- course_id
   sapply(user_ids, function(user_id) {
     add_user(user_id, group_id, token, permission, server)$status
   })
 }
 
 add_user <- function(user_id, group_id, token, permission, server) {
-  # user_id <- user_ids[1]
-  # permission <- 20
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
@@ -98,39 +87,34 @@ add_user <- function(user_id, group_id, token, permission, server) {
     if (mesg == "Already exists") {
       return(list(status = "OKAY"))
     } else {
-      # print(mesg)
       return(list(status = "SERVER_ERROR", message = mesg))
     }
   }
 
-  ## what does this do?
   resp$content <- fromJSON(rawToChar(resp$content))
   list(status = "OKAY")
 }
 
 #` export
-create_group <- function(username, password, course_name, student_file,
-                         pre = "rady-", permission = 20,
+create_group <- function(username, password, groupname, student_file,
+                         pre = "", permission = 20,
                          server = "https://gitlab.com/api/v3/") {
 
-  # pre <- "rady-msba-"
-  ## permission 20 --> reporter
-
-  cn <- paste0(pre, course_name)
   resp <- connect(username, password, server)
   if (resp$status != "OKAY")
     stop("Error connecting to server: check username/password/server")
 
   token <- resp$token
-  resp <- groupID(cn, cn, token, server)
+  resp <- groupID(groupname, groupname, token, server)
 
   if (resp$status == "NO_SUCH_GROUP")
-    resp <- groupr(cn, cn, token, server = server)
+    resp <- groupr(groupname, groupname, token, server = server)
 
   if (resp$status != "OKAY") {
     message("Unable to create or get group: ", resp$message)
     return(invisible())
   }
+
 
   ## must give users permission in order to forked it to them
   course_id <- resp$group_id
@@ -164,19 +148,19 @@ projID <- function(path_with_namespace, token, server) {
 
   mainproj <- resp$repos
   mainproj <- mainproj[mainproj$path_with_namespace == path_with_namespace,]
-  if (length(mainproj$id)==0) {
-    message("No such repo: ", path_with_namespace, "  Status code: ",mainproj$message)
-    list(status="NO_SUCH_REPO",message='No such repo')
+  if (length(mainproj$id) == 0) {
+    message("No such repo: ", path_with_namespace, "  Status code: ", mainproj$message)
+    list(status = "NO_SUCH_REPO", message = "No such repo")
   } else {
-    list(status="OKAY",project_id=mainproj$id[1])
+    list(status = "OKAY", project_id = mainproj$id[1])
   }
 }
 
-forkRepo <- function(proj_id, token, server) {
+forkRepo <- function(token, project_id, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
-  handle_setheaders(h,"PRIVATE-TOKEN" = token)
-  murl <- paste0(server, "projects/fork/", proj_id)
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  murl <- paste0(server, "projects/fork/", project_id)
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem forking")
@@ -187,11 +171,12 @@ forkRepo <- function(proj_id, token, server) {
   }
 }
 
-renameRepo <- function(proj_id, token, newname) {
+## not currently used
+renameRepo <- function(project_id, token, newname, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "PUT")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl <- paste0(SERVER, "projects/", proj_id, "?name=", newname)
+  murl <- paste0(server, "projects/", project_id, "?name=", newname)
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem changing repo name")
@@ -201,25 +186,24 @@ renameRepo <- function(proj_id, token, newname) {
   }
 }
 
-setupteam <- function(leader_token, other_user_ids, assignment_id, course, team_name, server, pre) {
-  ##fork if needed for leader
-  resp <- get_allprojects(leader_token, server, everything = TRUE)
+# setupteam <- function(token, others, project_id, course, team_name, server, pre) {
+setupteam <- function(token, others, project_id, server, pre) {
+  ##fork if needed for team lead
+  resp <- get_allprojects(token, server, everything = TRUE)
 
-  if (!"forked_from_project" %in% names(resp$repos) || !assignment_id %in% resp$repos$forked_from_project$id) {
-  # if (is.null(resp$repos$forked_from_project) | !(assignment_id %in% resp$repos$forked_from_project$id)) {
-    # printf("fork needs to be created for leader")
+  if (!"forked_from_project" %in% names(resp$repos) || !project_id %in% resp$repos$forked_from_project$id) {
     message("Creating fork for team lead")
-    resp <- forkRepo(assignment_id, leader_token, server)
+    resp <- forkRepo(token, project_id, server)
     if (resp$status != "OKAY") {
       message("Error forking for leader")
-      return()
+      return(invisible())
     }
     leader_project_id <- resp$content$id
     leader_project_name <- resp$content$name
     upstream_name <- resp$content$name
   } else {
     message("Team lead already forked the assignment")
-    id <- which(resp$repos$forked_from_project$id == assignment_id)
+    id <- which(resp$repos$forked_from_project$id == project_id)
     if (length(id) == 0) {
       message("Can't find repo ID for team lead")
       return()
@@ -229,26 +213,10 @@ setupteam <- function(leader_token, other_user_ids, assignment_id, course, team_
     upstream_name <- resp$repos$forked_from_project$name[id]
   }
 
-  ##rename leader's repo if needed.
-  ## VN -- needed?
-  # if (upstream_name == leader_project_name) {
-  #   # course <- gsub('rady-msba-(.*)','\\1',course)
-  #   cn <- gsub(paste0(pre,"-(.*)","\\1",course)
-  #   leader_project_name <- paste(cn,'-',team_name,'-',upstream_name,sep='')
-  #   resp <- renameRepo(leader_project_id,leader_token,leader_project_name)
-  #   if (resp$status=='OKAY') {
-  #       printf("Renamed leader's repo to %s",leader_project_name)
-  #   } else {
-  #     printf("Error renaming leader's repo to %s",leader_project_name)
-  #   }
-  # } else {
-  #   printf("Leader repo has already been renamed to %s",leader_project_name)
-  # }
-
-  #add other_user_ids as users
-  if (length(other_user_ids) > 0) {
+  #add others as users
+  if (length(others) > 0) {
     message("Adding team members to lead's repo")
-    add_team(leader_project_id, leader_token, other_user_ids, server)
+    add_team(leader_project_id, token, others, server)
   } else {
     message("No one to add to team")
   }
@@ -265,11 +233,9 @@ add_team <- function(proj_id, token, team_mates, server) {
     resp <- curl_fetch_memory(murl, h)
     if (checkerr(resp$status_code) == TRUE) {
       content <- fromJSON(rawToChar(resp$content))
-      # printf("\nAdding user %s to team\n",content$name)
       message("Adding user ", content$name, " to team")
       list(status = "OKAY", content = content)
     } else {
-      # printf("\nError adding %s to team: server code %d\n",otherid,resp$status_code)
       message("Error adding ", otherid, " to team: server code ", resp$status_code)
       content <- fromJSON(rawToChar(resp$content))
       list(status = "SERVER_ERROR", content = content)
@@ -278,71 +244,42 @@ add_team <- function(proj_id, token, team_mates, server) {
 }
 
 #` export
-assign_work <- function(username, password, course_name, assignment, student_file,
-                        type = "individual", pre = "rady-", server = "https://gitlab.com/api/v3/") {
-
-  cn <- paste0(pre, course_name)
+assign_work <- function(username, password, groupname, assignment, student_file,
+                        type = "individual", pre = "", server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
     stop("Error connecting to server: check username/password/server")
 
   token <- resp$token
-  upstream_name <- paste0(cn, "/", assignment)
+  upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
   resp <- projID(upstream_name, token, server)
 
   if (resp$status != "OKAY")
     stop("Error getting assignment ",upstream_name)
 
-  assignment_id <- resp$project_id
+  project_id <- resp$project_id
   student_data <- read.csv(student_file, stringsAsFactor = FALSE)
   student_data$user_id <- userIDs(student_data$userid, token, server)
 
   if (type == "individual")
-   student_data$team <- paste("team",1:nrow(student_data))
+    student_data$team <- paste("team",1:nrow(student_data))
 
   setup <- function(dat) {
-    # dat <- student_data[1:2,]
     dat$rownum <- sample(1:nrow(dat))
     leader <- which(with(dat, rownum == min(rownum)))
     teamname <- dat$team[leader]
-    setupteam(leader_token = dat$token[leader], other_user_ids = dat$user_id[-leader],
-              assignment_id = assignment_id, course = cn, team_name = teamname, server, pre)
+    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server, pre)
     dat$teamname <- teamname
     dat$leader <- dat$userid[leader]
     dat
   }
 
-  student_data %>% group_by(team) %>% do(setup(.)) %>% print(n = 1000)
-
-  # aggregate(student_data$rownum,by=list(team=student_data$team),function(rownum) {
-  #     leader <- min(rownum)
-  #     if (length(rownum)!=1) {
-  #         others <- rownum[!(rownum %in% leader)]
-  #         printf("Setting up team:%s : Leader: %s Others: %s",student_data$team[leader],student_data$userid[leader],
-  #                paste(student_data$userid[others],sep=','))
-  #     } else {
-  #         others <- c()
-  #         printf("Setting up team:%s : Leader: %s Others: -",student_data$team[leader],student_data$userid[leader])
-  #     }
-  #     teamname <- student_data$team[leader]
-  #     setupteam(leader_token=student_data$token[leader],
-  #               other_user_ids=student_data$user_id[others],
-  #               assignment_id=assignment_id,
-  #               course=cn,
-  #               team_name=teamname)
-  # })
-  return(NULL)
+  student_data %>% group_by_("team") %>% do(setup(.)) %>% print(n = 1000)
+  return(invisible())
 }
 
-#####################
-
 maker <- function(repo_name, token, server, namespace = "") {
-
-  # namespace <- cn
-  # repo_name <- assignment
-  # namespace
-  # repo_name
 
   if (namespace == "") {
     namespace_id <- namespace
@@ -384,47 +321,42 @@ maker <- function(repo_name, token, server, namespace = "") {
 }
 
 #` export
-create_repo <- function(username, password, course_name, assignment, directory,
-                        pre = "rady-", server = "https://gitlab.com/api/v3/") {
+create_repo <- function(username, password, groupname, assignment, directory,
+                        pre = "", server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server);
   if (resp$status != 'OKAY')
     stop("Error connecting to server: check username/password/server")
 
   token <- resp$token
-  if (course_name == "" || course_name == username) {
-    cn <- ""
-  } else {
-    cn <- paste0(pre, course_name)
-  }
+  gn <- ifelse (groupname == "" || groupname == username, "", groupname)
 
-  # message("Making repo ", assignment, " for course ", cn)
-  resp <- maker(assignment, token, server, cn)
+  message("Making repo ", paste0(pre, assignment), " in group ", gn)
+  resp <- maker(paste0(pre, assignment), token, server, gn)
 
   if (resp$status == "NO_SUCH_GROUP")
-    stop("Add group ", cn, " before pushing assignment ", assignment)
+    stop("Add group ", gn, " before pushing assignment ", assignment)
 
   ## set directory and reset to current on function exit
-  if (!dir.exists(directory)) {
-    dir.create(directory, recursive = TRUE)
-    cat("New repo created by gitgadget", file = file.path(directory, "README.md"))
+  adir <- file.path(directory, assignment)
+  if (!dir.exists(adir)) {
+    dir.create(adir, recursive = TRUE)
+    cat("New repo created by gitgadget", file = file.path(adir, "README.md"))
   }
 
-  owd <- setwd(directory)
+  owd <- setwd(adir)
   on.exit(setwd(owd))
 
   ## initialize git repo if it doesn't exist yet
   if (!dir.exists(".git")) system2("git", "init")
 
-  ## needed? doesn't seem to work on windows
+  ## needed? commands not available on windows
   # system2("unset", "SSH_ASKPASS")
   # system2("unsetenv", "SSH_ASKPASS")
 
-  if (cn != "") cn <- paste0(cn, "/")
-  if (cn == "") cn <- paste0(cn, username, "/")
-  murl <- paste0("https://", username, ":", password,"@gitlab.com/", cn, assignment, ".git")
+  if (gn == "") gn <- username
+  murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
   rorg <- system("git remote -v", intern = TRUE)
-  rorg
   borg <- "origin"
 
   if (length(rorg) == 0) {
@@ -441,59 +373,63 @@ create_repo <- function(username, password, course_name, assignment, directory,
   system2("git", c("push", "-u", borg, "master"))
 }
 
-##############
+## test section
 main__ <- FALSE
-
 if (main__) {
 
-  setwd("~/gh/gitgadget")
+  library(curl)
+  library(jsonlite)
+  library(dplyr)
+
+  ## settings
   server <- getOption("git.server", default = "https://gitlab.com/api/v3/")
   username <- getOption("git.user", default = "")
-
-  ## why not ssh with key?
   password <- getOption("git.password", default = "")
-
-  ## rady-msba will be added in course-update
-  course_name <- "mgta-bc"
-  group_name <- course_name
-
-  ##important - name the assignment something unique. because they will all reside in the student's namespce
-  ##so if we dont name it appropriately, two faculty might have assignment1 which would create conflict.
-  ##and we wont be able to fork.
-  assignment <- "assignment1" %>% paste0(course_name, "-", .)
+  groupname <- "rady-mgta-bc-2016"
   student_file <- "~/Desktop/mgba-students.csv"
-  # pre = ""
-  pre = "rady-mgta460"
-  directory <- "/Users/vnijs/Github/rady-mgta-bc"
+  stopifnot(file.exists(student_file))
+
+  ## to debug code
+  permission <- 20
+
+  ## important - name the assignment repo something unique because they will all reside
+  ## in the student's namespace, i.e., two faculty might have assignment1
+  assignment <- "assignment1"
+  type <- "individual"
+  pre <- paste0(groupname,"-")
+  directory <- paste0("/Users/vnijs/Github/", groupname)
+  stopifnot(file.exists(directory))
+  stopifnot(file.exists(file.path(directory, assignment)))
 
   ## create a group for a course where all assignments and cases will be posted
   create_group(
-    username, password, course_name, student_file,
+    username, password, groupname, student_file,
     pre = pre, server = server
   )
 
   ## get or create a repo for assignments and cases
   create_repo(
-    username, password, course_name, assignment, directory,
+    username, password, groupname, assignment, directory,
     pre = pre, server = server
   )
 
   assign_work(
-    username, password, course_name, assignment, student_file,
-    type = "individual", pre = pre, server = server
+    username, password, groupname, assignment, student_file,
+    type = type, pre = pre, server = server
   )
 
-  assignment <- "assignment2" %>% paste0(course_name, "-", .)
+  ## same steps for a team assignment
+  assignment <- "assignment2"
+  stopifnot(file.exists(file.path(directory, assignment)))
+  type <- "team"
 
   create_repo(
-    username, password, course_name, assignment, directory,
+    username, password, groupname, assignment, directory,
     pre = pre, server = server
   )
 
   assign_work(
-    username, password, course_name, assignment, student_file,
-    type = "team", pre = pre, server = server
+    username, password, groupname, assignment, student_file,
+    type = type, pre = pre, server = server
   )
 }
-
-## connect gets the faculties token ... provide directly? Perhaps in .Rprofile?
