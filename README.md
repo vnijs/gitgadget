@@ -65,7 +65,7 @@ Forks the assignment repo uploaded earlier for each student/team and creates the
 
 TODO. Requries an input file of the same form shown above.
 
-## Intial settings
+## Initial settings
 
 Supports the following starting values from .Rprofile:
 
@@ -74,4 +74,6 @@ Supports the following starting values from .Rprofile:
 * options(git.password = "yourgitlabpassword")
 * options(git.home = "/Users/you/Desktop/git")
 * options(git.server = "https://gitlab.com/api/v3/")
-* options(git.prefix = "school-courseid-2016")
+* options(git.prefix = "")
+
+On Windows use an editor (e.g., notepad) to create the .Rprofile file in your home directory. To find out what R thinks is the home directory enter `Sys.getenv("HOME")` in the R(studio) console
