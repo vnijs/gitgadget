@@ -1,5 +1,10 @@
 checkerr <- function(code) floor(code/100) == 2
 
+is_not <- function(x) length(x) == 0 || is.na(x)
+is_empty <- function(x, empty = "\\s*") if (is_not(x) || grepl(paste0("^",empty,"$"), x)) TRUE else FALSE
+not_pressed <- function(x) if (is.null(x) || x == 0) TRUE else FALSE
+pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
+
 connect <- function(username, password, server = "https://gitlab.com/api/v3/") {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
@@ -374,8 +379,8 @@ create_repo <- function(username, password, groupname, assignment, directory,
 }
 
 ## test section
-main__ <- FALSE
-if (main__) {
+main_git__ <- FALSE
+if (main_git__) {
 
   library(curl)
   library(jsonlite)
