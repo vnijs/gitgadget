@@ -331,7 +331,7 @@ create_repo <- function(username, password, groupname, assignment, directory,
   token <- resp$token
   gn <- ifelse (groupname == "" || groupname == username, "", groupname)
 
-  message("Making repo ", paste0(pre, assignment), " in group ", gn)
+  message("Making repo ", paste0(pre, assignment), " in group ", ifelse (gn == "", username, gn))
   resp <- maker(paste0(pre, assignment), token, server, gn)
 
   if (resp$status == "NO_SUCH_GROUP")
@@ -431,5 +431,16 @@ if (main__) {
   assign_work(
     username, password, groupname, assignment, student_file,
     type = type, pre = pre, server = server
+  )
+
+  ## create a repo on gitlab in the users namespace
+  groupname <- ""
+  pre <- ""
+  assignment <- "gitgadget-test-repo"
+  directory <- "/Users/vnijs/Github/"
+
+  create_repo(
+    username, password, groupname, assignment, directory,
+    pre = pre, server = server
   )
 }

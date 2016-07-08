@@ -3,9 +3,11 @@
 # shell("PATH")
 
 if (rstudioapi::isAvailable()) {
-  basedir <- normalizePath(file.path(rstudioapi::getActiveProject(), ".."))
+  projdir <- rstudioapi::getActiveProject()
+  basedir <- normalizePath(file.path(projdir, ".."))
 } else {
-  basedir <- normalizePath(file.path(getwd(),".."))
+  projdir <- getwd()
+  basedir <- normalizePath(file.path(projdir,".."))
 }
 
 #' export
@@ -35,8 +37,8 @@ gitgadget <- function() {
             textInput("create_group","Group name:", value = ""),
             textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
           ),
-          textInput("create_repo","Repo name:", value = ""),
           uiOutput("ui_create_directory"),
+          # textInput("create_repo","Repo name:", value = ""),
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           fillRow(height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
@@ -210,8 +212,11 @@ gitgadget <- function() {
     # })
 
     output$ui_create_directory <- renderUI({
-      init = file.path(getOption("git.home", basedir), input$create_repo)
-      textInput("create_directory","Local directory:", value = init)
+      # init = file.path(getOption("git.home", basedir), input$create_repo)
+      # init = file.path(getOption("git.home", default = basedir))
+      if (projdir == "")
+        projdir <- file.path(getOption("git.home", default = basedir))
+      textInput("create_directory","Local directory:", value = projdir)
     })
 
     create_file_find <- reactive({
@@ -230,8 +235,10 @@ gitgadget <- function() {
           input$create_user_name, input$create_password, input$create_group, input$create_user_file, input$create_pre, input$create_server
         )
       }
+      repo <- basename(input$create_directory)
+      directory <- dirname(input$create_directory)
       create_repo(
-        input$create_user_name, input$create_password, input$create_group, input$create_repo, input$create_directory, input$create_pre, input$create_server
+        input$create_user_name, input$create_password, input$create_group, repo, directory, input$create_pre, input$create_server
       )
     })
 
