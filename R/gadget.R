@@ -27,7 +27,7 @@ gitgadget <- function() {
           textInput("intro_user_email","User email:", value = getOption("git.email", "")),
           uiOutput("ui_intro_buttons"),
           hr(),
-          verbatimTextOutput("introduce")
+          verbatimTextOutput("introduce_output")
         )
       ),
       miniTabPanel("Create", icon = icon("git"),
@@ -53,18 +53,22 @@ gitgadget <- function() {
           ),
           actionButton("create", "Create"),
           hr(),
-          verbatimTextOutput("createoutput")
+          verbatimTextOutput("create_output")
         )
       ),
       miniTabPanel("Clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
+          fillRow(height = "70px", width = "300px",
+            textInput("clone_user_name","User name:", value = getOption("git.user", "")),
+            passwordInput("clone_password","Password:", value = getOption("git.password", ""))
+          ),
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
           actionButton("clone", "Clone"),
           hr(),
-          verbatimTextOutput("cloneoutput")
+          verbatimTextOutput("clone_output")
         )
       ),
       miniTabPanel("Branch", icon = icon("code-fork"),
@@ -79,7 +83,9 @@ gitgadget <- function() {
           HTML("<h2>Delete an existing branch</h2>"),
           uiOutput("ui_branch_delete_name"),
           actionButton("branch_unlink_remote", "Unlink remote"),
-          actionButton("branch_delete", "Delete local")
+          actionButton("branch_delete", "Delete local"),
+          hr(),
+          verbatimTextOutput("branch_output")
         )
       ),
       miniTabPanel("Collect", icon = icon("cloud-download"),
@@ -99,13 +105,13 @@ gitgadget <- function() {
   server <- function(input, output, session) {
 
     observeEvent(input$intro_git, {
-      if (input$intro_user_name != "") {
+      if (!is_empty(input$intro_user_name)) {
         cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
       }
 
-      if (input$intro_user_email != "") {
+      if (!is_empty(input$intro_user_email)) {
         cmd <- paste("git config --global --replace-all user.email", input$intro_user_email)
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
@@ -115,25 +121,30 @@ gitgadget <- function() {
     .ssh_exists <- reactive({
       ## update after pressing the intro_ssh button
       input$intro_ssh
+      input$intro_keyname
       os_type <- Sys.info()["sysname"]
       if (os_type == "Windows") {
         home <- file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH"))
       } else if (os_type == "Darwin") {
         home <- Sys.getenv("HOME")
       }
-      .ssh_path <- file.path(home, ".ssh/id_rsa.pub")
+      # keyname <- if (input$intro_keyname ==
+      keyname <- ifelse (is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+      .ssh_path <- file.path(home, ".ssh", paste0(keyname, ".pub"))
       if (file.exists(.ssh_path)) .ssh_path else ""
     })
 
+    # input <- output <- list()
+
     output$ui_intro_buttons <- renderUI({
-      if (.ssh_exists() != "") {
-        actionButton("intro_git", "Introduce")
-      } else {
-        tagList(
-          actionButton("intro_git", "Introduce"),
-          actionButton("intro_ssh", "SSH key")
-        )
-      }
+      tagList(
+        fillRow(height = "70px", width = "300px",
+          textInput("intro_keyname","Key name:", value = "id_rsa"),
+          textInput("intro_passphrase","Pass-phrase:", value = "")
+        ),
+        actionButton("intro_git", "Introduce"),
+        actionButton("intro_ssh", "SSH key")
+      )
     })
 
     intro_ssh <- eventReactive(input$intro_ssh, {
@@ -145,42 +156,75 @@ gitgadget <- function() {
 
         if (length(email) == 0) {
           cat("Make sure you have an email address and user name set before generating the SSH key")
-          return(NULL)
+          return(inivisible())
         }
 
-        if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
+        if (is_empty(.ssh_exists())) {
+          if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
+          keyname <- ifelse (is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+          paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/", keyname," -N '", input$intro_passphrase, "'") %>%
+           system(.)
 
-        paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/id_rsa -N ''") %>%
-          system(.)
+          # key <- readLines(.ssh_exists())
+          key <- readLines(paste0("~/.ssh/",keyname,".pub"))
+          out <- pipe("pbcopy")
+          cat(key, file = out)
+          close(out)
+          cat("\nYour new public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
 
-        key <- readLines("~/.ssh/id_rsa.pub")
-        out <- pipe("pbcopy")
-        cat(key, file = out)
-        close(out)
+        } else {
+          key <- readLines(.ssh_exists())
+          out <- pipe("pbcopy")
+          cat(key, file = out)
+          close(out)
+          cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+        }
       } else if (os_type == "Windows") {
-
-        if (.ssh_exists() != "") {
+        if (!is_empty(.ssh_exists())) {
           key <- readLines(.ssh_exists())
           cat(key, file = "clipboard")
+          cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
         } else {
           cat("\nSSH keys cannot be generated from GIT gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
         }
       }
     })
 
-    output$introduce <- renderPrint({
+    output$introduce_output <- renderPrint({
       input$intro_git
+      # req(!is.null(input$intro_keyname))
+      # req(!is.null(input$intro_passphrase))
       ret <- system("git config --global --list", intern = TRUE) %>%
         .[grepl("^user",.)]
       if (length(ret) == 0) {
         cat("No user information set. Enter a user name and email and click the 'Introduce' button\n\nSet user.name : git config --global user.name 'Your Name'\nSet user.email: git config --global user.email 'myemail@gmail.com'\n")
+        return(invisible())
       } else {
-        paste(ret, collapse = "\n") %>%
+        crh <- system("git config --global --list", intern = TRUE) %>%
+          .[grepl("^credential.help",.)]
+
+        if (length(crh) == 0) {
+          os_type <- Sys.info()["sysname"]
+          if (os_type == "Darwin") {
+            system("git config --global credential.helper osxkeychain")
+          } else if (os_type == "Windows") {
+            system("git config --global credential.helper wincred")
+          }
+
+          crh <- system("git config --global --list", intern = TRUE) %>%
+            .[grepl("^credential.help",.)]
+
+        }
+
+        if (length(crh) == 0) {
+          cat("\nSetting up credential help failed. Go to http://happygitwithr.com/credential-caching.html in your browser for additional suggestions\n")
+          crh <- ""
+        }
+
+        paste(c(ret, crh), collapse = "\n") %>%
           paste0("Show settings: git config --global --list\n\n", ., "\n") %>%
           cat
       }
-
-      if (!is.null(input$intro_ssh) && input$intro_ssh != 0) intro_ssh()
 
       os_type <- Sys.info()["sysname"]
       if (os_type == "Windows") {
@@ -189,24 +233,16 @@ gitgadget <- function() {
         home <- Sys.getenv("HOME")
       }
 
-      # system2("unset", "SSH_ASKPASS")
-      # system2("unsetenv", "SSH_ASKPASS")
-
-      if (.ssh_exists() != "") {
-        key <- readLines(.ssh_exists())
-        os_type <- Sys.info()["sysname"]
-        if (os_type == "Windows") {
-          cat(key, file = "clipboard")
-        } else if (os_type == "Darwin") {
-          out <- pipe("pbcopy")
-          cat(key, file = out)
-          close(out)
+      if (pressed(input$intro_ssh)) {
+        intro_ssh()
+      } else {
+        if (!is_empty(.ssh_exists()) ) {
+          cat("\nSSH keys seem to exist on your system. Click the 'SSH key' button to copy them to the clipboard")
+        } else {
+          cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
         }
 
-        if (os_type %in% c("Windows","Darwin"))
-          cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'")
-      } else {
-        cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
+
       }
     })
 
@@ -246,7 +282,7 @@ gitgadget <- function() {
       )
     })
 
-    output$createoutput <- renderPrint({
+    output$create_output <- renderPrint({
       input$create
       ret <- create()
       cat("Create process complete. Check the console for messages")
@@ -258,11 +294,19 @@ gitgadget <- function() {
           owd <- setwd(input$clone_into)
           on.exit(setwd(owd))
         }
+        clone_from <- input$clone_from
+        # clone_from <- "https://github.com/vnijs/mba_bootcamp.git"
+        # print(input$clone_user_name)
+        # print(input$clone_password)
+        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && is_empty(input$clone_password))
+         clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
+
         cloneto <- input$clone_to
-        if (cloneto == "") {
-          cmd <- paste("git clone", input$clone_from)
+
+        if (is_empty(cloneto)) {
+          cmd <- paste("git clone", clone_from)
         } else {
-          cmd <- paste("git clone", input$clone_from, cloneto)
+          cmd <- paste("git clone", clone_from, cloneto)
         }
         cat("Used:", cmd, "\n\n")
         # system(cmd, intern = TRUE)
@@ -270,8 +314,10 @@ gitgadget <- function() {
       }
     })
 
-    output$cloneoutput <- renderPrint({
+    output$clone_output <- renderPrint({
       input$clone
+      req(!is.null(input$clone_user_name))
+      req(!is.null(input$clone_password))
       ret <- clone()
       isolate({
         if (length(ret) == 0) {
@@ -343,8 +389,8 @@ gitgadget <- function() {
 
     observeEvent(input$branch_unlink_remote, {
       branch <- input$branch_delete_name
-      if (branch == "") input$branch_create_name
-      if (branch != "") {
+      if (is_empty(branch)) input$branch_create_name
+      if (!is_empty(branch)) {
         # paste0("git branch --unset-upstream ", branch) %>%
         paste0("git branch -d -r origin/", branch) %>%
           system(.)
@@ -357,6 +403,11 @@ gitgadget <- function() {
         paste("git branch -d", input$branch_delete_name) %>%
           system(.)
       }
+    })
+
+    output$branch_output <- renderPrint({
+      cat("Overview of remotes:\n\n")
+      cat(paste0(system("git remote -v", intern = TRUE), collapse = "\n"))
     })
 
     collect_file_find <- reactive({
@@ -375,4 +426,22 @@ gitgadget <- function() {
   }
 
   resp <- runGadget(shinyApp(ui, server), viewer = paneViewer())
+}
+
+## test section
+main_gadget__ <- FALSE
+if (main_gadget__) {
+
+  # setwd("~/gh/gitgadget")
+  library(shiny)
+  library(miniUI)
+  library(rstudioapi)
+  library(curl)
+  library(jsonlite)
+  library(dplyr)
+  # input <- list()
+
+  source("~/gh/gitgadget/R/git.R", local = TRUE)
+
+  gitgadget()
 }
