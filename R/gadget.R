@@ -1,7 +1,3 @@
-## adding postback to path on Windows
-# shell(paste0("setx PATH \"", Sys.getenv("RS_RPOSTBACK_PATH") %>% gsub("rpostback","postback",.), "\""))
-# shell("PATH")
-
 #' export
 gitgadget <- function() {
 
@@ -13,7 +9,17 @@ gitgadget <- function() {
   #   projdir <- getwd()
   #   basedir <- normalizePath(file.path(projdir,".."))
   # }
+  os_type <- Sys.info()["sysname"]
 
+  find_home <- function() {
+    if (os_type == "Windows") {
+      normalizePath(file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH")), winslash = "/")
+    } else if (os_type == "Darwin") {
+      Sys.getenv("HOME")
+    }
+  }
+
+  homedir <- find_home()
   projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(),".."))))
 
   ui <- miniPage(
@@ -41,8 +47,10 @@ gitgadget <- function() {
             textInput("create_group","Group name:", value = ""),
             textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
           ),
-          uiOutput("ui_create_directory"),
-          # textInput("create_repo","Repo name:", value = ""),
+          fillRow(height = "70px", width = "475px",
+            uiOutput("ui_create_directory"),
+            actionButton("create_directory_find", "Open")
+          ),
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           fillRow(height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
@@ -105,6 +113,7 @@ gitgadget <- function() {
   server <- function(input, output, session) {
 
     observeEvent(input$intro_git, {
+
       if (!is_empty(input$intro_user_name)) {
         cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
         resp <- system(cmd, intern = TRUE)
@@ -116,25 +125,26 @@ gitgadget <- function() {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
       }
+
+      ## Rstudio doesn't look for information in the Documents directory
+      if (file.exists(file.path(homedir, "Documents", ".gitconfig"))) {
+        file.copy(
+          file.path(homedir, "Documents", ".gitconfig"),
+          file.path(homedir, ".gitconfig"),
+          overwrite = TRUE
+        )
+      }
     })
 
     .ssh_exists <- reactive({
       ## update after pressing the intro_ssh button
       input$intro_ssh
       input$intro_keyname
-      os_type <- Sys.info()["sysname"]
-      if (os_type == "Windows") {
-        home <- file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH"))
-      } else if (os_type == "Darwin") {
-        home <- Sys.getenv("HOME")
-      }
-      # keyname <- if (input$intro_keyname ==
+
       keyname <- ifelse (is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
-      .ssh_path <- file.path(home, ".ssh", paste0(keyname, ".pub"))
+      .ssh_path <- file.path(homedir, ".ssh", paste0(keyname, ".pub"))
       if (file.exists(.ssh_path)) .ssh_path else ""
     })
-
-    # input <- output <- list()
 
     output$ui_intro_buttons <- renderUI({
       tagList(
@@ -148,7 +158,6 @@ gitgadget <- function() {
     })
 
     intro_ssh <- eventReactive(input$intro_ssh, {
-      os_type <- Sys.info()["sysname"]
       if (os_type == "Darwin") {
         email <- system("git config --global --list", intern = TRUE) %>%
           .[grepl("^user.email",.)] %>%
@@ -156,7 +165,7 @@ gitgadget <- function() {
 
         if (length(email) == 0) {
           cat("Make sure you have an email address and user name set before generating the SSH key")
-          return(inivisible())
+          return(invisible())
         }
 
         if (is_empty(.ssh_exists())) {
@@ -165,7 +174,6 @@ gitgadget <- function() {
           paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
-          # key <- readLines(.ssh_exists())
           key <- readLines(paste0("~/.ssh/",keyname,".pub"))
           out <- pipe("pbcopy")
           cat(key, file = out)
@@ -192,8 +200,6 @@ gitgadget <- function() {
 
     output$introduce_output <- renderPrint({
       input$intro_git
-      # req(!is.null(input$intro_keyname))
-      # req(!is.null(input$intro_passphrase))
       ret <- system("git config --global --list", intern = TRUE) %>%
         .[grepl("^user",.)]
       if (length(ret) == 0) {
@@ -204,7 +210,6 @@ gitgadget <- function() {
           .[grepl("^credential.help",.)]
 
         if (length(crh) == 0) {
-          os_type <- Sys.info()["sysname"]
           if (os_type == "Darwin") {
             system("git config --global credential.helper osxkeychain")
           } else if (os_type == "Windows") {
@@ -226,13 +231,6 @@ gitgadget <- function() {
           cat
       }
 
-      os_type <- Sys.info()["sysname"]
-      if (os_type == "Windows") {
-        home <- file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH"))
-      } else if (os_type == "Darwin") {
-        home <- Sys.getenv("HOME")
-      }
-
       if (pressed(input$intro_ssh)) {
         intro_ssh()
       } else {
@@ -241,31 +239,28 @@ gitgadget <- function() {
         } else {
           cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
         }
-
-
       }
     })
 
-    # create_directory_find <- eventReactive(input$create_directory_find, {
-    #   ## can't use choose here -- mac doesn't have a choose.dir function
-    #   file.choose()
-    # })
+    create_directory_find <- reactive({
+      if(not_pressed(input$create_directory_find)) return(c())
+      ## R doesn't have a cross platform dir.choose option
+      ## user must select a file in the directory they want
+      dirname(file.choose())
+    })
 
     output$ui_create_directory <- renderUI({
-      # init = file.path(getOption("git.home", basedir), input$create_repo)
-      # init = file.path(getOption("git.home", default = basedir))
-      if (projdir == "")
-        projdir <- file.path(getOption("git.home", default = basedir))
-      textInput("create_directory","Local directory:", value = projdir)
+      init <- create_directory_find() %>% {ifelse (length(.) == 0, projdir, .)}
+      textInput("create_directory","Local directory:", value = init)
     })
 
     create_file_find <- reactive({
-      if (input$create_file_find == 0) return(c())
+      if (not_pressed(input$create_file_find)) return(c())
       file.choose()
     })
 
     output$ui_create_user_file <- renderUI({
-      init <- create_file_find() %>% {ifelse(length(.) == 0, "", .)}
+      init <- create_file_find() %>% {ifelse (length(.) == 0, "", .)}
       textInput("create_user_file","User file:", value = init)
     })
 
@@ -294,22 +289,20 @@ gitgadget <- function() {
           owd <- setwd(input$clone_into)
           on.exit(setwd(owd))
         }
-        clone_from <- input$clone_from
-        # clone_from <- "https://github.com/vnijs/mba_bootcamp.git"
-        # print(input$clone_user_name)
-        # print(input$clone_password)
-        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password))
+        clone_from <- cmd_from <- input$clone_from
+        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password)) {
           clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
+        }
+
+        cmd <- paste("git clone", clone_from)
+        cmdclean <- paste("git clone", input$clone_from)
 
         cloneto <- input$clone_to
-
-        if (is_empty(cloneto)) {
-          cmd <- paste("git clone", clone_from)
-        } else {
-          cmd <- paste("git clone", clone_from, cloneto)
+        if (!is_empty(cloneto)) {
+          cmd <- paste(cmd, cloneto)
+          cmdclean <- paste(cmdclean, cloneto)
         }
-        cat("Used:", cmd, "\n\n")
-        # system(cmd, intern = TRUE)
+        cat("Used:", cmdclean, "\n\n")
         system(cmd)
       }
     })
@@ -430,6 +423,7 @@ gitgadget <- function() {
 
 ## test section
 main_gadget__ <- FALSE
+# main_gadget__ <- TRUE
 if (main_gadget__) {
 
   # setwd("~/gh/gitgadget")
