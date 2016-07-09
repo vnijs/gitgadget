@@ -69,11 +69,13 @@ TODO. Requries an input file of the same form shown above.
 
 Supports the following starting values from .Rprofile:
 
-* options(git.user = "yourgitlabid")
-* options(git.email = "yourgitlabemail@gmail.com")
-* options(git.password = "yourgitlabpassword")
-* options(git.home = "/Users/you/Desktop/git")
-* options(git.server = "https://gitlab.com/api/v3/")
-* options(git.prefix = "")
+```bash
+options(git.user = "yourgitlabid")
+options(git.email = "yourgitlabemail@gmail.com")
+options(git.password = "yourgitlabpassword")
+options(git.home = "/Users/you/Desktop/git")
+options(git.server = "https://gitlab.com/api/v3/")
+options(git.prefix = "")
+```
 
 On Windows use an editor (e.g., notepad) to create the .Rprofile file in your home directory. To find out what R thinks is the home directory enter `Sys.getenv("HOME")` in the R(studio) console

@@ -298,8 +298,8 @@ gitgadget <- function() {
         # clone_from <- "https://github.com/vnijs/mba_bootcamp.git"
         # print(input$clone_user_name)
         # print(input$clone_password)
-        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && is_empty(input$clone_password))
-         clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
+        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password))
+          clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
 
         cloneto <- input$clone_to
 
