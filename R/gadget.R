@@ -44,7 +44,7 @@ gitgadget <- function() {
             passwordInput("create_password","Password:", value = getOption("git.password", ""))
           ),
           fillRow(height = "70px", width = "300px",
-            textInput("create_group","Group name:", value = ""),
+            textInput("create_group","Group name:", value = getOption("git.group", "")),
             textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
           ),
           fillRow(height = "70px", width = "475px",
@@ -265,22 +265,43 @@ gitgadget <- function() {
     })
 
     create <- eventReactive(input$create, {
+
+      if (!dir.exists(input$create_directory)) {
+        cat("The specified directory does not exist. Create the directory and try again")
+        return(invisible())
+      }
+
       if (input$create_group != "" && input$create_group != getOption("git.user", "")) {
+        cat("Creating group ...\n")
         create_group(
-          input$create_user_name, input$create_password, input$create_group, input$create_user_file, input$create_pre, input$create_server
+          input$create_user_name, input$create_password, input$create_group, input$create_user_file,
+          permission = 20, pre = input$create_pre, server = input$create_server
         )
       }
+
       repo <- basename(input$create_directory)
       directory <- dirname(input$create_directory)
+      cat("Creating repo ...\n")
+
       create_repo(
-        input$create_user_name, input$create_password, input$create_group, repo, directory, input$create_pre, input$create_server
+        input$create_user_name, input$create_password, input$create_group, repo, directory,
+        pre = input$create_pre, server = input$create_server
       )
+      if (!is_empty(input$create_user_file)) {
+        cat("Assigning work ...\n")
+        assign_work(
+          input$create_user_name, input$create_password, input$create_group, repo,
+          input$create_user_file, type = input$create_type, pre = input$create_pre,
+          server = input$create_server
+        )
+      }
+
+      cat("\nCreate process complete. Check the console for messages")
     })
 
     output$create_output <- renderPrint({
       input$create
       ret <- create()
-      cat("Create process complete. Check the console for messages")
     })
 
     clone <- eventReactive(input$clone, {
