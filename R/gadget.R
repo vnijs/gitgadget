@@ -79,21 +79,37 @@ gitgadget <- function() {
           verbatimTextOutput("clone_output")
         )
       ),
-      miniTabPanel("Branch", icon = icon("code-fork"),
+       miniTabPanel("Branch", icon = icon("code-fork"),
         miniContentPanel(
           HTML("<h2>Create a new branch</h2>"),
           textInput("branch_create_name","Branch name:", value = ""),
           actionButton("branch_create", "Create local"),
-          actionButton("branch_link_remote", "Link remote"),
+          actionButton("branch_link", "Link remote"),
+          # HTML("<h2>Sync fork</h2>"),
+          # uiOutput("ui_sync_from"),
+          # actionButton("sync", "Sync"),
           HTML("<h2>Merge branch with master</h2>"),
           uiOutput("ui_branch_merge_name"),
           actionButton("branch_merge", "Merge"),
+          actionButton("branch_undo", "Undo"),
           HTML("<h2>Delete an existing branch</h2>"),
           uiOutput("ui_branch_delete_name"),
-          actionButton("branch_unlink_remote", "Unlink remote"),
+          actionButton("branch_unlink", "Unlink remote"),
           actionButton("branch_delete", "Delete local"),
           hr(),
           verbatimTextOutput("branch_output")
+        )
+      ),
+      miniTabPanel("Sync", icon = icon("refresh"),
+        miniContentPanel(
+          HTML("<h2>Sync a fork</h2>"),
+          uiOutput("ui_sync_from"),
+          actionButton("sync", "Sync"),
+          actionButton("sync_merge", "Merge"),
+          actionButton("sync_undo", "Undo"),
+          actionButton("sync_unlink", "Unlink"),
+          hr(),
+          verbatimTextOutput("sync_output")
         )
       ),
       miniTabPanel("Collect", icon = icon("cloud-download"),
@@ -349,32 +365,12 @@ gitgadget <- function() {
       })
     })
 
-    output$ui_branch_merge_name <- renderUI({
+    branches <- reactive({
       input$branch_delete
       input$branch_create
-      resp <- system("git branch", intern = TRUE) %>%
+      system("git branch ", intern = TRUE) %>%
         gsub("[\\* ]+", "", .) %>%
-        {.[!grepl("master",.)]}
-
-      if (length(resp) == 0) {
-        HTML("<label>No branches available to merge</label>")
-      } else {
-        selectInput("branch_merge_name","Branch name:", choices = resp)
-      }
-    })
-
-    output$ui_branch_delete_name <- renderUI({
-      input$branch_delete
-      input$branch_create
-      resp <- system("git branch", intern = TRUE) %>%
-        gsub("[\\* ]+", "", .) %>%
-        {.[!grepl("master",.)]}
-
-      if (length(resp) == 0) {
-        HTML("<label>No branches available to delete</label>")
-      } else {
-        selectInput("branch_delete_name","Branch name:", choices = resp)
-      }
+        {.[!grepl("(^master$)|(^origin/)",.)]}
     })
 
     observeEvent(input$branch_create, {
@@ -392,7 +388,11 @@ gitgadget <- function() {
       }
     })
 
-    observeEvent(input$branch_link_remote, {
+    observeEvent(input$branch_undo, {
+      system("git reset --merge HEAD~1")
+    })
+
+    observeEvent(input$branch_link, {
       if (input$branch_create_name != "") {
         ## would prefer to do this without 'push' -- however then I can't unlink for some reason
         # paste0("git branch --set-upstream-to origin ", input$branch_create_name) %>%
@@ -401,7 +401,7 @@ gitgadget <- function() {
       }
     })
 
-    observeEvent(input$branch_unlink_remote, {
+    observeEvent(input$branch_unlink, {
       branch <- input$branch_delete_name
       if (is_empty(branch)) input$branch_create_name
       if (!is_empty(branch)) {
@@ -419,9 +419,69 @@ gitgadget <- function() {
       }
     })
 
-    output$branch_output <- renderPrint({
+    output$ui_branch_merge_name <- renderUI({
+      resp <- branches()
+      if (length(resp) == 0) {
+        HTML("<label>No branches available to merge</label>")
+      } else {
+        selectInput("branch_merge_name","Branch name:", choices = resp)
+      }
+    })
+
+    output$ui_branch_delete_name <- renderUI({
+      resp <- branches()
+      if (length(resp) == 0) {
+        HTML("<label>No branches available to delete</label>")
+      } else {
+        selectInput("branch_delete_name","Branch name:", choices = resp)
+      }
+    })
+
+    remote_info <- function() {
+      input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
       cat("Overview of remotes:\n\n")
-      cat(paste0(system("git remote -v", intern = TRUE), collapse = "\n"))
+      cat(
+        paste0(system("git remote -v", intern = TRUE), collapse = "\n") %>%
+          gsub("(\t)|(  ) "," ",.)
+      )
+    }
+
+    output$branch_output <- renderPrint({
+      remote_info()
+    })
+
+    observeEvent(input$sync, {
+      if (!is_empty(input$sync_from)) {
+        system(paste("git remote add upstream", input$sync_from))
+        system("git fetch upstream")
+      }
+    })
+
+    observeEvent(input$sync_merge, {
+      system("git checkout master")
+      system("git merge upstream/master")
+    })
+
+    observeEvent(input$sync_undo, {
+      system("git reset --merge HEAD~1")
+    })
+
+    observeEvent(input$sync_unlink, {
+      system("git remote remove upstream")
+    })
+
+    output$ui_sync_from <- renderUI({
+      input$sync
+      init <- system("git remote -v", intern = TRUE) %>%
+        .[grepl("^upstream",.)] %>%
+        gsub("^upstream\\s+","", .) %>%
+        gsub(" \\(fetch\\)$","", .)
+
+      textInput("sync_from","Sync from:", value = ifelse (length(init) == 0, "", init[1]))
+    })
+
+    output$sync_output <- renderPrint({
+      remote_info()
     })
 
     collect_file_find <- reactive({
@@ -448,13 +508,13 @@ main_gadget__ <- FALSE
 if (main_gadget__) {
 
   # setwd("~/gh/gitgadget")
+  # input <- list()
   library(shiny)
   library(miniUI)
   library(rstudioapi)
   library(curl)
   library(jsonlite)
   library(dplyr)
-  # input <- list()
 
   source("~/gh/gitgadget/R/git.R", local = TRUE)
 
