@@ -450,9 +450,18 @@ gitgadget <- function() {
       remote_info()
     })
 
+    upstream_info <- function() {
+      input$sync; input$sync_unlink
+      system("git remote -v", intern = TRUE) %>%
+        .[grepl("^upstream",.)] %>%
+        gsub("^upstream\\s+","", .) %>%
+        gsub(" \\(fetch\\)$","", .)
+    }
+
     observeEvent(input$sync, {
       if (!is_empty(input$sync_from)) {
-        system(paste("git remote add upstream", input$sync_from))
+        if (is_empty(upstream_info()))
+          system(paste("git remote add upstream", input$sync_from))
         system("git fetch upstream")
       }
     })
@@ -471,12 +480,7 @@ gitgadget <- function() {
     })
 
     output$ui_sync_from <- renderUI({
-      input$sync
-      init <- system("git remote -v", intern = TRUE) %>%
-        .[grepl("^upstream",.)] %>%
-        gsub("^upstream\\s+","", .) %>%
-        gsub(" \\(fetch\\)$","", .)
-
+      init <- upstream_info()
       textInput("sync_from","Sync from:", value = ifelse (length(init) == 0, "", init[1]))
     })
 
