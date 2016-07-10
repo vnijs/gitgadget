@@ -44,11 +44,11 @@ Key functions in `git.R` that can be accessed through the `gitgadget` interface 
 
 Used to create a group for a course. The `Group name` variable should be set to something like "school-courseid-year". This creates the group and adds students as `reporters` with read-only access on gitlab. Access this functionality through the _Create_ tab in `gitgadget`. Creating a group requires an input file of the following form:
 
-| userid | team  | email              | pw |
-|--------|-------|--------------------|----|
-| id1    | team1 | student1@gmail.com | pw |
-| id2    | team1 | student2@gmail.com | pw |
-| id3    | team2 | student3@gmail.com | pw |
+| userid | team  | email              | token     |
+|--------|-------|--------------------|-----------|
+| id1    | team1 | student1@gmail.com | px....... |
+| id2    | team1 | student2@gmail.com | n9....... |
+| id3    | team2 | student3@gmail.com | VR....... |
 
 
 Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
@@ -59,7 +59,7 @@ To create an assignment repo set `Local directory` to the directory with the ass
 
 `assign_work(...)`
 
-Forks the assignment repo uploaded by a faculty member or TA earlier for each student/team and creates the appropriate groups for team work. Requires a csv file with the structure shown above, including the students' (gitlab) passwords. Access to these password probably requires that student accounts were created centrally for the class/program (e.g., when running your own gitlab server).
+Forks the assignment repo uploaded by a faculty member or TA earlier for each student/team and creates the appropriate groups for team work. Requires a csv file with the structure shown above, including the students' (gitlab) private token. Getting access to these tokens will most likely require that student accounts are created centrally for the class/program (e.g., running your own gitlab server).
 
 `collect_work(...)`
 
@@ -75,7 +75,8 @@ options(git.email = "yourgitlabemail@gmail.com")
 options(git.password = "")
 options(git.home = "/Users/you/Desktop/git")
 options(git.server = "https://gitlab.com/api/v3/")
-options(git.prefix = "")
+options(git.group = "school-courseid-2016")
+options(git.prefix = "school-courseid-2016-")
 ```
 
 On Windows use a text editor (e.g., notepad) to create .Rprofile in your home directory. To find out where R thinks your home directory is enter `Sys.getenv("HOME")` in the R(studio) console
