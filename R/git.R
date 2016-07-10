@@ -36,20 +36,18 @@ groupID <- function(name, path, token, server) {
   }
 }
 
-userIDs <- function(usernames, token, server) {
-  # usernames <- userfile$userid
-  sapply(usernames, function(username) {
-    resp <- userID(username, token, server)
+userIDs <- function(ids, token, server) {
+  sapply(ids, function(id) {
+    resp <- userID(id, token, server)
     ifelse (resp$status == "OKAY", resp$user_id[1], NA)
   })
 }
 
-userID <- function(username, token, server) {
-  # username <- usernames[1]
+userID <- function(id, token, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  resp <- curl_fetch_memory(paste0(server, "users?username=", username), h)
+  resp <- curl_fetch_memory(paste0(server, "users?username=", id), h)
 
   if (checkerr(resp$status_code) == FALSE)
     return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
@@ -126,10 +124,9 @@ create_group <- function(username, password, groupname, user_file,
   ## must give users permission in order to fork repo for them
   if (!is_empty(user_file)) {
     course_id <- resp$group_id
-    userfile <- read.csv(user_file, stringsAsFactor = FALSE)
-    user_ids <- userIDs(userfile$userid, token, server)
-
-    add_users(user_ids, course_id, token, permission, server)
+    uf <- read.csv(user_file, stringsAsFactor = FALSE)
+    uids <- userIDs(uf$userid, token, server)
+    add_users(uids, course_id, token, permission, server)
   }
 }
 
@@ -384,6 +381,7 @@ create_repo <- function(username, password, groupname, assignment, directory,
 }
 
 ## test section
+# main_git__ <- TRUE
 main_git__ <- FALSE
 if (main_git__) {
 
