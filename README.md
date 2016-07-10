@@ -32,6 +32,12 @@ Create a local branch from the active repo by providing a `Branch name` and clic
 
 Note that changes may only be visible in the Rstudio after clicking the `refresh` button in the Git tab.
 
+## Sync
+
+If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the `upstream` repo you forked from. Copy the HTTPS link to clone the original repo into the `Sync from` input in the _Sync_ tab and then press `Sync`. The repo you forked will now be added as a _remote_. Click `Merge` to update your local version with any changes to the original. Fix merge conflicts if they pop up and proceed working on the repo. To undo the merge simply click the `Undo` button. When you are done commit and then push your changes to gitlab.
+
+> Make sure not to click the `Undo` button more than once or you may lose previous (local) commits.
+
 ## Collect
 
 Collect assignments from users/students using Merge (Pull) requests. TODO
