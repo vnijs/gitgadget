@@ -493,6 +493,11 @@ gitgadget <- function() {
       file.choose()
     })
 
+    ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
+    ## setup a branch switcher so you can easily do "git checkout origin/merge-requests/1" for each PR
+    ## can you push back tot the PR as well?
+    ## still need "merge" to get all the PRs
+
     output$ui_collect_user_file <- renderUI({
       init <- collect_file_find() %>% {ifelse(length(.) == 0, "", .)}
       textInput("collect_user_file","User file:", value = init)
