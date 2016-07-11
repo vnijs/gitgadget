@@ -357,9 +357,11 @@ create_repo <- function(username, password, groupname, assignment, directory,
   ## initialize git repo if it doesn't exist yet
   if (!dir.exists(".git")) system2("git", "init")
 
-  ## needed? commands not available on windows
-  # system2("unset", "SSH_ASKPASS")
-  # system2("unsetenv", "SSH_ASKPASS")
+  ## allow fetching of MRs
+  ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
+  remote_fetch <- system("git config remote.origin.fetch", intern = TRUE)
+  if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch)
+    system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
 
   if (gn == "") gn <- username
   murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
@@ -451,4 +453,46 @@ if (main_git__) {
     username, password, groupname, repo, directory, pre = pre,
     server = server
   )
+
+
+  # assignment <- 'fork-test'
+  # studentname <- 'xxxx'
+  # studentpasswd <- 'xxxx'
+  # resp <- connect(studentname,studentpasswd)
+  # student_token <- resp$token
+
+  ##we first go through the student's repos to see which repo was forked from "assignment"
+  ##this gives us the id of the from and to repo
+  #which is then used in merge function to create the merge request (pull request)
+
+  ## sanjiv's merge target
+  # resp <- get_allprojects(student_token)
+  # forked_projects <-resp$repo[is.na(resp$repo$forked_from_project$id)==FALSE,]
+  # forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name==assignment)
+  # mergesource <- forked_projects$id
+  # mergetarget <- forked_projects$forked_from_project$id
+
+
+  # merge <- function(token,from,to,title='submission',frombranch='master',tobranch='master') {
+  #     h <- new_handle()
+  #     handle_setopt(h,customrequest="POST")
+  #     handle_setheaders(h,"PRIVATE-TOKEN"=token)
+  #     murl = paste(SERVER,"projects/",from,"/merge_requests?source_branch=",frombranch,sep='')
+  #     murl = paste(murl,"&target_branch=",tobranch,sep='')
+  #     murl = paste(murl,"&title=",title,sep='')
+  #     murl = paste(murl,"&target_project_id=",to,sep="")
+  #     resp <- curl_fetch_memory(murl,h)
+  #     if (checkerr(resp$status_code)==TRUE) {
+  #         resp$content <- fromJSON(rawToChar(resp$content))
+  #         return(list(status='OKAY',content=resp$content))
+  #     } else {
+  #         printf("Error creating the merge request %d\n",resp$status_code)
+  #         return(list(status='ERROR',content=rawToChar(resp$content))
+  #     }
+  # }
+  # merge(token=student_token,from=mergesource,to=mergetarget)
+
+
+
+
 }
