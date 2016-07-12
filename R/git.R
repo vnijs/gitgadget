@@ -382,6 +382,100 @@ create_repo <- function(username, password, groupname, assignment, directory,
   system2("git", c("push", "-u", borg, "master"))
 }
 
+
+merge <- function(token, from, to, server,
+                         title = "submission",
+                         frombranch = "master",
+                         tobranch = "master") {
+
+  h <- new_handle()
+  handle_setopt(h, customrequest = "POST")
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  murl = paste0(server, "projects/", from, "/merge_requests?source_branch=", frombranch)
+  murl = paste0(murl, "&target_branch=", tobranch)
+  murl = paste0(murl, "&title=", title)
+  murl = paste0(murl, "&target_project_id=", to)
+  resp <- curl_fetch_memory(murl,h)
+
+  resp$content <- fromJSON(rawToChar(resp$content))
+  if (checkerr(resp$status_code) == TRUE) {
+    list(status = "OKAY", content = resp$content)
+  } else if (grepl("This merge request already exists", resp$content)) {
+    message("Merge request already exists")
+    list(status = "OKAY", content = resp$content)
+  } else {
+    message("Error creating merge request ", resp$status_code)
+    list(status = "ERROR", content = rawToChar(resp$content))
+  }
+}
+
+#` export
+collect_work <- function(username, password, groupname, assignment, user_file,
+                         type = "individual",
+                         pre = "",
+                         server = "https://gitlab.com/api/v3/") {
+
+
+  ## collect work
+  ##we first go through the student's repos to see which repo was forked from "assignment"
+  ##this gives us the id of the from and to repo
+  #which is then used in merge function to create the merge request (pull request)
+  repo <- paste0(pre, "assignment1")
+  id <- "msba-student-1"
+  uf <- read.csv(file.path(directory, "msba-students.csv"), stringsAsFactor = FALSE)
+  token <- uf$token[1]
+
+  resp <- get_allprojects(token, server)
+  forked_projects <- resp$repo[is.na(resp$repo$forked_from_project$id) == FALSE,]
+  forked_projects
+  # forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name==assignment)
+  forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name == repo)
+  forked_projects
+  mergesource <- forked_projects$id
+  from <- mergesource
+  from
+  mergetarget <- forked_projects$forked_from_project$id
+  to <- mergetarget
+  to
+
+
+
+  resp <- connect(username, password, server)
+  if (resp$status != 'OKAY')
+    stop("Error connecting to server: check username/password/server")
+
+  token <- resp$token
+  upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
+  resp <- projID(upstream_name, token, server)
+
+  if (resp$status != "OKAY")
+    stop("Error getting assignment ",upstream_name)
+
+  project_id <- resp$project_id
+  student_data <- read.csv(user_file, stringsAsFactor = FALSE)
+  student_data$user_id <- userIDs(student_data$userid, token, server)
+
+  if (type == "individual")
+    student_data$team <- paste("team",1:nrow(student_data))
+
+  # merge(token, mergesource, mergetarget, server)
+
+  setup <- function(dat) {
+    dat$rownum <- sample(1:nrow(dat))
+    leader <- which(with(dat, rownum == min(rownum)))
+    teamname <- dat$team[leader]
+    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server, pre)
+    dat$teamname <- teamname
+    dat$leader <- dat$userid[leader]
+    dat
+  }
+
+  # student_data %>% group_by_("team") %>% do(setup(.)) %>% print(n = 1000)
+  resp <- student_data %>% group_by_("team") %>% do(setup(.))
+  return(invisible())
+}
+
+
 ## test section
 # main_git__ <- TRUE
 main_git__ <- FALSE
@@ -455,44 +549,14 @@ if (main_git__) {
   )
 
 
-  # assignment <- 'fork-test'
-  # studentname <- 'xxxx'
-  # studentpasswd <- 'xxxx'
-  # resp <- connect(studentname,studentpasswd)
-  # student_token <- resp$token
+  ## same steps for a team assignment
+  assignment <- "assignment1"
+  stopifnot(file.exists(file.path(directory, assignment)))
+  type <- "individual"
 
-  ##we first go through the student's repos to see which repo was forked from "assignment"
-  ##this gives us the id of the from and to repo
-  #which is then used in merge function to create the merge request (pull request)
-
-  ## sanjiv's merge target
-  # resp <- get_allprojects(student_token)
-  # forked_projects <-resp$repo[is.na(resp$repo$forked_from_project$id)==FALSE,]
-  # forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name==assignment)
-  # mergesource <- forked_projects$id
-  # mergetarget <- forked_projects$forked_from_project$id
-
-
-  # merge <- function(token,from,to,title='submission',frombranch='master',tobranch='master') {
-  #     h <- new_handle()
-  #     handle_setopt(h,customrequest="POST")
-  #     handle_setheaders(h,"PRIVATE-TOKEN"=token)
-  #     murl = paste(SERVER,"projects/",from,"/merge_requests?source_branch=",frombranch,sep='')
-  #     murl = paste(murl,"&target_branch=",tobranch,sep='')
-  #     murl = paste(murl,"&title=",title,sep='')
-  #     murl = paste(murl,"&target_project_id=",to,sep="")
-  #     resp <- curl_fetch_memory(murl,h)
-  #     if (checkerr(resp$status_code)==TRUE) {
-  #         resp$content <- fromJSON(rawToChar(resp$content))
-  #         return(list(status='OKAY',content=resp$content))
-  #     } else {
-  #         printf("Error creating the merge request %d\n",resp$status_code)
-  #         return(list(status='ERROR',content=rawToChar(resp$content))
-  #     }
-  # }
-  # merge(token=student_token,from=mergesource,to=mergetarget)
-
-
-
+  collect_work(
+    username, password, groupname, assignment, user_file, type = type,
+    pre = pre, server = server
+  )
 
 }
