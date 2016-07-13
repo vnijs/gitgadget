@@ -9,5 +9,6 @@ globalVariables(".")
 #' @importFrom jsonlite fromJSON
 #' @importFrom rstudioapi isAvailable getActiveProject
 #' @importFrom utils read.csv
+#' @importFrom stats na.omit
 #' @importFrom methods is
 NULL
