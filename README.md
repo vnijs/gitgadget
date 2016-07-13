@@ -36,11 +36,11 @@ Note that changes may only be visible in the Rstudio after clicking the `refresh
 
 If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the `upstream` repo you forked from. Copy the HTTPS link to clone the original repo into the `Sync from` input in the _Sync_ tab and then press `Sync`. The repo you forked will now be added as a _remote_. Click `Merge` to update your local version with any changes to the original. Fix merge conflicts if they pop up and proceed working on the repo. To undo the merge simply click the `Undo` button. When you are done commit and then push your changes to gitlab.
 
-> Make sure not to click the `Undo` button more than once or you may lose previous (local) commits.
+> Make sure **not** to click the `Undo` button more than once or you may lose previous (local) commits.
 
 ## Collect
 
-Collect assignments from users/students using Merge (Pull) requests. TODO
+Collect assignments from students/teams using Merge (Pull) Requests on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. Merge (pull) requests will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs on gitlab. To view the MRs locally press the `Fetch` button.
 
 ## Assignment management
 
@@ -69,7 +69,7 @@ Forks the assignment repo uploaded by a faculty member or TA earlier for each st
 
 `collect_work(...)`
 
-TODO. Requires an input file of the form shown earlier.
+Generates merge (pull) request for all students or students teams. Requires an input file of the form specified above.
 
 ## Initial settings
 
@@ -83,6 +83,7 @@ options(git.home = "/Users/you/Desktop/git")
 options(git.server = "https://gitlab.com/api/v3/")
 options(git.group = "school-courseid-2016")
 options(git.prefix = "school-courseid-2016-")
+options(git.userfile = "path-to-user-file.csv")
 ```
 
 On Windows use a text editor (e.g., notepad) to create .Rprofile in your home directory. To find out where R thinks your home directory is enter `Sys.getenv("HOME")` in the R(studio) console
