@@ -102,7 +102,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
 }
 
 #` export
-create_group <- function(username, password, groupname, user_file,
+create_group <- function(username, password, groupname, userfile,
                          permission = 20, pre = "",
                          server = "https://gitlab.com/api/v3/") {
 
@@ -122,10 +122,10 @@ create_group <- function(username, password, groupname, user_file,
   }
 
   ## must give users permission in order to fork repo for them
-  if (!is_empty(user_file)) {
+  if (!is_empty(userfile)) {
     course_id <- resp$group_id
-    uf <- read.csv(user_file, stringsAsFactor = FALSE)
-    uids <- userIDs(uf$userid, token, server)
+    udat <- read.csv(userfile, stringsAsFactor = FALSE)
+    uids <- userIDs(udat$userid, token, server)
     add_users(uids, course_id, token, permission, server)
   }
 }
@@ -192,12 +192,12 @@ renameRepo <- function(project_id, token, newname, server) {
   }
 }
 
-# setupteam <- function(token, others, project_id, course, team_name, server, pre) {
-setupteam <- function(token, others, project_id, server, pre) {
+setupteam <- function(token, others, project_id, server) {
   ##fork if needed for team lead
   resp <- get_allprojects(token, server, everything = TRUE)
 
-  if (!"forked_from_project" %in% names(resp$repos) || !project_id %in% resp$repos$forked_from_project$id) {
+  if (!"forked_from_project" %in% names(resp$repos) ||
+      !project_id %in% resp$repos$forked_from_project$id) {
     message("Creating fork for team lead")
     resp <- forkRepo(token, project_id, server)
     if (resp$status != "OKAY") {
@@ -250,8 +250,9 @@ add_team <- function(proj_id, token, team_mates, server) {
 }
 
 #` export
-assign_work <- function(username, password, groupname, assignment, user_file,
-                        type = "individual", pre = "", server = "https://gitlab.com/api/v3/") {
+assign_work <- function(username, password, groupname, assignment, userfile,
+                        type = "individual", pre = "",
+                        server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
@@ -262,20 +263,21 @@ assign_work <- function(username, password, groupname, assignment, user_file,
   resp <- projID(upstream_name, token, server)
 
   if (resp$status != "OKAY")
-    stop("Error getting assignment ",upstream_name)
+    stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  student_data <- read.csv(user_file, stringsAsFactor = FALSE)
+  student_data <- read.csv(userfile, stringsAsFactor = FALSE)
   student_data$user_id <- userIDs(student_data$userid, token, server)
 
   if (type == "individual")
     student_data$team <- paste("team",1:nrow(student_data))
 
   setup <- function(dat) {
-    dat$rownum <- sample(1:nrow(dat))
-    leader <- which(with(dat, rownum == min(rownum)))
+    # dat$rownum <- sample(1:nrow(dat))
+    # leader <- which(with(dat, rownum == min(rownum)))
+    dat$rownum <- 1:nrow(dat); leader <- 1
     teamname <- dat$team[leader]
-    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server, pre)
+    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server)
     dat$teamname <- teamname
     dat$leader <- dat$userid[leader]
     dat
@@ -283,7 +285,7 @@ assign_work <- function(username, password, groupname, assignment, user_file,
 
   # student_data %>% group_by_("team") %>% do(setup(.)) %>% print(n = 1000)
   resp <- student_data %>% group_by_("team") %>% do(setup(.))
-  return(invisible())
+  # return(invisible())
 }
 
 maker <- function(repo_name, token, server, namespace = "") {
@@ -382,21 +384,27 @@ create_repo <- function(username, password, groupname, assignment, directory,
   system2("git", c("push", "-u", borg, "master"))
 }
 
+merger <- function(token, to, server,
+                   title = "submission",
+                   frombranch = "master",
+                   tobranch = "master") {
 
-merge <- function(token, from, to, server,
-                         title = "submission",
-                         frombranch = "master",
-                         tobranch = "master") {
+  resp <- get_allprojects(token, server)
+  forked <- resp$repo[resp$repo$forked_from_project$id == to,]
+  from <- na.omit(forked$id)
+
+  if (length(from) == 0) {
+    message("No fork found")
+    return(list(status = "ERROR", content = ""))
+  }
 
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl = paste0(server, "projects/", from, "/merge_requests?source_branch=", frombranch)
-  murl = paste0(murl, "&target_branch=", tobranch)
-  murl = paste0(murl, "&title=", title)
-  murl = paste0(murl, "&target_project_id=", to)
-  resp <- curl_fetch_memory(murl,h)
-
+  murl <- paste0(server, "projects/", from, "/merge_requests?source_branch=",
+                 frombranch, "&target_branch=", tobranch, "&title=", title,
+                 "&target_project_id=", to)
+  resp <- curl_fetch_memory(murl, h)
   resp$content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
     list(status = "OKAY", content = resp$content)
@@ -410,35 +418,9 @@ merge <- function(token, from, to, server,
 }
 
 #` export
-collect_work <- function(username, password, groupname, assignment, user_file,
-                         type = "individual",
-                         pre = "",
+collect_work <- function(username, password, groupname, assignment, userfile,
+                         type = "individual", pre = "",
                          server = "https://gitlab.com/api/v3/") {
-
-
-  ## collect work
-  ##we first go through the student's repos to see which repo was forked from "assignment"
-  ##this gives us the id of the from and to repo
-  #which is then used in merge function to create the merge request (pull request)
-  repo <- paste0(pre, "assignment1")
-  id <- "msba-student-1"
-  uf <- read.csv(file.path(directory, "msba-students.csv"), stringsAsFactor = FALSE)
-  token <- uf$token[1]
-
-  resp <- get_allprojects(token, server)
-  forked_projects <- resp$repo[is.na(resp$repo$forked_from_project$id) == FALSE,]
-  forked_projects
-  # forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name==assignment)
-  forked_projects <- subset(forked_projects,forked_projects$forked_from_project$name == repo)
-  forked_projects
-  mergesource <- forked_projects$id
-  from <- mergesource
-  from
-  mergetarget <- forked_projects$forked_from_project$id
-  to <- mergetarget
-  to
-
-
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
@@ -449,32 +431,21 @@ collect_work <- function(username, password, groupname, assignment, user_file,
   resp <- projID(upstream_name, token, server)
 
   if (resp$status != "OKAY")
-    stop("Error getting assignment ",upstream_name)
+    stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  student_data <- read.csv(user_file, stringsAsFactor = FALSE)
-  student_data$user_id <- userIDs(student_data$userid, token, server)
+  udat <- read.csv(userfile, stringsAsFactor = FALSE)
 
-  if (type == "individual")
-    student_data$team <- paste("team",1:nrow(student_data))
-
-  # merge(token, mergesource, mergetarget, server)
-
-  setup <- function(dat) {
-    dat$rownum <- sample(1:nrow(dat))
-    leader <- which(with(dat, rownum == min(rownum)))
-    teamname <- dat$team[leader]
-    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server, pre)
-    dat$teamname <- teamname
-    dat$leader <- dat$userid[leader]
-    dat
+  if (type == "individual") {
+    udat$team <- paste("ind",1:nrow(udat))
+  } else {
+    ## MR only from team lead
+    udat <- group_by_(udat, "team") %>% slice(1)
   }
 
-  # student_data %>% group_by_("team") %>% do(setup(.)) %>% print(n = 1000)
-  resp <- student_data %>% group_by_("team") %>% do(setup(.))
-  return(invisible())
+  udat$user_id <- userIDs(udat$userid, token, server)
+  resp <- sapply(udat$token, merger, project_id, server)
 }
-
 
 ## test section
 # main_git__ <- TRUE
@@ -490,8 +461,8 @@ if (main_git__) {
   username <- getOption("git.user", default = "")
   password <- getOption("git.password", default = "")
   groupname <- "rady-mgta-bc-2016"
-  user_file <- "~/bc/rady-mgta-bc-2016/msba-students.csv"
-  stopifnot(file.exists(user_file))
+  userfile <- "~/bc/rady-mgta-bc-2016/msba-students.csv"
+  stopifnot(file.exists(userfile))
 
   ## to debug code
   permission <- 20
@@ -507,7 +478,7 @@ if (main_git__) {
 
   ## create a group for a course where all assignments and cases will be posted
   create_group(
-    username, password, groupname, user_file, permission = permission,
+    username, password, groupname, userfile, permission = permission,
     pre = pre, server = server
   )
 
@@ -518,7 +489,7 @@ if (main_git__) {
   )
 
   assign_work(
-    username, password, groupname, assignment, user_file, type = type,
+    username, password, groupname, assignment, userfile, type = type,
     pre = pre, server = server
   )
 
@@ -533,7 +504,7 @@ if (main_git__) {
   )
 
   assign_work(
-    username, password, groupname, assignment, user_file, type = type,
+    username, password, groupname, assignment, userfile, type = type,
     pre = pre, server = server
   )
 
@@ -548,15 +519,13 @@ if (main_git__) {
     server = server
   )
 
-
-  ## same steps for a team assignment
+  ## generate merge (pull) requests
   assignment <- "assignment1"
   stopifnot(file.exists(file.path(directory, assignment)))
   type <- "individual"
 
   collect_work(
-    username, password, groupname, assignment, user_file, type = type,
+    username, password, groupname, assignment, userfile, type = type,
     pre = pre, server = server
   )
-
 }

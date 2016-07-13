@@ -13,14 +13,17 @@ gitgadget <- function() {
 
   find_home <- function() {
     if (os_type == "Windows") {
-      normalizePath(file.path(Sys.getenv("HOMEDRIVE"),Sys.getenv("HOMEPATH")), winslash = "/")
+      normalizePath(
+        file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
+        winslash = "/"
+      )
     } else if (os_type == "Darwin") {
       Sys.getenv("HOME")
     }
   }
 
   homedir <- find_home()
-  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(),".."))))
+  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."))))
 
   ui <- miniPage(
     gadgetTitleBar("GITGADGET"),
@@ -115,12 +118,27 @@ gitgadget <- function() {
       miniTabPanel("Collect", icon = icon("cloud-download"),
         miniContentPanel(
           HTML("<h2>Collect assignments</h2>"),
-          textInput("collect_assignment_name","Assignment name:", value = ""),
+          fillRow(height = "70px", width = "300px",
+            textInput("collect_user_name","User name:", value = getOption("git.user", "")),
+            passwordInput("collect_password","Password:", value = getOption("git.password", ""))
+          ),
+          textInput("collect_group","Group name:", value = getOption("git.group", "")),
+          # fillRow(height = "70px", width = "300px",
+            # textInput("collect_group","Group name:", value = getOption("git.group", "")),
+            # textInput("collect_pre","Prefix:", value = getOption("git.prefix", ""))
+          # ),
+          # textInput("collect_assignment","Assignment name:", value = ""),
+          uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
             actionButton("collect_file_find", "Open")
           ),
-          actionButton("collect", "Collect")
+          textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
+          radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
+          actionButton("collect", "Collect"),
+          actionButton("collect_fetch", "Fetch"),
+          hr(),
+          verbatimTextOutput("collect_output")
         )
       )
     )
@@ -143,11 +161,13 @@ gitgadget <- function() {
       }
 
       ## Rstudio doesn't look for information in the Documents directory
-      if (file.exists(file.path(homedir, "Documents", ".gitconfig"))) {
+      if (
+        !file.exists(file.path(homedir, ".gitconfig")) &&
+        file.exists(file.path(homedir, "Documents", ".gitconfig"))
+      ) {
         file.copy(
           file.path(homedir, "Documents", ".gitconfig"),
-          file.path(homedir, ".gitconfig"),
-          overwrite = TRUE
+          file.path(homedir, ".gitconfig")
         )
       }
     })
@@ -276,7 +296,8 @@ gitgadget <- function() {
     })
 
     output$ui_create_user_file <- renderUI({
-      init <- create_file_find() %>% {ifelse (length(.) == 0, "", .)}
+      init <- getOption("git.userfile", default = "")
+      init <- create_file_find() %>% {ifelse (length(.) == 0, init, .)}
       textInput("create_user_file","User file:", value = init)
     })
 
@@ -414,7 +435,7 @@ gitgadget <- function() {
     observeEvent(input$branch_delete, {
       if (!is.null(input$branch_delete_name)) {
         system("git checkout master")
-        paste("git branch -d", input$branch_delete_name) %>%
+        paste("git branch -D", input$branch_delete_name) %>%
           system(.)
       }
     })
@@ -488,6 +509,55 @@ gitgadget <- function() {
       remote_info()
     })
 
+    # get_assignments <- function(username, password, group, server) {
+    get_assignments <- reactive({
+
+      username <- input$collect_user_name
+      password <- input$collect_password
+      group <- input$collect_group
+      server <- input$collect_server
+      # req(username, password, group, server)
+      if (is_empty(username) || is_empty(password) || is_empty(group) || is_empty(server)) {
+        message("Specify all required inputs to retrieve available assignments")
+        return(invisible())
+      }
+
+      h <- new_handle()
+      handle_setopt(h, customrequest = "POST")
+      murl <- paste0(server, "session?login=", username, "&password=", password)
+      resp <- curl_fetch_memory(murl, h)
+
+      if (checkerr(resp$status_code) == FALSE)
+        message("Server Error: ", fromJSON(rawToChar(resp$content))$message)
+
+      token <- fromJSON(rawToChar(resp$content))$private_token
+      handle_setopt(h, customrequest = "GET")
+      handle_setheaders(h, "PRIVATE-TOKEN" = token)
+      resp <- curl_fetch_memory(paste0(server, "projects"), h)
+
+      if (checkerr(resp$status_code) == FALSE)
+        message("Server Error: ", fromJSON(rawToChar(resp$content))$message)
+
+      proj <- fromJSON(rawToChar(resp$content))
+      proj <- proj[proj$namespace$name == group,]
+
+      if (length(proj) == 0) {
+        message("No assignments found for specified groupname")
+        return(invisible())
+      } else {
+        proj[["name"]]
+      }
+    })
+
+    output$ui_collect_assignment <- renderUI({
+      resp <- get_assignments()
+      if (length(resp) == 0) {
+        HTML("<label>No assignments available for specified input values</label>")
+      } else {
+        selectInput("collect_assignment","Assignment name:", choices = resp)
+      }
+    })
+
     collect_file_find <- reactive({
       if (input$collect_file_find == 0) return(c())
       file.choose()
@@ -496,11 +566,49 @@ gitgadget <- function() {
     ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
     ## setup a branch switcher so you can easily do "git checkout origin/merge-requests/1" for each PR
     ## can you push back tot the PR as well?
-    ## still need "merge" to get all the PRs
-
     output$ui_collect_user_file <- renderUI({
-      init <- collect_file_find() %>% {ifelse(length(.) == 0, "", .)}
+      init <- getOption("git.userfile", default = "")
+      init <- collect_file_find() %>% {ifelse(length(.) == 0, init, .)}
       textInput("collect_user_file","User file:", value = init)
+    })
+
+    collect <- eventReactive(input$collect, {
+      req(
+        input$collect_user_name, input$collect_password, input$collect_group,
+        input$collect_server, input$collect_user_file
+      )
+
+      cat("Generating merge requests ...\n")
+
+      collect_work(
+        input$collect_user_name, input$collect_password, input$collect_group,
+        input$collect_assignment, input$collect_user_file,
+        type = input$collect_type, pre = "", server = input$collect_server
+      )
+
+      cat("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
+    })
+
+    collect_fetch <- eventReactive(input$collect_fetch, {
+      remote_fetch <- system("git config remote.origin.fetch", intern = TRUE)
+      if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
+        cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
+      } else {
+        system("git fetch origin")
+        cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignment merge requests")
+      }
+    })
+
+    output$collect_output <- renderPrint({
+      if (is_empty(input$collect_assignment)) {
+       cat("Specify all required inputs to generate the list of available assignments. Then press the Collect button")
+      } else if (pressed(input$collect)) {
+        ret <- collect()
+      } else if (pressed(input$collect_fetch)) {
+        ret <- collect_fetch()
+      } else {
+        cat("Specify all required inputs and then press the Collect button")
+      }
     })
 
     observeEvent(input$done, {
