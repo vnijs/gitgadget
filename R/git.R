@@ -473,59 +473,75 @@ if (main_git__) {
   type <- "individual"
   pre <- paste0(groupname,"-")
   directory <- paste0("~/bc/", groupname)
-  stopifnot(file.exists(directory))
-  stopifnot(file.exists(file.path(directory, assignment)))
+  if (file.exists(file.path(directory, assignment))) {
+    ## create a group for a course where all assignments and cases will be posted
+    create_group(
+      username, password, groupname, userfile, permission = permission,
+      pre = pre, server = server
+    )
 
-  ## create a group for a course where all assignments and cases will be posted
-  create_group(
-    username, password, groupname, userfile, permission = permission,
-    pre = pre, server = server
-  )
+    ## get or create a repo for assignments and cases
+    create_repo(
+      username, password, groupname, assignment, directory, pre = pre,
+      server = server
+    )
 
-  ## get or create a repo for assignments and cases
-  create_repo(
-    username, password, groupname, assignment, directory, pre = pre,
-    server = server
-  )
+    assign_work(
+      username, password, groupname, assignment, userfile, type = type,
+      pre = pre, server = server
+    )
 
-  assign_work(
-    username, password, groupname, assignment, userfile, type = type,
-    pre = pre, server = server
-  )
+    # unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    # dir.exists(file.path(directory, assignment, ".git"))
+  } else {
+    cat("Assignment does not exist")
+  }
 
   ## same steps for a team assignment
   assignment <- "assignment2"
-  stopifnot(file.exists(file.path(directory, assignment)))
   type <- "team"
+  if (file.exists(file.path(directory, assignment))) {
+    create_repo(
+      username, password, groupname, assignment, directory, pre = pre,
+      server = server
+    )
 
-  create_repo(
-    username, password, groupname, assignment, directory, pre = pre,
-    server = server
-  )
+    assign_work(
+      username, password, groupname, assignment, userfile, type = type,
+      pre = pre, server = server
+    )
 
-  assign_work(
-    username, password, groupname, assignment, userfile, type = type,
-    pre = pre, server = server
-  )
+    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, assignment, ".git"))
+  } else {
+    cat("Assignment does not exist")
+  }
+
+  ## generate merge (pull) requests
+  assignment <- "assignment1"
+  type <- "individual"
+  if (file.exists(file.path(directory, assignment))) {
+    collect_work(
+      username, password, groupname, assignment, userfile, type = type,
+      pre = pre, server = server
+    )
+    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, assignment, ".git"))
+  } else {
+    cat("Assignment does not exist")
+  }
 
   ## create a repo on gitlab in the users own namespace
   groupname <- ""
   pre <- ""
   repo <- "gitgadget-test-repo"
-  directory <- "/Users/vnijs/Github/"
-
-  create_repo(
-    username, password, groupname, repo, directory, pre = pre,
-    server = server
-  )
-
-  ## generate merge (pull) requests
-  assignment <- "assignment1"
-  stopifnot(file.exists(file.path(directory, assignment)))
-  type <- "individual"
-
-  collect_work(
-    username, password, groupname, assignment, userfile, type = type,
-    pre = pre, server = server
-  )
+  directory <- "/Users/vnijs/Desktop/Github"
+  if (file.exists(file.path(directory, repo))) {
+    create_repo(
+      username, password, groupname, repo, directory, pre = pre,
+      server = server
+    )
+    unlink(file.path(directory, repo, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, repo, ".git"))
+  }
 }
