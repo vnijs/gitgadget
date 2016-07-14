@@ -30,7 +30,7 @@ groupID <- function(name, path, token, server) {
   id <- which(name == resp$content$name && path == resp$content$path)
 
   if (length(id) == 0) {
-    list(status = "NO_SUCH_GROUP")
+    list(status = "NOSUCHGROUP")
   } else {
     list(status = "OKAY", group_id = resp$content$id[id])
   }
@@ -113,7 +113,7 @@ create_group <- function(username, password, groupname, userfile,
   token <- resp$token
   resp <- groupID(groupname, groupname, token, server)
 
-  if (resp$status == "NO_SUCH_GROUP")
+  if (resp$status == "NOSUCHGROUP")
     resp <- groupr(groupname, groupname, token, server = server)
 
   if (resp$status != "OKAY") {
@@ -295,7 +295,7 @@ maker <- function(repo_name, token, server, namespace = "") {
   } else {
     resp <- groupID(namespace, namespace, token, server)
     if (resp$status != "OKAY")
-      return(list(status = "NO_SUCH_GROUP", content = "Namespace to create repo does not exist"))
+      return(list(status = "NOSUCHGROUP", content = "Namespace to create repo does not exist"))
     namespace_id <- resp$group_id
   }
 
@@ -343,7 +343,7 @@ create_repo <- function(username, password, groupname, assignment, directory,
   message("Making repo ", paste0(pre, assignment), " in group ", ifelse (gn == "", username, gn))
   resp <- maker(paste0(pre, assignment), token, server, gn)
 
-  if (resp$status == "NO_SUCH_GROUP")
+  if (resp$status == "NOSUCHGROUP")
     stop("Add group ", gn, " before pushing assignment ", assignment)
 
   ## set directory and reset to current on function exit
@@ -359,29 +359,25 @@ create_repo <- function(username, password, groupname, assignment, directory,
   ## initialize git repo if it doesn't exist yet
   if (!dir.exists(".git")) system2("git", "init")
 
+  if (gn == "") gn <- username
+  murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
+  rorg <- system("git remote -v", intern = TRUE)
+
+  if (length(rorg) == 0) {
+    system2("git", c("remote", "add", "origin", murl))
+  } else {
+    system2("git", c("remote", "set-url", "origin", murl))
+  }
+
   ## allow fetching of MRs
   ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
   remote_fetch <- system("git config remote.origin.fetch", intern = TRUE)
   if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch)
     system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
 
-  if (gn == "") gn <- username
-  murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
-  rorg <- system("git remote -v", intern = TRUE)
-  borg <- "origin"
-
-  if (length(rorg) == 0) {
-    system2("git", c("remote", "add", borg, murl))
-  } else if (grepl(murl, rorg) %>% sum(.) == 0) {
-    borg <- "alternative"
-    if (grepl(borg, rorg) %>% sum(.) > 0)
-      system2("git", c("remote", "rm", borg))
-    system2("git", c("remote", "add", borg, murl))
-  }
-
   system2("git", c("add", "."))
   system2("git", c("commit", "-m", '"Upload repo using gitgadget"'))
-  system2("git", c("push", "-u", borg, "master"))
+  system2("git", c("push", "-u", "origin", "master"))
 }
 
 merger <- function(token, to, server,
@@ -445,6 +441,55 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 
   udat$user_id <- userIDs(udat$userid, token, server)
   resp <- sapply(udat$token, merger, project_id, server)
+}
+
+remove_group <- function(token, groupname, server) {
+  resp <- groupID(groupname, groupname, token, server)
+
+  id <- resp$group_id
+  h <- new_handle()
+  handle_setopt(h, customrequest = "DELETE")
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  resp <- curl_fetch_memory(paste0(server, "groups/", id), h)
+}
+
+remove_projects <- function(token, server) {
+  ids <- get_allprojects(token, server)
+  sapply(ids$repos$id, function(id) {
+    remove_project(token, id, server)
+  })
+}
+
+remove_project <- function(token, id, server) {
+  h <- new_handle()
+  handle_setopt(h, customrequest = "DELETE")
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  resp <- curl_fetch_memory(paste0(server, "projects/", id), h)
+}
+
+remove_student_projects <- function(userfile, server) {
+  udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  sapply(udat$token, remove_projects, server)
+}
+
+update_file <- function(userfile, assignment, file, path, add = "\n\nAll finished!") {
+  file <- "assignment.Rmd"
+  path <- file.path(directory, assignment, file)
+
+  content <- paste0(readLines(path), collapse = "\n") %>% paste0(add) %>% base64_enc
+
+  udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  udat <- slice(udat, 1)
+  id <- projID(paste0(udat$userid,"/",pre, assignment), udat$token, server)$project_id
+
+  h <- new_handle()
+  handle_setopt(h, customrequest = "POST")
+  handle_setheaders(h, "PRIVATE-TOKEN" = udat$token)
+  resp <-
+    curl_fetch_memory(
+      paste0(server, "projects/", id,"/repository/files?file_path=", file, "&branch_name=master&encoding=base64&commit_message=update file&content=", content)
+      ,h
+    )
 }
 
 ## test section
@@ -544,4 +589,12 @@ if (main_git__) {
     unlink(file.path(directory, repo, ".git"), recursive = TRUE, force = TRUE)
     dir.exists(file.path(directory, repo, ".git"))
   }
+
+  ## uncomment to cleanup
+  # token <- connect(username, password, server)$token
+  # remove_group(token, "rady-mgta-bc-2016", server)
+  # remove_student_projects(userfile, server)
+  # id <- projID(paste0("vnijs/",repo), token, server)$project_id
+  # remove_project(token, id, server)
+
 }
