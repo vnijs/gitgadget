@@ -5,10 +5,10 @@
 			"path": "/Users/vnijs/Dropbox/TODO"
 		},
 		{
-			"path": "/Users/vnijs/Desktop/GitHub/radiant.decide"
+			"path": "/Users/vnijs/Desktop/Github/docs"
 		},
 		{
-			"path": "/Users/vnijs/Desktop/GitHub/radiant.quant"
+			"path": "/Users/vnijs/Desktop/Github/radiant"
 		},
 		{
 			"path": "/Users/vnijs/Desktop/GitHub/radiant.basics"
@@ -20,10 +20,13 @@
 			"path": "/Users/vnijs/Desktop/GitHub/radiant.data"
 		},
 		{
-			"path": "."
+			"path": "/Users/vnijs/Desktop/Github/radiant.multivariate"
 		},
 		{
-			"path": "/Users/vnijs/Desktop/GitHub/radiant_gh-pages"
+			"path": "/Users/vnijs/Desktop/Github/radiant.model"
+		},
+		{
+			"path": "."
 		}
 	]
 }
