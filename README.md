@@ -40,7 +40,9 @@ If the repo you are working on is a fork you probably want to make sure it is up
 
 ## Collect
 
-Collect assignments from students/teams using Merge (Pull) Requests on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. Merge (pull) requests will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs on gitlab. To view the MRs locally press the `Fetch` button.
+Collect assignments from students/teams using Merge (Pull) Requests on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. MRs will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs using the gitlab UI.
+
+To view, run, and edit the MRs locally press the `Fetch` button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in Rstudio to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.
 
 ## Assignment management
 
@@ -70,6 +72,10 @@ Forks the assignment repo uploaded by a faculty member or TA earlier for each st
 `collect_work(...)`
 
 Generates merge (pull) request for all students or students teams. Requires an input file of the form specified above.
+
+`fetch_work(...)`
+
+Fetch Merge (pull) Requests for all students or students teams from the gitlab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.
 
 ## Initial settings
 
