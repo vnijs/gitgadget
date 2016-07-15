@@ -594,20 +594,28 @@ gitgadget <- function() {
       if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
         cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
       } else {
-        system("git fetch origin")
-        cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignment merge requests")
+
+        fetch_work(
+          input$collect_user_name, input$collect_password, input$collect_group,
+          input$collect_assignment, pre = "", server = input$collect_server
+        )
+
+        cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignments")
       }
     })
 
     output$collect_output <- renderPrint({
       if (is_empty(input$collect_assignment)) {
        cat("Specify all required inputs to generate the list of available assignments. Then press the Collect button")
-      } else if (pressed(input$collect)) {
-        ret <- collect()
-      } else if (pressed(input$collect_fetch)) {
-        ret <- collect_fetch()
       } else {
-        cat("Specify all required inputs and then press the Collect button")
+        if (pressed(input$collect))
+          ret <- collect()
+        if (pressed(input$collect_fetch)) {
+          cat("Fetching merge requests ...\n")
+          ret <- collect_fetch()
+        }
+        if (not_pressed(input$collect) && not_pressed(input$collect_fetch))
+          cat("Specify all required inputs and then press the Collect button")
       }
     })
 
