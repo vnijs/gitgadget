@@ -403,6 +403,7 @@ merger <- function(token, to, server,
   resp <- curl_fetch_memory(murl, h)
   resp$content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
+    message("Generating merge request")
     list(status = "OKAY", content = resp$content)
   } else if (grepl("This merge request already exists", resp$content)) {
     message("Merge request already exists")
@@ -441,6 +442,55 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 
   udat$user_id <- userIDs(udat$userid, token, server)
   resp <- sapply(udat$token, merger, project_id, server)
+}
+
+#` export
+fetch_work <- function(username, password, groupname, assignment,
+                       pre = "", server = "https://gitlab.com/api/v3/") {
+
+  resp <- connect(username, password, server)
+  if (resp$status != 'OKAY')
+    stop("Error connecting to server: check username/password/server")
+
+  token <- resp$token
+  upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
+  resp <- projID(upstream_name, token, server)
+
+  if (resp$status != "OKAY")
+    stop("Error getting assignment ", upstream_name)
+
+  project_id <- resp$project_id
+
+  h <- new_handle()
+  handle_setopt(h, customrequest = "GET")
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests"), h)
+
+  mr <- fromJSON(rawToChar(resp$content))
+
+  mrdat <-
+    data_frame(id = mr$iid, un = mr$author$username) %>%
+    # bind_rows(data_frame(id = 4, un = "msba-student-1"), .) %>%
+    arrange(un, desc(id)) %>%
+    group_by(un) %>%
+    slice(1) %>%
+    ungroup
+
+  system("git fetch origin")
+
+  branches <- system("git branch ", intern = TRUE) %>% gsub("[\\* ]+", "", .)
+
+  create_branch <- function(dat) {
+    if (any(grepl(dat[["un"]], branches))) {
+      cat("Branch", dat[["un"]], "already exists. To update this branch first delete the current branch in the Branch tab and then click the Fetch button again\n")
+    } else {
+      system(paste0("git checkout -b ", dat[["un"]], " origin/merge-requests/", dat[["id"]]))
+      system(paste0("git branch -d -r origin/merge-requests/", dat[["id"]]))
+      system(paste0("git push --set-upstream origin ", dat["un"]))
+    }
+  }
+
+  tmp <- apply(mrdat, 1, create_branch)
 }
 
 remove_group <- function(token, groupname, server) {
@@ -518,7 +568,19 @@ if (main_git__) {
   type <- "individual"
   pre <- paste0(groupname,"-")
   directory <- paste0("~/bc/", groupname)
+
+  ## uncomment to cleanup
+  # token <- connect(username, password, server)$token
+  # remove_group(token, "rady-mgta-bc-2016", server)
+  # remove_student_projects(userfile, server)
+  # repo <- "gitgadget-test-repo"
+  # id <- projID(paste0("vnijs/",repo), token, server)$project_id
+  # remove_project(token, id, server)
+
   if (file.exists(file.path(directory, assignment))) {
+    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, assignment, ".git"))
+
     ## create a group for a course where all assignments and cases will be posted
     create_group(
       username, password, groupname, userfile, permission = permission,
@@ -536,8 +598,6 @@ if (main_git__) {
       pre = pre, server = server
     )
 
-    # unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
-    # dir.exists(file.path(directory, assignment, ".git"))
   } else {
     cat("Assignment does not exist")
   }
@@ -546,6 +606,9 @@ if (main_git__) {
   assignment <- "assignment2"
   type <- "team"
   if (file.exists(file.path(directory, assignment))) {
+    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, assignment, ".git"))
+
     create_repo(
       username, password, groupname, assignment, directory, pre = pre,
       server = server
@@ -555,9 +618,6 @@ if (main_git__) {
       username, password, groupname, assignment, userfile, type = type,
       pre = pre, server = server
     )
-
-    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
-    dir.exists(file.path(directory, assignment, ".git"))
   } else {
     cat("Assignment does not exist")
   }
@@ -570,8 +630,13 @@ if (main_git__) {
       username, password, groupname, assignment, userfile, type = type,
       pre = pre, server = server
     )
-    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
-    dir.exists(file.path(directory, assignment, ".git"))
+
+    fetch_work(
+      username, password, groupname, assignment, pre = pre, server = server
+    )
+
+    # unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    # dir.exists(file.path(directory, assignment, ".git"))
   } else {
     cat("Assignment does not exist")
   }
@@ -582,19 +647,13 @@ if (main_git__) {
   repo <- "gitgadget-test-repo"
   directory <- "/Users/vnijs/Desktop/Github"
   if (file.exists(file.path(directory, repo))) {
+    unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
+    dir.exists(file.path(directory, assignment, ".git"))
     create_repo(
       username, password, groupname, repo, directory, pre = pre,
       server = server
     )
-    unlink(file.path(directory, repo, ".git"), recursive = TRUE, force = TRUE)
-    dir.exists(file.path(directory, repo, ".git"))
+    # unlink(file.path(directory, repo, ".git"), recursive = TRUE, force = TRUE)
+    # dir.exists(file.path(directory, repo, ".git"))
   }
-
-  ## uncomment to cleanup
-  # token <- connect(username, password, server)$token
-  # remove_group(token, "rady-mgta-bc-2016", server)
-  # remove_student_projects(userfile, server)
-  # id <- projID(paste0("vnijs/",repo), token, server)$project_id
-  # remove_project(token, id, server)
-
 }
