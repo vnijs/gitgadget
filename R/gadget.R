@@ -389,9 +389,14 @@ gitgadget <- function() {
     branches <- reactive({
       input$branch_delete
       input$branch_create
-      system("git branch ", intern = TRUE) %>%
-        gsub("[\\* ]+", "", .) %>%
+      br <- system("git branch ", intern = TRUE)
+      ## need both conditions because output on windows and mac differs
+      if (length(br) == 0 || attr(br, "status") == 128) {
+        c()
+      } else {
+        br %>% gsub("[\\* ]+", "", .) %>%
         {.[!grepl("(^master$)|(^origin/)",.)]}
+      }
     })
 
     observeEvent(input$branch_create, {
