@@ -17,7 +17,7 @@ gitgadget <- function() {
         file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
         winslash = "/"
       )
-    } else if (os_type == "Darwin") {
+    } else {
       Sys.getenv("HOME")
     }
   }
@@ -390,8 +390,9 @@ gitgadget <- function() {
       input$branch_delete
       input$branch_create
       br <- system("git branch ", intern = TRUE)
+      brs <- attr(br, "status")
       ## need both conditions because output on windows and mac differs
-      if (length(br) == 0 || attr(br, "status") == 128) {
+      if (length(br) == 0 || (!is.null(brs) && brs == 128)) {
         c()
       } else {
         br %>% gsub("[\\* ]+", "", .) %>%
