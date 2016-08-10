@@ -1,8 +1,8 @@
 # Git Gadget
 
-> Warning: `gitgadget` is still very early in its development. Use at your own risk. May blow-up your computer.
+> Note: `gitgadget` is still early in its development. Use at your own risk.
 
-`gitgadget` is an Rstudio addin for version control and assignment management using git. The assignment management functions currently only support the [gitlab](https://gitlab.com) API. PRs for githubs, bitbucket, etc welcome.
+`gitgadget` is an Rstudio addin for version control and assignment management using git. The assignment management functions currently support the [gitlab](https://gitlab.com) API. PRs for github, bitbucket, etc welcome.
 
 `gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. Its goal is to provide a few additional features not (yet) available in Rstudio that can be useful to students and faculty using git for classes. For an excellent discussion of this type of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
 
