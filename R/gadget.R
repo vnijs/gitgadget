@@ -250,6 +250,8 @@ gitgadget <- function() {
             system("git config --global credential.helper osxkeychain")
           } else if (os_type == "Windows") {
             system("git config --global credential.helper wincred")
+          } else {
+            system("git config --global credential.helper store")
           }
 
           crh <- system("git config --global --list", intern = TRUE) %>%
