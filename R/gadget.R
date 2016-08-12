@@ -11,18 +11,19 @@ gitgadget <- function() {
   # }
   os_type <- Sys.info()["sysname"]
 
-  find_home <- function() {
-    if (os_type == "Windows") {
-      normalizePath(
-        file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
-        winslash = "/"
-      )
-    } else {
-      Sys.getenv("HOME")
-    }
-  }
+  # find_home <- function(os_type = Sys.info()["sysname"]) {
+  #   if (os_type == "Windows") {
+  #     normalizePath(
+  #       file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
+  #       winslash = "/"
+  #     )
+  #   } else {
+  #     Sys.getenv("HOME")
+  #   }
+  # }
 
-  homedir <- find_home()
+  # find_home <- function()
+  homedir <- normalizePath("~", winslash = "/")
   projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."))))
 
   ui <- miniPage(
@@ -70,10 +71,10 @@ gitgadget <- function() {
       miniTabPanel("Clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
-          fillRow(height = "70px", width = "300px",
-            textInput("clone_user_name","User name:", value = getOption("git.user", "")),
-            passwordInput("clone_password","Password:", value = getOption("git.password", ""))
-          ),
+          # fillRow(height = "70px", width = "300px",
+          #   textInput("clone_user_name","User name:", value = getOption("git.user", "")),
+          #   passwordInput("clone_password","Password:", value = getOption("git.password", ""))
+          # ),
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
@@ -305,6 +306,11 @@ gitgadget <- function() {
 
     create <- eventReactive(input$create, {
 
+      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
+        cat("User name and password are required to create a new repo")
+        return(invisible())
+      }
+
       if (!dir.exists(input$create_directory)) {
         cat("The specified directory does not exist. Create the directory and try again")
         return(invisible())
@@ -350,9 +356,9 @@ gitgadget <- function() {
           on.exit(setwd(owd))
         }
         clone_from <- cmd_from <- input$clone_from
-        if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password)) {
-          clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
-        }
+        # if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password)) {
+        #   clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
+        # }
 
         cmd <- paste("git clone", clone_from)
         cmdclean <- paste("git clone", input$clone_from)
@@ -369,8 +375,8 @@ gitgadget <- function() {
 
     output$clone_output <- renderPrint({
       input$clone
-      req(!is.null(input$clone_user_name))
-      req(!is.null(input$clone_password))
+      # req(!is.null(input$clone_user_name))
+      # req(!is.null(input$clone_password))
       ret <- clone()
       isolate({
         if (length(ret) == 0) {
