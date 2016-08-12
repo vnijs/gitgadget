@@ -470,7 +470,6 @@ fetch_work <- function(username, password, groupname, assignment,
 
   mrdat <-
     data_frame(id = mr$iid, un = mr$author$username) %>%
-    # bind_rows(data_frame(id = 4, un = "msba-student-1"), .) %>%
     arrange(un, desc(id)) %>%
     group_by(un) %>%
     slice(1) %>%
