@@ -360,7 +360,8 @@ create_repo <- function(username, password, groupname, assignment, directory,
   if (!dir.exists(".git")) system2("git", "init")
 
   if (gn == "") gn <- username
-  murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
+  # murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
+  murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
