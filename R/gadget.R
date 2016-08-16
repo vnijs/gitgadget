@@ -9,21 +9,22 @@ gitgadget <- function() {
   #   projdir <- getwd()
   #   basedir <- normalizePath(file.path(projdir,".."))
   # }
+
   os_type <- Sys.info()["sysname"]
 
-  # find_home <- function(os_type = Sys.info()["sysname"]) {
-  #   if (os_type == "Windows") {
-  #     normalizePath(
-  #       file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
-  #       winslash = "/"
-  #     )
-  #   } else {
-  #     Sys.getenv("HOME")
-  #   }
-  # }
+  find_home <- function(os_type = Sys.info()["sysname"]) {
+    if (os_type == "Windows") {
+      ## gives /Users/x and not /Users/x/Documents
+      normalizePath(
+        file.path(Sys.getenv("HOMEDRIVE"), Sys.getenv("HOMEPATH")),
+        winslash = "/"
+      )
+    } else {
+      Sys.getenv("HOME")
+    }
+  }
 
-  # find_home <- function()
-  homedir <- normalizePath("~", winslash = "/")
+  homedir <- find_home()
   projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."))))
 
   ui <- miniPage(
@@ -96,6 +97,7 @@ gitgadget <- function() {
           uiOutput("ui_branch_merge_name"),
           actionButton("branch_merge", "Merge"),
           actionButton("branch_undo", "Undo"),
+          # actionButton("branch_redo", "Redo"),
           HTML("<h2>Delete an existing branch</h2>"),
           uiOutput("ui_branch_delete_name"),
           actionButton("branch_unlink", "Unlink remote"),
@@ -397,14 +399,14 @@ gitgadget <- function() {
     branches <- reactive({
       input$branch_delete
       input$branch_create
-      br <- system("git branch ", intern = TRUE)
+      br <- system("git branch -a", intern = TRUE)
       brs <- attr(br, "status")
       ## need both conditions because output on windows and mac differs
       if (length(br) == 0 || (!is.null(brs) && brs == 128)) {
         c()
       } else {
         br %>% gsub("[\\* ]+", "", .) %>%
-        {.[!grepl("(^master$)|(^origin/)",.)]}
+        {.[!grepl("(^master$)|(^remotes/origin/master$)|(^remotes/origin/HEAD)",.)]}
       }
     })
 
@@ -425,7 +427,12 @@ gitgadget <- function() {
 
     observeEvent(input$branch_undo, {
       system("git reset --merge HEAD~1")
+      # system("git revert HEAD~1")
     })
+
+    # observeEvent(input$branch_redo, {
+    #   system("git reset HEAD@{1}")
+    # })
 
     observeEvent(input$branch_link, {
       if (input$branch_create_name != "") {
