@@ -83,7 +83,7 @@ gitgadget <- function() {
           verbatimTextOutput("clone_output")
         )
       ),
-       miniTabPanel("Branch", icon = icon("code-fork"),
+      miniTabPanel("Branch", icon = icon("code-fork"),
         miniContentPanel(
           HTML("<h2>Create a new branch</h2>"),
           textInput("branch_create_name","Branch name:", value = ""),
@@ -244,7 +244,7 @@ gitgadget <- function() {
         return(invisible())
       } else {
         crh <- system("git config --global --list", intern = TRUE) %>%
-          .[grepl("^credential.help",.)]
+          .[grepl("^credential.helper",.)]
 
         if (length(crh) == 0) {
           if (os_type == "Darwin") {
@@ -252,11 +252,11 @@ gitgadget <- function() {
           } else if (os_type == "Windows") {
             system("git config --global credential.helper wincred")
           } else {
-            system("git config --global credential.helper store")
+            system("git config --global credential.helper 'cache --timeout=32000000'")
           }
 
           crh <- system("git config --global --list", intern = TRUE) %>%
-            .[grepl("^credential.help",.)]
+            .[grepl("^credential.helper",.)]
 
         }
 
