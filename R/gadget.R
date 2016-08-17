@@ -28,7 +28,7 @@ gitgadget <- function() {
   projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."))))
 
   ui <- miniPage(
-    gadgetTitleBar("GITGADGET"),
+    gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
     miniTabstripPanel(
       miniTabPanel("Introduce", icon = icon("hand-paper-o"),
