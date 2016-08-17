@@ -166,10 +166,10 @@ gitgadget <- function() {
       ## Rstudio doesn't look for information in the Documents directory
       if (
         !file.exists(file.path(homedir, ".gitconfig")) &&
-        file.exists(file.path(homedir, "Documents", ".gitconfig"))
+        file.exists(file.path(homedir, "Documents/.gitconfig"))
       ) {
         file.copy(
-          file.path(homedir, "Documents", ".gitconfig"),
+          file.path(homedir, "Documents/.gitconfig"),
           file.path(homedir, ".gitconfig")
         )
       }
@@ -327,6 +327,12 @@ gitgadget <- function() {
       }
 
       repo <- basename(input$create_directory)
+
+      if (grepl(" ", repo)) {
+        cat("The repo name cannot contain spaces. Please change the name and try again")
+        return(invisible())
+      }
+
       directory <- dirname(input$create_directory)
       cat("Creating repo ...\n")
 
