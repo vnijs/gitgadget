@@ -89,7 +89,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
   resp <- curl_fetch_memory(murl,h)
   if (checkerr(resp$status_code) == FALSE) {
     mess <- fromJSON(rawToChar(resp$content))$message
-    if (grepl("already exists", mess)) {
+    if (grepl("already exists", mess, ignore.case = TRUE)) {
       return(list(status = "OKAY", message = mess))
     } else {
       message("There was an error adding user to the group:", mess, "\n")
