@@ -89,7 +89,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
   resp <- curl_fetch_memory(murl,h)
   if (checkerr(resp$status_code) == FALSE) {
     mess <- fromJSON(rawToChar(resp$content))$message
-    if (mess == "Already exists") {
+    if (grepl("already exists", mess)) {
       return(list(status = "OKAY", message = mess))
     } else {
       message("There was an error adding user to the group:", mess, "\n")
@@ -199,6 +199,7 @@ setupteam <- function(token, others, project_id, server) {
   if (!"forked_from_project" %in% names(resp$repos) ||
       !project_id %in% resp$repos$forked_from_project$id) {
     message("Creating fork for team lead")
+
     resp <- forkRepo(token, project_id, server)
     if (resp$status != "OKAY") {
       message("Error forking for leader")
@@ -283,9 +284,7 @@ assign_work <- function(username, password, groupname, assignment, userfile,
     dat
   }
 
-  # student_data %>% group_by_("team") %>% do(setup(.)) %>% print(n = 1000)
   resp <- student_data %>% group_by_("team") %>% do(setup(.))
-  # return(invisible())
 }
 
 maker <- function(repo_name, token, server, namespace = "") {
@@ -573,7 +572,7 @@ if (main_git__) {
   # token <- connect(username, password, server)$token
   # remove_group(token, "rady-mgta-bc-2016", server)
   # remove_student_projects(userfile, server)
-  # repo <- "gitgadget-test-repo"
+  # ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
   # remove_project(token, id, server)
 
