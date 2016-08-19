@@ -72,10 +72,6 @@ gitgadget <- function() {
       miniTabPanel("Clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
-          # fillRow(height = "70px", width = "300px",
-          #   textInput("clone_user_name","User name:", value = getOption("git.user", "")),
-          #   passwordInput("clone_password","Password:", value = getOption("git.password", ""))
-          # ),
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
@@ -90,14 +86,12 @@ gitgadget <- function() {
           textInput("branch_create_name","Branch name:", value = ""),
           actionButton("branch_create", "Create local"),
           actionButton("branch_link", "Link remote"),
-          # HTML("<h2>Sync fork</h2>"),
-          # uiOutput("ui_sync_from"),
-          # actionButton("sync", "Sync"),
-          HTML("<h2>Merge branch with master</h2>"),
+          uiOutput("ui_branch_checkout_name"),
+          HTML("<h2>Merge branch and master</h2>"),
           uiOutput("ui_branch_merge_name"),
-          actionButton("branch_merge", "Merge"),
+          actionButton("branch_merge", "Merge into master"),
+          actionButton("branch_merge_rev", "Merge into branch"),
           actionButton("branch_undo", "Undo"),
-          # actionButton("branch_redo", "Redo"),
           HTML("<h2>Delete an existing branch</h2>"),
           uiOutput("ui_branch_delete_name"),
           actionButton("branch_unlink", "Unlink remote"),
@@ -126,11 +120,6 @@ gitgadget <- function() {
             passwordInput("collect_password","Password:", value = getOption("git.password", ""))
           ),
           textInput("collect_group","Group name:", value = getOption("git.group", "")),
-          # fillRow(height = "70px", width = "300px",
-            # textInput("collect_group","Group name:", value = getOption("git.group", "")),
-            # textInput("collect_pre","Prefix:", value = getOption("git.prefix", ""))
-          # ),
-          # textInput("collect_assignment","Assignment name:", value = ""),
           uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
@@ -364,10 +353,6 @@ gitgadget <- function() {
           on.exit(setwd(owd))
         }
         clone_from <- cmd_from <- input$clone_from
-        # if (grepl("^https", clone_from) && !is_empty(input$clone_user_name) && !is_empty(input$clone_password)) {
-        #   clone_from <- gsub("https://",paste0("https://", input$clone_user_name,":", input$clone_password, "@"), clone_from)
-        # }
-
         cmd <- paste("git clone", clone_from)
         cmdclean <- paste("git clone", input$clone_from)
 
@@ -383,8 +368,6 @@ gitgadget <- function() {
 
     output$clone_output <- renderPrint({
       input$clone
-      # req(!is.null(input$clone_user_name))
-      # req(!is.null(input$clone_password))
       ret <- clone()
       isolate({
         if (length(ret) == 0) {
@@ -405,6 +388,7 @@ gitgadget <- function() {
     branches <- reactive({
       input$branch_delete
       input$branch_create
+      input$branch_checkout
       br <- system("git branch -a", intern = TRUE)
       brs <- attr(br, "status")
       ## need both conditions because output on windows and mac differs
@@ -428,6 +412,14 @@ gitgadget <- function() {
         system("git checkout master")
         paste("git merge ", input$branch_merge_name) %>%
           system(.)
+      }
+    })
+
+    observeEvent(input$branch_merge_rev, {
+      branch <- input$branch_merge_name
+      if (!is.null(branch)) {
+        system(paste0("git checkout ", branch))
+        system("git merge master")
       }
     })
 
@@ -476,8 +468,44 @@ gitgadget <- function() {
       }
     })
 
+    rbranches <- reactive({
+      # input$branch_delete
+      # input$branch_create
+      input$branch_unlink
+      br <- system("git branch -r", intern = TRUE)
+      brs <- attr(br, "status")
+      ## need both conditions because output on windows and mac differs
+      if (length(br) == 0 || (!is.null(brs) && brs == 128)) {
+        c()
+      } else {
+        br %>% gsub("[\\* ]+", "", .) %>%
+        {.[!grepl("(^origin/master$)|(^origin/HEAD)",.)]}
+      }
+    })
+
+    output$ui_branch_checkout_name <- renderUI({
+      resp <- rbranches()
+      if (length(resp) == 0) {
+        invisible()
+      } else {
+        tagList(
+          HTML("<h2>Check out a remote branch</h2>"),
+          selectInput("branch_checkout_name","Branch name:", choices = resp),
+          actionButton("branch_checkout", "Check out")
+        )
+      }
+    })
+
+    observeEvent(input$branch_checkout, {
+      if (!is.null(input$branch_checkout_name)) {
+        ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
+        system(paste0("git checkout ", sub("origin/","",input$branch_checkout_name)))
+      }
+    })
+
     output$ui_branch_delete_name <- renderUI({
-      resp <- branches()
+      resp <- branches() %>% .[!grepl("^remotes/origin", .)]
+
       if (length(resp) == 0) {
         HTML("<label>No branches available to delete</label>")
       } else {
