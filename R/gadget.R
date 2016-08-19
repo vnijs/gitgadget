@@ -424,13 +424,8 @@ gitgadget <- function() {
     })
 
     observeEvent(input$branch_undo, {
-      system("git reset --merge HEAD~1")
-      # system("git revert HEAD~1")
+      system("git merge --abort")
     })
-
-    # observeEvent(input$branch_redo, {
-    #   system("git reset HEAD@{1}")
-    # })
 
     observeEvent(input$branch_link, {
       if (input$branch_create_name != "") {
@@ -469,8 +464,6 @@ gitgadget <- function() {
     })
 
     rbranches <- reactive({
-      # input$branch_delete
-      # input$branch_create
       input$branch_unlink
       br <- system("git branch -r", intern = TRUE)
       brs <- attr(br, "status")
@@ -548,7 +541,7 @@ gitgadget <- function() {
     })
 
     observeEvent(input$sync_undo, {
-      system("git reset --merge HEAD~1")
+      system("git merge --abort")
     })
 
     observeEvent(input$sync_unlink, {
@@ -564,14 +557,12 @@ gitgadget <- function() {
       remote_info()
     })
 
-    # get_assignments <- function(username, password, group, server) {
     get_assignments <- reactive({
 
       username <- input$collect_user_name
       password <- input$collect_password
       group <- input$collect_group
       server <- input$collect_server
-      # req(username, password, group, server)
       if (is_empty(username) || is_empty(password) || is_empty(group) || is_empty(server)) {
         message("Specify all required inputs to retrieve available assignments")
         return(invisible())
