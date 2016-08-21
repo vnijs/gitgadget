@@ -16,7 +16,7 @@ Set a global user name and email for git. Please use your gitlab user name. If a
 
 > To avoid possible authentication issues with SSH on gitlab we recommend you clone, push, pull, etc. using HTTPS
 
-## Create
+## Create (gitlab only)
 
 Enter the path to a local directory to create a repo on gitlab. If the local directory does not yet exist it will be created. For existing directories you can click the `Open` button and navigate to a file in the directory of interest. The directory path will be parsed from the provided file path. If a `Group name` is provided it will be used to place the repo on gitlab. If left blank, the user name will be used as the group. A `Prefix` can be used and will default to the value of `git.prefix` in .Rprofile in your home directory (see _Initial settings_ below). The prefix is used for assignment management to avoid conflicting assignment/case names.
 
@@ -24,21 +24,21 @@ Enter the path to a local directory to create a repo on gitlab. If the local dir
 
 ## Clone
 
-Clone a repo from gitlab (or github) (e.g., https://github.com/vnijs/gitgadget-test-repo). The name for the directory placed inside `Clone into` will be taken from the repo name unless an alternative name is provided in `Clone to`.
+Clone a repo from gitlab (or github) (e.g., https://github.com/vnijs/gitgadget-test-repo). The name for the directory placed inside `Clone into` will be taken from the repo name unless an alternative name is provided in `Clone to`. If no Rstudio project file (`.Rproj`) exists in the repo one will be created.
+
+> To activate an HTTPS credential helper the first time you clone from github or gitlab you may need to use the command line (e.g., git clone repo-to-clone)
 
 ## Branch
 
-Create a local branch from the active repo by providing a `Branch name` and clicking `Create local`. Link and push to the (gitlab) remote by clicking the `Link remote` button. If branches other than `master` exist you can `Merge` them with the master branch or delete them if no longer needed. `Unlink remote` will not remove the local or the remote repo but only the link to the remote (i.e., the push/pull arrows in Rstudio will gray-out).
+Create a local branch from the active branch by providing a `Branch name` and clicking `Create local`. Link and push to the (gitlab) remote by clicking the `Link remote` button. If remote branches exists click the `Check out` button to work with a branch locally. If branches other than `master` exist you can `Merge branches` or delete them if they are no longer needed. To undo a merge-in-progress, e.g., with merge conflicts, click the `Abort merge` button. `Unlink remote` will not remove the local or the remote branch but only the link to the remote (i.e., the push/pull arrows in Rstudio will gray-out).
 
-Note that changes may only be visible in the Rstudio after clicking the `refresh` button in the Git tab.
+> Changes to the list of available branches may only be visible in Rstudio after clicking the `refresh` button in the Git tab.
 
 ## Sync
 
-If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the `upstream` repo you forked from. Copy the HTTPS link to clone the original repo into the `Sync from` input in the _Sync_ tab and then press `Sync`. The repo you forked will now be added as a _remote_. Click `Merge` to update your local version with any changes to the original. Fix merge conflicts if they pop up and proceed working on the repo. To undo the merge simply click the `Undo` button. When you are done commit and then push your changes to gitlab.
+If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the `upstream` repo you forked from. Copy the HTTPS link to clone the original repo into the `Sync from` input in the _Sync_ tab and then press `Sync`. The repo you forked will now be added as a _remote_. Click `Merge` to update your local version with any changes to the original. Fix merge conflicts if they pop up and proceed working on the repo. To undo the merge simply click the `Abort merge` button. When you are done commit and then push your changes to gitlab.
 
-> Make sure **not** to click the `Undo` button more than once or you may lose previous (local) commits.
-
-## Collect
+## Collect (gitlab only)
 
 Collect assignments from students/teams using Merge (Pull) Requests on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. MRs will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs using the gitlab UI.
 
