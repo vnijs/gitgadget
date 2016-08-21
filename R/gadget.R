@@ -25,7 +25,8 @@ gitgadget <- function() {
   }
 
   homedir <- find_home()
-  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."))))
+  rprofdir <- Sys.getenv("HOME")
+  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
 
   ui <- miniPage(
     gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
@@ -36,6 +37,7 @@ gitgadget <- function() {
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput("intro_user_name","User name:", value = getOption("git.user", "")),
           textInput("intro_user_email","User email:", value = getOption("git.email", "")),
+          textInput("intro_git_home","Git directory:", value = getOption("git.home", basedir)),
           uiOutput("ui_intro_buttons"),
           hr(),
           verbatimTextOutput("introduce_output")
@@ -54,17 +56,17 @@ gitgadget <- function() {
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
-            actionButton("create_directory_find", "Open")
+            actionButton("create_directory_find", "Open", title = "Browse and select a file inside the local repo directory")
           ),
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           fillRow(height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
-              actionButton("create_file_find", "Open")
+              actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information")
           ),
           conditionalPanel("input.create_user_file != ''",
             radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
           ),
-          actionButton("create", "Create"),
+          actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
           hr(),
           verbatimTextOutput("create_output")
         )
@@ -75,7 +77,7 @@ gitgadget <- function() {
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
-          actionButton("clone", "Clone"),
+          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a repo from, e.g., github or gitlab run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
         )
@@ -84,30 +86,38 @@ gitgadget <- function() {
         miniContentPanel(
           HTML("<h2>Create a new branch</h2>"),
           textInput("branch_create_name","Branch name:", value = ""),
-          actionButton("branch_create", "Create local"),
-          actionButton("branch_link", "Link remote"),
+          actionButton("branch_create", "Create local", title = "Create a new local branch based on master\n\nGit command:\ngit branch -b <branch>"),
+          actionButton("branch_link", "Link remote", title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"),
           uiOutput("ui_branch_checkout_name"),
-          HTML("<h2>Merge branch and master</h2>"),
-          uiOutput("ui_branch_merge_name"),
-          actionButton("branch_merge", "Merge into master"),
-          actionButton("branch_merge_rev", "Merge into branch"),
-          actionButton("branch_undo", "Undo"),
+          HTML("<h2>Merge branches</h2>"),
+          uiOutput("ui_branch_merge_branches"),
+          actionButton("branch_merge", "Merge branches", title = "Merge the 'from' branch into the 'into' branch\n\nGit commands:\ngit checkout <from branch>\ngit merge <into branch>"),
+          # actionButton("branch_merge_rev", "Merge into branch", title = "Merge the master branch into the selected branch\n\nGit commands:\ngit checkout <branch>\ngit merge master"),
+          actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
+          actionButton("branch_undo", "Undo merge", style = "color: white; background-color: red", title = "Undo a successful merge\n\nGit command:\ngit reset --merge HEAD~1"),
+          # style="color: #fff; background-color: #337ab7; border-color: #2e6da4"
+          # HTML("<h2>Merge branch and master</h2>"),
+          # uiOutput("ui_branch_merge_name"),
+          # actionButton("branch_merge", "Merge into master", title = "Merge the selected branch into the master branch\n\nGit commands:\ngit checkout master\ngit merge <branch>"),
+          # actionButton("branch_merge_rev", "Merge into branch", title = "Merge the master branch into the selected branch\n\nGit commands:\ngit checkout <branch>\ngit merge master"),
+          # actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
           HTML("<h2>Delete an existing branch</h2>"),
           uiOutput("ui_branch_delete_name"),
-          actionButton("branch_unlink", "Unlink remote"),
-          actionButton("branch_delete", "Delete local"),
-          hr(),
-          verbatimTextOutput("branch_output")
+          actionButton("branch_unlink", "Unlink remote", title = "Unlink the local and the remote branch. The remote branch will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"),
+          actionButton("branch_delete", "Delete local", title = "Remove the local branch\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"),
+          br(), br()
+          # hr(),
+          # verbatimTextOutput("branch_output")
         )
       ),
       miniTabPanel("Sync", icon = icon("refresh"),
         miniContentPanel(
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
-          actionButton("sync", "Sync"),
-          actionButton("sync_merge", "Merge"),
-          actionButton("sync_undo", "Undo"),
-          actionButton("sync_unlink", "Unlink"),
+          actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
+          actionButton("sync_merge", "Merge", title = "Merge the upstream/ branch(es) from the orginal with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"),
+          actionButton("synch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
+          actionButton("sync_unlink", "Unlink", title = "Remove a link between a local repo and original from which it was forked\n\nGit command:\ngit remote remove upstream"),
           hr(),
           verbatimTextOutput("sync_output")
         )
@@ -123,12 +133,12 @@ gitgadget <- function() {
           uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
-            actionButton("collect_file_find", "Open")
+            actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information")
           ),
           textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
-          actionButton("collect", "Collect"),
-          actionButton("collect_fetch", "Fetch"),
+          actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API"),
+          actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches"),
           hr(),
           verbatimTextOutput("collect_output")
         )
@@ -144,12 +154,40 @@ gitgadget <- function() {
         cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
+
+        rprof <- file.path(rprofdir, ".Rprofile")
+        if (file.exists(rprof)) {
+          readLines(rprof) %>%
+            .[!grepl("options\\(git.user\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
+            cat(file = rprof)
+        } else {
+          paste0("\noptions(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
+        }
       }
 
       if (!is_empty(input$intro_user_email)) {
         cmd <- paste("git config --global --replace-all user.email", input$intro_user_email)
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
+      }
+
+      ## set git.home option
+      git_home <- gsub("^\\s+|\\s+$", "", input$intro_git_home)
+      if (!is_empty(git_home) && git_home != getOption("git.home", "")) {
+        if (!dir.exists(git_home)) dir.create(git_home, recursive = TRUE)
+        rprof <- file.path(rprofdir, ".Rprofile")
+        if (file.exists(rprof)) {
+          readLines(rprof) %>%
+            .[!grepl("options\\(git.home\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\noptions(git.home = \"", git_home, "\")\n") %>%
+            cat(file = rprof)
+        } else {
+          paste0("\noptions(git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
+        }
+        cat("Updated .Rprofile. Restart Rstudio to see the changes\n")
       }
 
       ## Rstudio doesn't look for information in the Documents directory
@@ -180,8 +218,8 @@ gitgadget <- function() {
           textInput("intro_keyname","Key name:", value = "id_rsa"),
           textInput("intro_passphrase","Pass-phrase:", value = "")
         ),
-        actionButton("intro_git", "Introduce"),
-        actionButton("intro_ssh", "SSH key")
+        actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
+        actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
       )
     })
 
@@ -258,6 +296,7 @@ gitgadget <- function() {
 
         paste(c(ret, crh), collapse = "\n") %>%
           paste0("Show settings: git config --global --list\n\n", ., "\n") %>%
+          paste0("git.home=", getOption("git.home", "<restart Rstudio to view updates>"),"\n") %>%
           cat
       }
 
@@ -378,6 +417,12 @@ gitgadget <- function() {
           } else {
             dir <- file.path(input$clone_into, input$clone_to)
           }
+
+          rproj <- list.files(path = dir, pattern = "*.Rproj")
+          if (length(rproj) == 0) {
+            "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nEncoding: UTF-8\n\nAutoAppendNewline: Yes\nStripTrailingWhitespace: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace" %>%
+              cat(file = file.path(dir, paste0(basename(dir),".Rproj")))
+          }
           cat("Repo was sucessfully cloned into", dir)
         } else {
           cat("There was an error cloning the repo. Check the R console for output")
@@ -408,23 +453,28 @@ gitgadget <- function() {
     })
 
     observeEvent(input$branch_merge, {
-      if (!is.null(input$branch_merge_name)) {
-        system("git checkout master")
-        paste("git merge ", input$branch_merge_name) %>%
-          system(.)
+      from <- input$branch_merge_from
+      into <- input$branch_merge_into
+      if (!is.null(from) || !is.null(into)) {
+        system(paste("git checkout", into))
+        system(paste("git merge", from))
       }
     })
 
-    observeEvent(input$branch_merge_rev, {
-      branch <- input$branch_merge_name
-      if (!is.null(branch)) {
-        system(paste0("git checkout ", branch))
-        system("git merge master")
-      }
+    # observeEvent(input$branch_merge_rev, {
+    #   branch <- input$branch_merge_name
+    #   if (!is.null(branch)) {
+    #     system(paste0("git checkout ", branch))
+    #     system("git merge master")
+    #   }
+    # })
+
+    observeEvent(input$branch_abort, {
+      system("git merge --abort")
     })
 
     observeEvent(input$branch_undo, {
-      system("git merge --abort")
+      system("git reset --merge HEAD~1")
     })
 
     observeEvent(input$branch_link, {
@@ -439,11 +489,7 @@ gitgadget <- function() {
     observeEvent(input$branch_unlink, {
       branch <- input$branch_delete_name
       if (is_empty(branch)) input$branch_create_name
-      if (!is_empty(branch)) {
-        # paste0("git branch --unset-upstream ", branch) %>%
-        paste0("git branch -d -r origin/", branch) %>%
-          system(.)
-      }
+      if (!is_empty(branch)) system(paste0("git branch -d -r origin/", branch))
     })
 
     observeEvent(input$branch_delete, {
@@ -454,16 +500,32 @@ gitgadget <- function() {
       }
     })
 
-    output$ui_branch_merge_name <- renderUI({
-      resp <- branches()
-      if (length(resp) == 0) {
+    # output$ui_branch_merge_name <- renderUI({
+    #   resp <- branches()
+    #   if (length(resp) == 0) {
+    #     HTML("<label>No branches available to merge</label>")
+    #   } else {
+    #     selectInput("branch_merge_name","Branch name:", choices = resp)
+    #   }
+    # })
+
+    output$ui_branch_merge_branches <- renderUI({
+      from <- c("master", branches())
+      into <- from[!grepl("/", from)]
+      if (length(from) == 1) {
         HTML("<label>No branches available to merge</label>")
       } else {
-        selectInput("branch_merge_name","Branch name:", choices = resp)
+        tagList(
+          fillRow(height = "70px", width = "300px",
+            selectInput("branch_merge_from", "From:", choices = from, selected = from[2]),
+            selectInput("branch_merge_into", "Into:", choices = into)
+          )
+        )
       }
     })
 
     rbranches <- reactive({
+      input$branch_link
       input$branch_unlink
       br <- system("git branch -r", intern = TRUE)
       brs <- attr(br, "status")
@@ -484,7 +546,7 @@ gitgadget <- function() {
         tagList(
           HTML("<h2>Check out a remote branch</h2>"),
           selectInput("branch_checkout_name","Branch name:", choices = resp),
-          actionButton("branch_checkout", "Check out")
+          actionButton("branch_checkout", "Check out", title = "Check out a remote branch locally\n\nGit command:\ngit checkout <remote branch>")
         )
       }
     })
@@ -515,9 +577,9 @@ gitgadget <- function() {
       )
     }
 
-    output$branch_output <- renderPrint({
-      remote_info()
-    })
+    # output$branch_output <- renderPrint({
+    #   remote_info()
+    # })
 
     upstream_info <- function() {
       input$sync; input$sync_unlink
@@ -540,7 +602,7 @@ gitgadget <- function() {
       system("git merge upstream/master")
     })
 
-    observeEvent(input$sync_undo, {
+    observeEvent(input$synch_abort, {
       system("git merge --abort")
     })
 
