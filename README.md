@@ -8,6 +8,8 @@
 
 Please use the issue tracker on GitHub to suggest enhancements or report problems: https://github.com/vnijs/gitgadget/issues.
 
+> Hover over any button in the application for additional information about the action taken upon click
+
 ## Introduce
 
 To start using git and gitgadget [introduce yourself to git](http://happygitwithr.com/hello-git.html)
