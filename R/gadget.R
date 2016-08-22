@@ -61,7 +61,7 @@ gitgadget <- function() {
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           fillRow(height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
-              actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information")
+              actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
           ),
           conditionalPanel("input.create_user_file != ''",
             radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
@@ -77,37 +77,31 @@ gitgadget <- function() {
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
-          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a repo from, e.g., github or gitlab run 'git clone <remote url>' from the command line"),
+          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
         )
       ),
       miniTabPanel("Branch", icon = icon("code-fork"),
         miniContentPanel(
-          HTML("<h2>Create a new branch</h2>"),
-          textInput("branch_create_name","Branch name:", value = ""),
-          actionButton("branch_create", "Create local", title = "Create a new local branch based on master\n\nGit command:\ngit branch -b <branch>"),
+          HTML("<h4>Create a new branch</h4>"),
+          textInput("branch_create_name", NULL, value = ""),
+          actionButton("branch_create", "Create local", title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"),
           actionButton("branch_link", "Link remote", title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"),
-          uiOutput("ui_branch_checkout_name"),
-          HTML("<h2>Merge branches</h2>"),
+          HTML("<h4>Check out a branch</h4>"),
+          fillRow(height = "40px", width = "420px",
+            uiOutput("ui_branch_checkout_name"),
+            actionButton("branch_checkout", "Check out", title = "Check out a branch\n\nGit command:\ngit checkout <branch>")
+          ),
+          HTML("<h4>Merge branches</h4>"),
           uiOutput("ui_branch_merge_branches"),
           actionButton("branch_merge", "Merge branches", title = "Merge the 'from' branch into the 'into' branch\n\nGit commands:\ngit checkout <from branch>\ngit merge <into branch>"),
-          # actionButton("branch_merge_rev", "Merge into branch", title = "Merge the master branch into the selected branch\n\nGit commands:\ngit checkout <branch>\ngit merge master"),
           actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
-          actionButton("branch_undo", "Undo merge", style = "color: white; background-color: red", title = "Undo a successful merge\n\nGit command:\ngit reset --merge HEAD~1"),
-          # style="color: #fff; background-color: #337ab7; border-color: #2e6da4"
-          # HTML("<h2>Merge branch and master</h2>"),
-          # uiOutput("ui_branch_merge_name"),
-          # actionButton("branch_merge", "Merge into master", title = "Merge the selected branch into the master branch\n\nGit commands:\ngit checkout master\ngit merge <branch>"),
-          # actionButton("branch_merge_rev", "Merge into branch", title = "Merge the master branch into the selected branch\n\nGit commands:\ngit checkout <branch>\ngit merge master"),
-          # actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
-          HTML("<h2>Delete an existing branch</h2>"),
+          HTML("<h4>Delete an existing branch</h4>"),
           uiOutput("ui_branch_delete_name"),
           actionButton("branch_unlink", "Unlink remote", title = "Unlink the local and the remote branch. The remote branch will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"),
           actionButton("branch_delete", "Delete local", title = "Remove the local branch\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"),
           br(), br()
-          # hr(),
-          # verbatimTextOutput("branch_output")
         )
       ),
       miniTabPanel("Sync", icon = icon("refresh"),
@@ -133,12 +127,12 @@ gitgadget <- function() {
           uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
-            actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information")
+            actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
           ),
           textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
-          actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API"),
-          actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches"),
+          actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
+          actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"),
           hr(),
           verbatimTextOutput("collect_output")
         )
@@ -461,20 +455,8 @@ gitgadget <- function() {
       }
     })
 
-    # observeEvent(input$branch_merge_rev, {
-    #   branch <- input$branch_merge_name
-    #   if (!is.null(branch)) {
-    #     system(paste0("git checkout ", branch))
-    #     system("git merge master")
-    #   }
-    # })
-
     observeEvent(input$branch_abort, {
       system("git merge --abort")
-    })
-
-    observeEvent(input$branch_undo, {
-      system("git reset --merge HEAD~1")
     })
 
     observeEvent(input$branch_link, {
@@ -500,61 +482,50 @@ gitgadget <- function() {
       }
     })
 
-    # output$ui_branch_merge_name <- renderUI({
-    #   resp <- branches()
-    #   if (length(resp) == 0) {
-    #     HTML("<label>No branches available to merge</label>")
-    #   } else {
-    #     selectInput("branch_merge_name","Branch name:", choices = resp)
-    #   }
-    # })
-
     output$ui_branch_merge_branches <- renderUI({
-      from <- c("master", branches())
-      into <- from[!grepl("/", from)]
-      if (length(from) == 1) {
+      br <- c("master", branches()) %>% .[!grepl("origin/", .)]
+      if (length(br) == 1) {
         HTML("<label>No branches available to merge</label>")
       } else {
         tagList(
           fillRow(height = "70px", width = "300px",
-            selectInput("branch_merge_from", "From:", choices = from, selected = from[2]),
-            selectInput("branch_merge_into", "Into:", choices = into)
+            selectInput("branch_merge_from", "From:", choices = br, selected = br[2]),
+            selectInput("branch_merge_into", "Into:", choices = br, selected = br[1])
           )
         )
       }
     })
 
     rbranches <- reactive({
-      input$branch_link
-      input$branch_unlink
-      br <- system("git branch -r", intern = TRUE)
+      input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
+      input$branch_create; input$branch_checkout; input$branch_delete; input$branch_merge
+
+      br <- system("git branch --all", intern = TRUE)
       brs <- attr(br, "status")
       ## need both conditions because output on windows and mac differs
       if (length(br) == 0 || (!is.null(brs) && brs == 128)) {
         c()
       } else {
-        br %>% gsub("[\\* ]+", "", .) %>%
-        {.[!grepl("(^origin/master$)|(^origin/HEAD)",.)]}
+        br %>% {unique(c(.[grepl("\\* ",.)],.))} %>%
+        gsub("[\\* ]+", "", .) %>%
+        {.[!grepl("(^remotes/origin/master$)|(^remotes/origin/HEAD)",.)]}
       }
     })
 
     output$ui_branch_checkout_name <- renderUI({
-      resp <- rbranches()
-      if (length(resp) == 0) {
+      input$branch_create
+      br <- rbranches()
+      if (length(br) == 0) {
         invisible()
       } else {
-        tagList(
-          HTML("<h2>Check out a remote branch</h2>"),
-          selectInput("branch_checkout_name","Branch name:", choices = resp),
-          actionButton("branch_checkout", "Check out", title = "Check out a remote branch locally\n\nGit command:\ngit checkout <remote branch>")
-        )
+        selectInput("branch_checkout_name", NULL, choices = br)
       }
     })
 
     observeEvent(input$branch_checkout, {
       if (!is.null(input$branch_checkout_name)) {
         ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
-        system(paste0("git checkout ", sub("origin/","",input$branch_checkout_name)))
+        system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
       }
     })
 
@@ -564,7 +535,7 @@ gitgadget <- function() {
       if (length(resp) == 0) {
         HTML("<label>No branches available to delete</label>")
       } else {
-        selectInput("branch_delete_name","Branch name:", choices = resp)
+        selectInput("branch_delete_name", NULL, choices = resp)
       }
     })
 
@@ -576,10 +547,6 @@ gitgadget <- function() {
           gsub("(\t)|(  ) "," ",.)
       )
     }
-
-    # output$branch_output <- renderPrint({
-    #   remote_info()
-    # })
 
     upstream_info <- function() {
       input$sync; input$sync_unlink
