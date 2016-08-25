@@ -572,7 +572,7 @@ if (main_git__) {
   # token <- connect(username, password, server)$token
   # remove_group(token, "rady-mgta-bc-2016", server)
   # remove_student_projects(userfile, server)
-  # ## repo <- "gitgadget-test-repo"
+  ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
   # remove_project(token, id, server)
 
