@@ -417,6 +417,11 @@ gitgadget <- function() {
             "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nEncoding: UTF-8\n\nAutoAppendNewline: Yes\nStripTrailingWhitespace: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace" %>%
               cat(file = file.path(dir, paste0(basename(dir),".Rproj")))
           }
+
+          gitignore <- list.files(path = dir, pattern = ".gitignore")
+          if (length(gitignore) == 0)
+            cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n", file = file.path(dir, ".gitignore"))
+
           cat("Repo was sucessfully cloned into", dir)
         } else {
           cat("There was an error cloning the repo. Check the R console for output")

@@ -11,4 +11,5 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server"))
 #' @importFrom utils read.csv
 #' @importFrom stats na.omit
 #' @importFrom methods is
+#' @importFrom utils packageVersion
 NULL
