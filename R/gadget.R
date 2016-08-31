@@ -363,7 +363,7 @@ gitgadget <- function() {
 
       repo <- basename(input$create_directory)
 
-      if (!grepl("[^A-z0-9_\\.\\-]", repo)) {
+      if (grepl("[^A-z0-9_\\.\\-]", repo)) {
         cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
         return(invisible())
       }
