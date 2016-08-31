@@ -1,18 +1,6 @@
 #' export
 gitgadget <- function() {
 
-  addResourcePath("js", file.path(system.file(package = "gitgadget"), "app/www/js/"))
-
-  ## from radiant.data
-  returnTextInput <- function(id, label = NULL, value = "") {
-    tagList(
-      tags$label(label, `for` = id),
-      tags$input(id = id, type = "text", value = value,
-                 class = "returnTextInput form-control"),
-      br()
-    )
-  }
-
   ## points to gitgadget project unfortunately
   # if (rstudioapi::isAvailable()) {
   #   projdir <- rstudioapi::getActiveProject()
@@ -138,7 +126,10 @@ gitgadget <- function() {
             textInput("collect_user_name","User name:", value = getOption("git.user", "")),
             passwordInput("collect_password","Password:", value = getOption("git.password", ""))
           ),
-          returnTextInput("collect_group","Group name (press return to see assignment list):", value = getOption("git.group", "")),
+          fillRow(height = "70px", width = "500px",
+            textInput("collect_group","Group name:", value = getOption("git.group", "")),
+            actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
+          ),
           uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
@@ -152,9 +143,6 @@ gitgadget <- function() {
           verbatimTextOutput("collect_output")
         )
       )
-    ),
-    tags$head(
-      tags$script(src = "js/returnTextInputBinding.js")
     )
   )
 
@@ -616,7 +604,7 @@ gitgadget <- function() {
       remote_info()
     })
 
-    get_assignments <- eventReactive(input$collect_group, {
+    get_assignments <- eventReactive(input$collect_list, {
 
       username <- input$collect_user_name
       password <- input$collect_password
