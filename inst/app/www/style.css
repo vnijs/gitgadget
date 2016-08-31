@@ -1,3 +1,31 @@
 #create_file_find, #create_directory_find, #collect_file_find, #collect_list {
   margin-top: 25px;
 }
+
+/* adapted from https://jackolney.github.io/2016/shiny/*/
+.shiny-progress .progress-text {
+    height: 30px;
+    width: 100%;
+    background-color: #D9534F;
+    padding-top: 2px;
+    padding-right: 3px;
+    padding-bottom: 2px;
+    padding-left: 3px;
+    opacity: 0.95;
+}
+
+.progress-text {
+    top: 50px !important;
+    color: #FFFFFF !important;
+    text-align: center;
+}
+
+/* Bold Initial part of message */
+.shiny-progress .progress-text .progress-message {
+    padding-top: 0px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    font-weight: bold;
+    font-size: 20px;
+}
