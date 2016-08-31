@@ -1,3 +1,7 @@
 #create_file_find, #create_directory_find, #collect_file_find {
   margin-top: 25px;
 }
+
+#collect_group {
+  max-width: 300px;
+}
