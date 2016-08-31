@@ -488,7 +488,8 @@ fetch_work <- function(username, password, groupname, assignment,
     arrange(un, desc(id)) %>%
     group_by(un) %>%
     slice(1) %>%
-    ungroup
+    ungroup %>%
+    mutate(id = as.character(id))   ## needed to ensure there are no spaces in branch name
 
   system("git fetch origin")
 
