@@ -1,6 +1,18 @@
 #' export
 gitgadget <- function() {
 
+  addResourcePath("js", file.path(system.file(package = "gitgadget"), "app/www/js/"))
+
+  ## from radiant.data
+  returnTextInput <- function(id, label = NULL, value = "") {
+    tagList(
+      tags$label(label, `for` = id),
+      tags$input(id = id, type = "text", value = value,
+                 class = "returnTextInput form-control"),
+      br()
+    )
+  }
+
   ## points to gitgadget project unfortunately
   # if (rstudioapi::isAvailable()) {
   #   projdir <- rstudioapi::getActiveProject()
@@ -27,8 +39,11 @@ gitgadget <- function() {
   homedir <- find_home()
   rprofdir <- Sys.getenv("HOME")
   projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
+  # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
+  # help <- HTML("<button id='help' type='button' class='btn btn-default btn-sm action-button'>Help</button>")
 
   ui <- miniPage(
+    # gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")"), left = miniTitleBarButton("help", "Help", primary = FALSE)),
     gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
     miniTabstripPanel(
@@ -123,7 +138,7 @@ gitgadget <- function() {
             textInput("collect_user_name","User name:", value = getOption("git.user", "")),
             passwordInput("collect_password","Password:", value = getOption("git.password", ""))
           ),
-          textInput("collect_group","Group name:", value = getOption("git.group", "")),
+          returnTextInput("collect_group","Group name (press return to see assignment list):", value = getOption("git.group", "")),
           uiOutput("ui_collect_assignment"),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_collect_user_file"),
@@ -137,13 +152,20 @@ gitgadget <- function() {
           verbatimTextOutput("collect_output")
         )
       )
+    ),
+    tags$head(
+      tags$script(src = "js/returnTextInputBinding.js")
     )
   )
 
   server <- function(input, output, session) {
 
-    observeEvent(input$intro_git, {
+    observeEvent(input$help, {
+      viewer <- getOption("viewer", default = browseURL)
+      viewer("https://github.com/vnijs/gitgadget")
+    })
 
+    observeEvent(input$intro_git, {
       if (!is_empty(input$intro_user_name)) {
         cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
         resp <- system(cmd, intern = TRUE)
@@ -340,18 +362,21 @@ gitgadget <- function() {
         return(invisible())
       }
 
-      if (input$create_group != "" && input$create_group != getOption("git.user", "")) {
+      create_group_lc <- tolower(input$create_group)
+      create_pre_lc <- tolower(input$create_pre)
+
+      if (create_group_lc != "" && create_group_lc != getOption("git.user", "")) {
         cat("Creating group ...\n")
         create_group(
-          input$create_user_name, input$create_password, input$create_group, input$create_user_file,
-          permission = 20, pre = input$create_pre, server = input$create_server
+          input$create_user_name, input$create_password, create_group_lc, input$create_user_file,
+          permission = 20, pre = create_pre_lc, server = input$create_server
         )
       }
 
       repo <- basename(input$create_directory)
 
-      if (grepl(" ", repo)) {
-        cat("The repo name cannot contain spaces. Please change the name and try again")
+      if (!grepl("[^A-z0-9_\\.\\-]", repo)) {
+        cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
         return(invisible())
       }
 
@@ -359,14 +384,14 @@ gitgadget <- function() {
       cat("Creating repo ...\n")
 
       create_repo(
-        input$create_user_name, input$create_password, input$create_group, repo, directory,
-        pre = input$create_pre, server = input$create_server
+        input$create_user_name, input$create_password, create_group_lc, repo, directory,
+        pre = create_pre_lc, server = input$create_server
       )
       if (!is_empty(input$create_user_file)) {
         cat("Assigning work ...\n")
         assign_work(
-          input$create_user_name, input$create_password, input$create_group, repo,
-          input$create_user_file, type = input$create_type, pre = input$create_pre,
+          input$create_user_name, input$create_password, create_group_lc, repo,
+          input$create_user_file, type = input$create_type, pre = create_pre_lc,
           server = input$create_server
         )
       }
@@ -591,13 +616,14 @@ gitgadget <- function() {
       remote_info()
     })
 
-    get_assignments <- reactive({
+    get_assignments <- eventReactive(input$collect_group, {
 
       username <- input$collect_user_name
       password <- input$collect_password
       group <- input$collect_group
       server <- input$collect_server
-      if (is_empty(username) || is_empty(password) || is_empty(group) || is_empty(server)) {
+      if (is_empty(username) || is_empty(password) || is_empty(group) ||
+          is_empty(server)) {
         message("Specify all required inputs to retrieve available assignments")
         return(invisible())
       }
