@@ -134,11 +134,17 @@ get_allprojects <- function(token, server, everything = FALSE) {
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  resp <- curl_fetch_memory(paste0(server, "projects"), h)
+  resp <- curl_fetch_memory(paste0(server, "projects?per_page=100"), h)
   if (checkerr(resp$status_code) == FALSE) {
     message("SERVER_ERROR: Problem getting projects")
     return(list(status="SERVER_ERROR",message=fromJSON(rawToChar(resp$content))$message))
   }
+  nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
+    .[grepl("X-Total-Pages",.)] %>%
+    sub("X-Total-Pages:\\s+","",.) %>%
+    as.numeric
+  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of projects is > 100. Updates limits in 'get_allprojects")
+
   mainproj <- fromJSON(rawToChar(resp$content))
 
   if (everything == FALSE)
@@ -464,7 +470,16 @@ fetch_work <- function(username, password, groupname, assignment,
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests"), h)
+
+  ## collecting informatio on (max) 100 merge requests
+  # resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&page=1&per_page=100"), h)
+  resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&per_page=100"), h)
+
+  nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
+    .[grepl("X-Total-Pages",.)] %>%
+    sub("X-Total-Pages:\\s+","",.) %>%
+    as.numeric
+  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of merge requests is > 100. Updates limits in 'fetch_work'")
 
   mr <- fromJSON(rawToChar(resp$content))
 
@@ -483,6 +498,7 @@ fetch_work <- function(username, password, groupname, assignment,
     if (any(grepl(dat[["un"]], branches))) {
       cat("Branch", dat[["un"]], "already exists. To update this branch first delete the current branch in the Branch tab and then click the Fetch button again\n")
     } else {
+      cat("Creating local and remote branch for ", dat[["un"]], "\n")
       system(paste0("git checkout -b ", dat[["un"]], " origin/merge-requests/", dat[["id"]]))
       system(paste0("git branch -d -r origin/merge-requests/", dat[["id"]]))
       system(paste0("git push --set-upstream origin ", dat["un"]))
