@@ -87,6 +87,7 @@ gitgadget <- function() {
       ),
       miniTabPanel("Branch", icon = icon("code-fork"),
         miniContentPanel(
+          br(),
           HTML("<h4>Create a new branch</h4>"),
           textInput("branch_create_name", NULL, value = ""),
           actionButton("branch_create", "Create local", title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"),
@@ -276,22 +277,26 @@ gitgadget <- function() {
         cat("No user information set. Enter a user name and email and click the 'Introduce' button\n\nSet user.name : git config --global user.name 'Your Name'\nSet user.email: git config --global user.email 'myemail@gmail.com'\n")
         return(invisible())
       } else {
-        crh <- system("git config --global --list", intern = TRUE) %>%
-          .[grepl("^credential.helper",.)]
 
-        if (length(crh) == 0) {
-          if (os_type == "Darwin") {
-            system("git config --global credential.helper osxkeychain")
-          } else if (os_type == "Windows") {
-            system("git config --global credential.helper wincred")
-          } else {
-            system("git config --global credential.helper 'cache --timeout=32000000'")
-          }
+        ptext <- if(not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
+        withProgress(message = ptext, value = 0.5, {
 
           crh <- system("git config --global --list", intern = TRUE) %>%
             .[grepl("^credential.helper",.)]
 
-        }
+          if (length(crh) == 0) {
+            if (os_type == "Darwin") {
+              system("git config --global credential.helper osxkeychain")
+            } else if (os_type == "Windows") {
+              system("git config --global credential.helper wincred")
+            } else {
+              system("git config --global credential.helper 'cache --timeout=32000000'")
+            }
+
+            crh <- system("git config --global --list", intern = TRUE) %>%
+              .[grepl("^credential.helper",.)]
+          }
+        })
 
         if (length(crh) == 0) {
           cat("\nSetting up credential help failed. Go to http://happygitwithr.com/credential-caching.html in your browser for additional suggestions\n")
@@ -350,46 +355,51 @@ gitgadget <- function() {
         return(invisible())
       }
 
-      create_group_lc <- tolower(input$create_group)
-      create_pre_lc <- tolower(input$create_pre)
+      withProgress(message = "Creating and forking repo", value = 0.5, {
 
-      if (create_group_lc != "" && create_group_lc != getOption("git.user", "")) {
-        cat("Creating group ...\n")
-        create_group(
-          input$create_user_name, input$create_password, create_group_lc, input$create_user_file,
-          permission = 20, pre = create_pre_lc, server = input$create_server
+        create_group_lc <- tolower(input$create_group)
+        create_pre_lc <- tolower(input$create_pre)
+
+        if (create_group_lc != "" && create_group_lc != getOption("git.user", "")) {
+          cat("Creating group ...\n")
+          create_group(
+            input$create_user_name, input$create_password, create_group_lc, input$create_user_file,
+            permission = 20, pre = create_pre_lc, server = input$create_server
+          )
+        }
+
+        repo <- basename(input$create_directory)
+
+        if (grepl("[^A-z0-9_\\.\\-]", repo)) {
+          cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
+          return(invisible())
+        }
+
+        directory <- dirname(input$create_directory)
+        cat("Creating repo ...\n")
+
+        create_repo(
+          input$create_user_name, input$create_password, create_group_lc, repo, directory,
+          pre = create_pre_lc, server = input$create_server
         )
-      }
+        if (!is_empty(input$create_user_file)) {
+          cat("Assigning work ...\n")
+          assign_work(
+            input$create_user_name, input$create_password, create_group_lc, repo,
+            input$create_user_file, type = input$create_type, pre = create_pre_lc,
+            server = input$create_server
+          )
+        }
 
-      repo <- basename(input$create_directory)
-
-      if (grepl("[^A-z0-9_\\.\\-]", repo)) {
-        cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
-        return(invisible())
-      }
-
-      directory <- dirname(input$create_directory)
-      cat("Creating repo ...\n")
-
-      create_repo(
-        input$create_user_name, input$create_password, create_group_lc, repo, directory,
-        pre = create_pre_lc, server = input$create_server
-      )
-      if (!is_empty(input$create_user_file)) {
-        cat("Assigning work ...\n")
-        assign_work(
-          input$create_user_name, input$create_password, create_group_lc, repo,
-          input$create_user_file, type = input$create_type, pre = create_pre_lc,
-          server = input$create_server
-        )
-      }
-
-      cat("\nCreate process complete. Check the console for messages")
+        cat("\nCreate process complete. Check the console for messages")
+      })
     })
 
     output$create_output <- renderPrint({
-      input$create
-      ret <- create()
+      input$create  ## creating a dependency
+      # withProgress(message = "Creating and forking repo", value = 0.5, {
+        ret <- create()
+      # })
     })
 
     clone <- eventReactive(input$clone, {
@@ -408,7 +418,10 @@ gitgadget <- function() {
           cmdclean <- paste(cmdclean, cloneto)
         }
         cat("Used:", cmdclean, "\n\n")
-        system(cmd)
+
+        withProgress(message = "Cloning repo", value = 0.5, {
+          system(cmd)
+        })
       }
     })
 
@@ -459,8 +472,10 @@ gitgadget <- function() {
 
     observeEvent(input$branch_create, {
       if (input$branch_create_name != "") {
-        paste("git checkout -b", input$branch_create_name) %>%
-          system(.)
+        withProgress(message = "Creating branch", value = 0.5, {
+          paste("git checkout -b", input$branch_create_name) %>%
+            system(.)
+        })
       }
     })
 
@@ -468,8 +483,10 @@ gitgadget <- function() {
       from <- input$branch_merge_from
       into <- input$branch_merge_into
       if (!is.null(from) || !is.null(into)) {
-        system(paste("git checkout", into))
-        system(paste("git merge", from))
+        withProgress(message = "Merging branch", value = 0.5, {
+          system(paste("git checkout", into))
+          system(paste("git merge", from))
+        })
       }
     })
 
@@ -494,9 +511,11 @@ gitgadget <- function() {
 
     observeEvent(input$branch_delete, {
       if (!is.null(input$branch_delete_name)) {
-        system("git checkout master")
-        paste("git branch -D", input$branch_delete_name) %>%
-          system(.)
+        withProgress(message = "Deleting branch", value = 0.5, {
+          system("git checkout master")
+          paste("git branch -D", input$branch_delete_name) %>%
+            system(.)
+        })
       }
     })
 
@@ -543,7 +562,10 @@ gitgadget <- function() {
     observeEvent(input$branch_checkout, {
       if (!is.null(input$branch_checkout_name)) {
         ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
-        system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
+
+        withProgress(message = "Checkout branch", value = 0.5, {
+          system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
+        })
       }
     })
 
@@ -576,15 +598,19 @@ gitgadget <- function() {
 
     observeEvent(input$sync, {
       if (!is_empty(input$sync_from)) {
-        if (is_empty(upstream_info()))
-          system(paste("git remote add upstream", input$sync_from))
-        system("git fetch upstream")
+        withProgress(message = "Syncing repo", value = 0.5, {
+          if (is_empty(upstream_info()))
+            system(paste("git remote add upstream", input$sync_from))
+          system("git fetch upstream")
+        })
       }
     })
 
     observeEvent(input$sync_merge, {
-      system("git checkout master")
-      system("git merge upstream/master")
+      withProgress(message = "Merging synced repo", value = 0.5, {
+        system("git checkout master")
+        system("git merge upstream/master")
+      })
     })
 
     observeEvent(input$synch_abort, {
@@ -674,11 +700,13 @@ gitgadget <- function() {
 
       cat("Generating merge requests ...\n")
 
-      collect_work(
-        input$collect_user_name, input$collect_password, input$collect_group,
-        input$collect_assignment, input$collect_user_file,
-        type = input$collect_type, pre = "", server = input$collect_server
-      )
+      withProgress(message = "Generating merge requests", value = 0.5, {
+        collect_work(
+          input$collect_user_name, input$collect_password, input$collect_group,
+          input$collect_assignment, input$collect_user_file,
+          type = input$collect_type, pre = "", server = input$collect_server
+        )
+      })
 
       cat("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
     })
@@ -689,10 +717,13 @@ gitgadget <- function() {
         cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
       } else {
 
-        fetch_work(
-          input$collect_user_name, input$collect_password, input$collect_group,
-          input$collect_assignment, pre = "", server = input$collect_server
-        )
+
+        withProgress(message = "Fetching merge requests", value = 0.5, {
+          fetch_work(
+            input$collect_user_name, input$collect_password, input$collect_group,
+            input$collect_assignment, pre = "", server = input$collect_server
+          )
+        })
 
         cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignments")
       }
