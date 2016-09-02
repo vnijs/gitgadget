@@ -279,7 +279,8 @@ gitgadget <- function() {
       } else {
 
         ptext <- if(not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
-        withProgress(message = ptext, value = 0.5, {
+        # withProgress(message = ptext, value = 0, style = "old", {
+        withProgress(message = ptext, value = 0, {
 
           crh <- system("git config --global --list", intern = TRUE) %>%
             .[grepl("^credential.helper",.)]
@@ -355,7 +356,7 @@ gitgadget <- function() {
         return(invisible())
       }
 
-      withProgress(message = "Creating and forking repo", value = 0.5, {
+      withProgress(message = "Creating and forking repo", value = 0, {
 
         create_group_lc <- tolower(input$create_group)
         create_pre_lc <- tolower(input$create_pre)
@@ -397,7 +398,7 @@ gitgadget <- function() {
 
     output$create_output <- renderPrint({
       input$create  ## creating a dependency
-      # withProgress(message = "Creating and forking repo", value = 0.5, {
+      # withProgress(message = "Creating and forking repo", value = 0, {
         ret <- create()
       # })
     })
@@ -419,7 +420,7 @@ gitgadget <- function() {
         }
         cat("Used:", cmdclean, "\n\n")
 
-        withProgress(message = "Cloning repo", value = 0.5, {
+        withProgress(message = "Cloning repo", value = 0, {
           system(cmd)
         })
       }
@@ -472,7 +473,7 @@ gitgadget <- function() {
 
     observeEvent(input$branch_create, {
       if (input$branch_create_name != "") {
-        withProgress(message = "Creating branch", value = 0.5, {
+        withProgress(message = "Creating branch", value = 0, {
           paste("git checkout -b", input$branch_create_name) %>%
             system(.)
         })
@@ -483,7 +484,7 @@ gitgadget <- function() {
       from <- input$branch_merge_from
       into <- input$branch_merge_into
       if (!is.null(from) || !is.null(into)) {
-        withProgress(message = "Merging branch", value = 0.5, {
+        withProgress(message = "Merging branch", value = 0, {
           system(paste("git checkout", into))
           system(paste("git merge", from))
         })
@@ -511,7 +512,7 @@ gitgadget <- function() {
 
     observeEvent(input$branch_delete, {
       if (!is.null(input$branch_delete_name)) {
-        withProgress(message = "Deleting branch", value = 0.5, {
+        withProgress(message = "Deleting branch", value = 0, {
           system("git checkout master")
           paste("git branch -D", input$branch_delete_name) %>%
             system(.)
@@ -563,7 +564,7 @@ gitgadget <- function() {
       if (!is.null(input$branch_checkout_name)) {
         ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
 
-        withProgress(message = "Checkout branch", value = 0.5, {
+        withProgress(message = "Checkout branch", value = 0, {
           system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
         })
       }
@@ -598,7 +599,7 @@ gitgadget <- function() {
 
     observeEvent(input$sync, {
       if (!is_empty(input$sync_from)) {
-        withProgress(message = "Syncing repo", value = 0.5, {
+        withProgress(message = "Syncing repo", value = 0, {
           if (is_empty(upstream_info()))
             system(paste("git remote add upstream", input$sync_from))
           system("git fetch upstream")
@@ -607,7 +608,7 @@ gitgadget <- function() {
     })
 
     observeEvent(input$sync_merge, {
-      withProgress(message = "Merging synced repo", value = 0.5, {
+      withProgress(message = "Merging synced repo", value = 0, {
         system("git checkout master")
         system("git merge upstream/master")
       })
@@ -700,7 +701,7 @@ gitgadget <- function() {
 
       cat("Generating merge requests ...\n")
 
-      withProgress(message = "Generating merge requests", value = 0.5, {
+      withProgress(message = "Generating merge requests", value = 0, {
         collect_work(
           input$collect_user_name, input$collect_password, input$collect_group,
           input$collect_assignment, input$collect_user_file,
@@ -718,7 +719,7 @@ gitgadget <- function() {
       } else {
 
 
-        withProgress(message = "Fetching merge requests", value = 0.5, {
+        withProgress(message = "Fetching merge requests", value = 0, {
           fetch_work(
             input$collect_user_name, input$collect_password, input$collect_group,
             input$collect_assignment, pre = "", server = input$collect_server
