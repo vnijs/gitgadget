@@ -6,3 +6,6 @@ r:
 cache: packages
 warnings_are_errors: true
 sudo: required
+
+r_github_packages:
+  - kevinushey/sourcetools
