@@ -752,11 +752,8 @@ gitgadget <- function() {
 
 ## test section
 main_gadget__ <- FALSE
-# main_gadget__ <- TRUE
 if (main_gadget__) {
 
-  # setwd("~/gh/gitgadget")
-  # input <- list()
   library(shiny)
   library(miniUI)
   library(rstudioapi)
@@ -764,7 +761,7 @@ if (main_gadget__) {
   library(jsonlite)
   library(dplyr)
 
-  source("~/gh/gitgadget/R/git.R", local = TRUE)
+  source("R/git.R", local = TRUE)
 
   gitgadget()
 }
