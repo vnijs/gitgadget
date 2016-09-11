@@ -1,4 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^build$
-^gitgadget.sublime-project$
+^.*\.sublime-project$
+cran-comments.md
+^\.travis\.yml$
