@@ -1,7 +1,5 @@
 # Git Gadget
 
-> Note: `gitgadget` is still early in its development. Use at your own risk.
-
 `gitgadget` is an Rstudio addin for version control and assignment management using git. The assignment management functions currently support the [gitlab](https://gitlab.com) API. PRs for github, bitbucket, etc welcome.
 
 `gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. Its goal is to provide a few additional features not (yet) available in Rstudio that can be useful to students and faculty using git for classes. For an excellent discussion of this type of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
@@ -42,7 +40,7 @@ If the repo you are working on is a fork you probably want to make sure it is up
 
 ## Collect (gitlab only)
 
-Collect assignments from students/teams using Merge (Pull) Requests on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. MRs will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs using the gitlab UI.
+Collect assignments from students/teams using Merge Requests (MR) on gitlab. When you navigate to the _Collect_ tab gitgadget will search for all assignments in the specified group on gitlab. Once all inputs are provided, including the path to a file with student information, press the `Collect` button. MRs will be generated for all students (or team leads). Once this step is completed you can review and comment on the MRs using the gitlab UI.
 
 To view, run, and edit the MRs locally press the `Fetch` button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in Rstudio to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.
 
@@ -69,15 +67,15 @@ To create an assignment repo set `Local directory` to the directory with the ass
 
 `assign_work(...)`
 
-Forks the assignment repo uploaded by a faculty member or TA earlier for each student/team and creates the appropriate groups for team work. Requires a csv file with the structure shown above, including the students' (gitlab) private token. Getting access to these tokens will most likely require that student accounts are created centrally for the class/program (e.g., running your own gitlab server).
+Forks the assignment repo uploaded by a faculty member or TA for each student/team and creates the appropriate groups for team work. Requires a csv file with the structure shown above, including the students' (gitlab) private token. Getting access to these tokens will most likely require that student accounts are created centrally for the class/program.
 
 `collect_work(...)`
 
-Generates merge (pull) request for all students or students teams. Requires an input file of the form specified above.
+Generates Merge Requests for all students or teams. Requires a csv file with the structure shown above.
 
 `fetch_work(...)`
 
-Fetch Merge (pull) Requests for all students or students teams from the gitlab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.
+Fetch Merge Requests for all students or teams from the gitlab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.
 
 ## Initial settings
 
@@ -94,4 +92,4 @@ options(git.prefix = "school-courseid-2016-")
 options(git.userfile = "path-to-user-file.csv")
 ```
 
-On Windows use a text editor (e.g., notepad) to create .Rprofile in your home directory. To find out where R thinks your home directory is enter `Sys.getenv("HOME")` in the R(studio) console
+Use a text editor (e.g., notepad on Windows) to create or edit .Rprofile in your home directory.
