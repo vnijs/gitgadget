@@ -1,0 +1,8 @@
+language: r
+r:
+  - release
+  - devel
+
+cache: packages
+warnings_are_errors: true
+sudo: required
