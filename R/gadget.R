@@ -80,7 +80,7 @@ gitgadget <- function() {
           textInput("clone_from","Clone from:", value = ""),
           textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
           textInput("clone_to","Clone to:", value = ""),
-          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab run 'git clone <remote url>' from the command line"),
+          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name of the local repo, provide an alternative in the 'Clone to' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
         )
@@ -113,9 +113,9 @@ gitgadget <- function() {
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
-          actionButton("sync_merge", "Merge", title = "Merge the upstream/ branch(es) from the orginal with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"),
+          actionButton("sync_merge", "Merge", title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"),
           actionButton("synch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
-          actionButton("sync_unlink", "Unlink", title = "Remove a link between a local repo and original from which it was forked\n\nGit command:\ngit remote remove upstream"),
+          actionButton("sync_unlink", "Unlink", title = "Remove a link between a local repo and the original from which it was forked\n\nGit command:\ngit remote remove upstream"),
           hr(),
           verbatimTextOutput("sync_output")
         )
@@ -279,8 +279,7 @@ gitgadget <- function() {
       } else {
 
         ptext <- if(not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
-        # withProgress(message = ptext, value = 0, style = "old", {
-        withProgress(message = ptext, value = 0, {
+        withProgress(message = ptext, value = 0, style = "old", {
 
           crh <- system("git config --global --list", intern = TRUE) %>%
             .[grepl("^credential.helper",.)]
@@ -356,7 +355,7 @@ gitgadget <- function() {
         return(invisible())
       }
 
-      withProgress(message = "Creating and forking repo", value = 0, {
+      withProgress(message = "Creating and forking repo", value = 0, style = "old", {
 
         create_group_lc <- tolower(input$create_group)
         create_pre_lc <- tolower(input$create_pre)
@@ -398,9 +397,7 @@ gitgadget <- function() {
 
     output$create_output <- renderPrint({
       input$create  ## creating a dependency
-      # withProgress(message = "Creating and forking repo", value = 0, {
-        ret <- create()
-      # })
+      ret <- create()
     })
 
     clone <- eventReactive(input$clone, {
@@ -420,7 +417,7 @@ gitgadget <- function() {
         }
         cat("Used:", cmdclean, "\n\n")
 
-        withProgress(message = "Cloning repo", value = 0, {
+        withProgress(message = "Cloning repo", value = 0, style = "old", {
           system(cmd)
         })
       }
@@ -473,7 +470,7 @@ gitgadget <- function() {
 
     observeEvent(input$branch_create, {
       if (input$branch_create_name != "") {
-        withProgress(message = "Creating branch", value = 0, {
+        withProgress(message = "Creating branch", value = 0, style = "old", {
           paste("git checkout -b", input$branch_create_name) %>%
             system(.)
         })
@@ -484,7 +481,7 @@ gitgadget <- function() {
       from <- input$branch_merge_from
       into <- input$branch_merge_into
       if (!is.null(from) || !is.null(into)) {
-        withProgress(message = "Merging branch", value = 0, {
+        withProgress(message = "Merging branch", value = 0, style = "old", {
           system(paste("git checkout", into))
           system(paste("git merge", from))
         })
@@ -512,7 +509,7 @@ gitgadget <- function() {
 
     observeEvent(input$branch_delete, {
       if (!is.null(input$branch_delete_name)) {
-        withProgress(message = "Deleting branch", value = 0, {
+        withProgress(message = "Deleting branch", value = 0, style = "old", {
           system("git checkout master")
           paste("git branch -D", input$branch_delete_name) %>%
             system(.)
@@ -564,7 +561,7 @@ gitgadget <- function() {
       if (!is.null(input$branch_checkout_name)) {
         ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
 
-        withProgress(message = "Checkout branch", value = 0, {
+        withProgress(message = "Checkout branch", value = 0, style = "old", {
           system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
         })
       }
@@ -599,7 +596,7 @@ gitgadget <- function() {
 
     observeEvent(input$sync, {
       if (!is_empty(input$sync_from)) {
-        withProgress(message = "Syncing repo", value = 0, {
+        withProgress(message = "Syncing repo", value = 0, style = "old", {
           if (is_empty(upstream_info()))
             system(paste("git remote add upstream", input$sync_from))
           system("git fetch upstream")
@@ -608,7 +605,7 @@ gitgadget <- function() {
     })
 
     observeEvent(input$sync_merge, {
-      withProgress(message = "Merging synced repo", value = 0, {
+      withProgress(message = "Merging synced repo", value = 0, style = "old", {
         system("git checkout master")
         system("git merge upstream/master")
       })
@@ -701,7 +698,7 @@ gitgadget <- function() {
 
       cat("Generating merge requests ...\n")
 
-      withProgress(message = "Generating merge requests", value = 0, {
+      withProgress(message = "Generating merge requests", value = 0, style = "old", {
         collect_work(
           input$collect_user_name, input$collect_password, input$collect_group,
           input$collect_assignment, input$collect_user_file,
@@ -719,7 +716,7 @@ gitgadget <- function() {
       } else {
 
 
-        withProgress(message = "Fetching merge requests", value = 0, {
+        withProgress(message = "Fetching merge requests", value = 0, style = "old", {
           fetch_work(
             input$collect_user_name, input$collect_password, input$collect_group,
             input$collect_assignment, pre = "", server = input$collect_server
