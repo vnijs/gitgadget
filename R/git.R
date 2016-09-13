@@ -1,5 +1,4 @@
 checkerr <- function(code) floor(code/100) == 2
-
 is_not <- function(x) length(x) == 0 || is.na(x)
 is_empty <- function(x, empty = "\\s*") if (is_not(x) || grepl(paste0("^",empty,"$"), x)) TRUE else FALSE
 not_pressed <- function(x) if (is.null(x) || x == 0) TRUE else FALSE
