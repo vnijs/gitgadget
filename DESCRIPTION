@@ -2,12 +2,12 @@ Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
 Version: 0.2.0
-Date: 2016-9-10
+Date: 2016-9-14
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
     )
-Description: An Rstudio addin for version control that allows users to clone repos, create and delete branches, and sync forks on github, gitlab, etc. Furthermore, the addin uses the gitlab API to allow instructors to create forks and merge requests for all students/teams with one click of a button.
+Description: An Rstudio addin for version control that allows users to clone repos, create and delete branches, and sync forks on GitHub, GitLab, etc. Furthermore, the addin uses the GitLab API to allow instructors to create forks and merge requests for all students/teams with one click of a button.
 Depends:
     R (>= 3.3.0)
 Imports:
