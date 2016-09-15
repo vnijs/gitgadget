@@ -26,7 +26,7 @@ groupID <- function(name, path, token, server) {
   resp$content <- fromJSON(rawToChar(resp$content))
 
   ## check if group exists
-  id <- which(name == resp$content$name && path == resp$content$path)
+  id <- which(name == resp$content$name & path == resp$content$path)
 
   if (length(id) == 0) {
     list(status = "NOSUCHGROUP")
