@@ -5,4 +5,5 @@
 ## BUG FIXES
 
 - Updated links to source code and issue tracker
+- Fix for `create_repo` when group already exists
 
