@@ -100,9 +100,20 @@ add_user <- function(user_id, group_id, token, permission, server) {
   list(status = "OKAY")
 }
 
-#` export
-create_group <- function(username, password, groupname, userfile,
-                         permission = 20, pre = "",
+#' Create a group on gitlab using the API
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @param username Gitlab username
+#' @param password Gitlab password
+#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param permission Permission setting for the group (default is 20, i.e., reporter)
+#' @param server The gitlab API server
+#'
+#' @export
+create_group <- function(username, password, groupname = "", userfile = "",
+                         permission = 20,
                          server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server)
@@ -255,7 +266,21 @@ add_team <- function(proj_id, token, team_mates, server) {
   })
 }
 
-#` export
+
+#' Assign work to each student/team by creating a fork of the main repo
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @param username Gitlab username
+#' @param password Gitlab password
+#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param assignment Name of the assigment to assign
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param type Individual or Team work
+#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param server The gitlab API server
+#'
+#' @export
 assign_work <- function(username, password, groupname, assignment, userfile,
                         type = "individual", pre = "",
                         server = "https://gitlab.com/api/v3/") {
@@ -333,7 +358,19 @@ maker <- function(repo_name, token, server, namespace = "") {
   }
 }
 
-#` export
+#' Create the main repo from a local directory
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @param username Gitlab username
+#' @param password Gitlab password
+#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param assignment Name of the assigment (repo)
+#' @param directory Base directory for the repo. file.path(directory, assignment) should exist
+#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param server The gitlab API server
+#'
+#' @export
 create_repo <- function(username, password, groupname, assignment, directory,
                         pre = "", server = "https://gitlab.com/api/v3/") {
 
@@ -419,7 +456,20 @@ merger <- function(token, to, server,
   }
 }
 
-#` export
+#' Create merge requests for each student/team
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @param username Gitlab username
+#' @param password Gitlab password
+#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param assignment Name of the assigment. file.path(directory, assignment) should exist
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param type Individual or Team work
+#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param server The gitlab API server
+#'
+#' @export
 collect_work <- function(username, password, groupname, assignment, userfile,
                          type = "individual", pre = "",
                          server = "https://gitlab.com/api/v3/") {
@@ -449,7 +499,18 @@ collect_work <- function(username, password, groupname, assignment, userfile,
   resp <- sapply(udat$token, merger, project_id, server)
 }
 
-#` export
+#' Fetch all merge requests as local branches and link to a remote
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @param username Gitlab username
+#' @param password Gitlab password
+#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param assignment Name of the assigment
+#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param server The gitlab API server
+#'
+#' @export
 fetch_work <- function(username, password, groupname, assignment,
                        pre = "", server = "https://gitlab.com/api/v3/") {
 

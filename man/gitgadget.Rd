@@ -11,6 +11,9 @@ gitgadget()
 \description{
 gitgadget
 
-export
+Launch gitgadget in Rstudio viewer if available
+}
+\details{
+See \url{https://github.com/vnijs/gitgadget} for documentation
 }
 
