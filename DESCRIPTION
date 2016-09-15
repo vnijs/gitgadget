@@ -18,8 +18,8 @@ Imports:
     jsonlite (>= 1.0),
     dplyr (>= 0.5),
     methods
-URL: https://gitlab.com/vnijs/gitgadget
-BugReports: https://github.com/vnijs/gitgadget
+URL: https://github.com/vnijs/gitgadget
+BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 LazyData: true
 RoxygenNote: 5.0.1
