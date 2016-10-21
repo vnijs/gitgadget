@@ -755,7 +755,18 @@ gitgadget <- function() {
   }
 
   resp <- runGadget(shinyApp(ui, server), viewer = paneViewer())
+
+  ## attempt to run in separate process
+  # resp <- runGadget(shinyApp(ui, server), viewer = browserViewer())
+  # resp <- runApp(shinyApp(ui, server), launch.browser = FALSE, port = 1234)
+  # resp <- runApp(shinyApp(ui, server), launch.browser = TRUE)
+  # viewer("http://127.0.0.1:4444")
 }
+
+## blocks Rstudio console
+# gitgadget::gitgadget()
+## attempt to run in separate process
+# system(paste0(Sys.which("R"), " -e \"gitgadget:::gitgadget()\""))
 
 ## test section
 main_gadget__ <- FALSE

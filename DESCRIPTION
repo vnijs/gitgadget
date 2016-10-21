@@ -2,12 +2,15 @@ Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
 Version: 0.2.1
-Date: 2016-9-14
+Date: 2016-10-21
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
     )
-Description: An Rstudio addin for version control that allows users to clone repos, create and delete branches, and sync forks on GitHub, GitLab, etc. Furthermore, the addin uses the GitLab API to allow instructors to create forks and merge requests for all students/teams with one click of a button.
+Description: An Rstudio addin for version control that allows users to clone
+    repositories, create and delete branches, and sync forks on GitHub, GitLab, etc.
+    Furthermore, the addin uses the GitLab API to allow instructors to create
+    forks and merge requests for all students/teams with one click of a button.
 Depends:
     R (>= 3.3.0)
 Imports:
@@ -18,8 +21,13 @@ Imports:
     jsonlite (>= 1.0),
     dplyr (>= 0.5),
     methods
+Suggests:
+    knitr,
+    rmarkdown
 URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 LazyData: true
 RoxygenNote: 5.0.1
+URL: https://github.com/radiant-rstats/radiant
+VignetteBuilder: knitr

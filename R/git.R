@@ -266,10 +266,9 @@ add_team <- function(proj_id, token, team_mates, server) {
   })
 }
 
-
 #' Assign work to each student/team by creating a fork of the main repo
 #'
-#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Gitlab username
 #' @param password Gitlab password
@@ -360,7 +359,7 @@ maker <- function(repo_name, token, server, namespace = "") {
 
 #' Create the main repo from a local directory
 #'
-#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Gitlab username
 #' @param password Gitlab password
@@ -458,11 +457,11 @@ merger <- function(token, to, server,
 
 #' Create merge requests for each student/team
 #'
-#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Gitlab username
 #' @param password Gitlab password
-#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param groupname Group containing the assignment
 #' @param assignment Name of the assigment. file.path(directory, assignment) should exist
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param type Individual or Team work
@@ -501,11 +500,11 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 
 #' Fetch all merge requests as local branches and link to a remote
 #'
-#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Gitlab username
 #' @param password Gitlab password
-#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param groupname Group containing the assignment
 #' @param assignment Name of the assigment
 #' @param pre Pre-amble for the assignment name, usually groupname + "-"
 #' @param server The gitlab API server
