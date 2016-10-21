@@ -1,0 +1,14 @@
+---
+title: "Using Git Gadget"
+author: "Vincent Nijs"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using Git Gadget}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+```{r child='../README.md'}
+```
