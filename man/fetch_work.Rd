@@ -12,7 +12,7 @@ fetch_work(username, password, groupname, assignment, pre = "",
 
 \item{password}{Gitlab password}
 
-\item{groupname}{Group to create on gitlab (defaults to user's namespace)}
+\item{groupname}{Group containing the assignment}
 
 \item{assignment}{Name of the assigment}
 
@@ -24,6 +24,6 @@ fetch_work(username, password, groupname, assignment, pre = "",
 Fetch all merge requests as local branches and link to a remote
 }
 \details{
-See \url{https://github.com/vnijs/gitgadget} for documentation
+See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
 

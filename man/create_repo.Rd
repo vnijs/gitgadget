@@ -26,6 +26,6 @@ create_repo(username, password, groupname, assignment, directory, pre = "",
 Create the main repo from a local directory
 }
 \details{
-See \url{https://github.com/vnijs/gitgadget} for documentation
+See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
 

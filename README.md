@@ -14,7 +14,7 @@ Please use the issue tracker on GitHub to suggest enhancements or report problem
 
 To start using git and gitgadget [introduce yourself to git](http://happygitwithr.com/hello-git.html)
 
-Set a global user name and email for git. Please use your gitlab user name. If available, `gitgadget` will put `~/.ssh/id_rsa.pub` into the clipboard when you click the `SSH key` button. Provide the key to github or gitlab for authentication. By default, `gitgadget` will try to turn on credential helpers for your platform. See <a href="http://happygitwithr.com/credential-caching.html target="_blank">http://happygitwithr.com/credential-caching.html</a> for additional information
+Set a global user name and email for git. Please use your gitlab user name. If available, `gitgadget` will put `~/.ssh/id_rsa.pub` into the clipboard when you click the `SSH key` button. Provide the key to github or gitlab for authentication. By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-caching.html) for additional information 
 
 > To avoid possible authentication issues with SSH on gitlab we recommend you clone, push, pull, etc. using HTTPS
 

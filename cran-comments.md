@@ -2,6 +2,23 @@
 
 This is a resubmission. In this version I have:
 
+- Fixed a bug in the `create_repo` function when a GitLab group already exists
+- Updated links to source code and issue tracker
+- Exported the main functions used in the package
+- Added a vignette based on README.md
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs.
+
+There was 1 NOTE: Possibly mis-spelled words. Spelling is correct however.
+
+## Previous cran-comments
+
+## Resubmission
+
+This is a resubmission. In this version I have:
+
 * Changed github and gitlab to GitHub and GitLab in DESCRIPTION
 
 ## Previous cran-comments

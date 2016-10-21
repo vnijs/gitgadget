@@ -12,7 +12,7 @@ collect_work(username, password, groupname, assignment, userfile,
 
 \item{password}{Gitlab password}
 
-\item{groupname}{Group to create on gitlab (defaults to user's namespace)}
+\item{groupname}{Group containing the assignment}
 
 \item{assignment}{Name of the assigment. file.path(directory, assignment) should exist}
 
@@ -28,6 +28,6 @@ collect_work(username, password, groupname, assignment, userfile,
 Create merge requests for each student/team
 }
 \details{
-See \url{https://github.com/vnijs/gitgadget} for documentation
+See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
 
