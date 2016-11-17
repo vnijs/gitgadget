@@ -435,7 +435,7 @@ gitgadget <- function() {
           cat("Nothing was returned. Make sure you specified a repo to clone from")
         } else if (ret == 0) {
           if (input$clone_to == "") {
-            dir <- file.path(input$clone_into, gsub(".git", "", basename(input$clone_from)))
+            dir <- file.path(input$clone_into, gsub("\\.git\\s*$", "", basename(input$clone_from)))
           } else {
             dir <- file.path(input$clone_into, input$clone_to)
           }
@@ -537,7 +537,8 @@ gitgadget <- function() {
 
     rbranches <- reactive({
       input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
-      input$branch_create; input$branch_checkout; input$branch_delete; input$branch_merge
+      input$branch_create; input$branch_checkout; input$branch_delete;
+      input$branch_merge; input$collect_fetch; input$collect
 
       br <- system("git branch --all", intern = TRUE)
       brs <- attr(br, "status")
@@ -716,10 +717,12 @@ gitgadget <- function() {
     })
 
     collect_fetch <- eventReactive(input$collect_fetch, {
-      remote_fetch <- system("git config remote.origin.fetch", intern = TRUE)
+      remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
       if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
-        cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
-      } else {
+        # cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
+        system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
+      }
+      # } else {
 
       ## pre not used when called from the gadget interface because the full
       ## assignment name is retrieved from gitlab
@@ -731,7 +734,7 @@ gitgadget <- function() {
         })
 
         cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignments")
-      }
+      # }
     })
 
     output$collect_output <- renderPrint({

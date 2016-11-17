@@ -102,7 +102,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
 
 #' Create a group on gitlab using the API
 #'
-#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Gitlab username
 #' @param password Gitlab password
@@ -412,7 +412,7 @@ create_repo <- function(username, password, groupname, assignment, directory,
 
   ## allow fetching of MRs
   ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
-  remote_fetch <- system("git config remote.origin.fetch", intern = TRUE)
+  remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
   if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch)
     system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
 
@@ -428,7 +428,7 @@ merger <- function(token, to, server,
 
   resp <- get_allprojects(token, server)
   forked <- resp$repo[resp$repo$forked_from_project$id == to,]
-  from <- na.omit(forked$id)
+  from <- na.omit(forked$id)[1]
 
   if (length(from) == 0) {
     message("No fork found")
@@ -441,6 +441,7 @@ merger <- function(token, to, server,
   murl <- paste0(server, "projects/", from, "/merge_requests?source_branch=",
                  frombranch, "&target_branch=", tobranch, "&title=", title,
                  "&target_project_id=", to)
+
   resp <- curl_fetch_memory(murl, h)
   resp$content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
@@ -550,7 +551,8 @@ fetch_work <- function(username, password, groupname, assignment,
     ungroup %>%
     mutate(id = as.character(id))   ## needed to ensure there are no spaces in branch name
 
-  system("git fetch origin")
+  # system("git fetch origin")
+  system("git fetch origin +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
 
   branches <- system("git branch ", intern = TRUE) %>% gsub("[\\* ]+", "", .)
 
@@ -658,8 +660,7 @@ if (main_git__) {
 
     ## create a group for a course where all assignments and cases will be posted
     create_group(
-      username, password, groupname, userfile, permission = permission,
-      pre = pre, server = server
+      username, password, groupname, userfile, permission = permission, server = server
     )
 
     ## get or create a repo for assignments and cases
