@@ -1,4 +1,4 @@
-# CHANGES IN radiant.data VERSION 0.2.2
+# CHANGES IN radiant.data VERSION 0.2.3
 
 ## BUG FIXES
 
@@ -10,4 +10,8 @@
 - Improved regex for Rproj file creation on clone
 - Update branch list on collect and fetch
 - Get full remote orgin list from .git/config
+
+## FEATURES 
+
+- Automatically replace any number of "\\" by "/" in input file paths
 

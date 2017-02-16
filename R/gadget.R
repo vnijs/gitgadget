@@ -30,7 +30,14 @@ gitgadget <- function() {
 
   homedir <- find_home()
   rprofdir <- Sys.getenv("HOME")
-  projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
+  projdir <- basedir <- NULL
+
+  if (rstudioapi::isAvailable())
+    projdir <- basedir <- rstudioapi::getActiveProject()
+
+  if (length(projdir) == 0)
+    projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
+
   # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
   # help <- HTML("<button id='help' type='button' class='btn btn-default btn-sm action-button'>Help</button>")
 
@@ -156,6 +163,30 @@ gitgadget <- function() {
     observeEvent(input$help, {
       viewer <- getOption("viewer", default = browseURL)
       viewer("https://github.com/vnijs/gitgadget")
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$intro_git_home), {
+      updateTextInput(session = session, "intro_git_home", value = gsub("([\\]+)|([/]{2,})","/", input$intro_git_home))
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$create_directory), {
+      updateTextInput(session = session, "create_directory", value = gsub("([\\]+)|([/]{2,})","/", input$create_directory))
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$create_user_file), {
+      updateTextInput(session = session, "create_user_file", value = gsub("([\\]+)|([/]{2,})","/", input$create_user_file))
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$clone_into), {
+      updateTextInput(session = session, "clone_into", value = gsub("([\\]+)|([/]{2,})","/", input$clone_into))
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$clone_to), {
+      updateTextInput(session = session, "clone_to", value = gsub("([\\]+)|([/]{2,})","/", input$clone_to))
+    })
+
+    observeEvent(grep("([\\]+)|([/]{2,})", input$collect_user_file), {
+      updateTextInput(session = session, "collect_user_file", value = gsub("([\\]+)|([/]{2,})","/", input$collect_user_file))
     })
 
     observeEvent(input$intro_git, {

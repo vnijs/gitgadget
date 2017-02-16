@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
-Version: 0.2.2
-Date: 2016-11-16
+Version: 0.2.3
+Date: 2017-2-16
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -14,7 +14,7 @@ Description: An Rstudio addin for version control that allows users to clone
 Depends:
     R (>= 3.3.0)
 Imports:
-    shiny (>= 0.14),
+    shiny (>= 1.0.0),
     miniUI (>= 0.1.1),
     rstudioapi (>= 0.6),
     curl (>= 0.9),
