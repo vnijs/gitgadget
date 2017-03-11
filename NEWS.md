@@ -14,4 +14,5 @@
 ## FEATURES 
 
 - Automatically replace any number of "\\" by "/" in input file paths
+- Added option to remove previous .git and remote repo before creating new local and remote repos
 

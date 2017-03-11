@@ -80,6 +80,10 @@ gitgadget <- function() {
           conditionalPanel("input.create_user_file != ''",
             radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
           ),
+          HTML("<h4>Remove previous version of .git and repo on Gitlab</h4>"),
+          actionButton("remove_git", "Remove .git", title = "Remove previous .git directory if present"),
+          actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present"),
+          HTML("<h4>Create local .git and remote repo on Gitlab</h4>"),
           actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
           hr(),
           verbatimTextOutput("create_output")
@@ -376,6 +380,52 @@ gitgadget <- function() {
       init <- getOption("git.userfile", default = "")
       init <- create_file_find() %>% {ifelse (length(.) == 0, init, .)}
       textInput("create_user_file","User file:", value = init)
+    })
+
+    remove_git <- observeEvent(input$remove_git, {
+      if (!dir.exists(input$create_directory)) {
+        cat("The specified directory does not exist. Create the directory and try again")
+        return(invisible())
+      }
+
+      if (!dir.exists(file.path(input$create_directory, ".git"))) {
+        cat("\nNo .git directory found\n")
+      } else {
+        cat("\nA .git directory was found and removed\n")
+        unlink(file.path(input$create_directory, ".git"), recursive = TRUE, force = TRUE)
+      }
+    })
+
+    remove_gitlab <- observeEvent(input$remove_gitlab, {
+
+      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
+        cat("User name and password are required to create a new repo")
+        return(invisible())
+      }
+
+      if (!dir.exists(input$create_directory)) {
+        cat("The specified directory does not exist. Create the directory and try again")
+        return(invisible())
+      }
+
+      withProgress(message = "Removing remote repo", value = 0, style = "old", {
+        create_group_lc <- tolower(input$create_group)
+        create_pre_lc <- tolower(input$create_pre)
+        repo <- basename(input$create_directory)
+        cat("Removing repo ...\n")
+
+        token <- connect(input$create_user_name, input$create_password, input$create_server)$token
+        id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), token, input$create_server)
+        if (id$status == "OKAY") {
+          resp <- remove_project(token, id$project_id, input$create_server)
+          if (checkerr(resp$status_code))
+            cat("\nRemote repo successfully removed\n")
+          else
+            cat("\nProblem removing remote repo. See the console for messages\n")
+        } else {
+          cat("\nNo remote repo found\n")
+        }
+      })
     })
 
     create <- eventReactive(input$create, {

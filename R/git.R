@@ -531,7 +531,7 @@ fetch_work <- function(username, password, groupname, assignment,
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
-  ## collecting informatio on (max) 100 merge requests
+  ## collecting information on (max) 100 merge requests
   # resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&page=1&per_page=100"), h)
   resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&per_page=100"), h)
 
@@ -539,7 +539,7 @@ fetch_work <- function(username, password, groupname, assignment,
     .[grepl("X-Total-Pages",.)] %>%
     sub("X-Total-Pages:\\s+","",.) %>%
     as.numeric
-  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of merge requests is > 100. Updates limits in 'fetch_work'")
+  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of merge requests is > 100. Update limits in 'fetch_work'")
 
   mr <- fromJSON(rawToChar(resp$content))
 
@@ -653,6 +653,14 @@ if (main_git__) {
   ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
   # remove_project(token, id, server)
+
+  ## removing individual projects cloned to a student's account
+  # students <- read.csv(userfile)
+  # for (i in 1:nrow(students)) {
+  #   id <- projID(paste0(students[i, "userid"], "/rady-mgta-bc-2016-assignment1"), students[i,"token"], "https://gitlab.com/api/v3/")
+  #   if (id$status == "OKAY")
+  #     remove_project(students[i,"token"], id$project_id, "https://gitlab.com/api/v3/")
+  # }
 
   if (file.exists(file.path(directory, assignment))) {
     unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
