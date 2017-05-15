@@ -141,10 +141,12 @@ create_group <- function(username, password, groupname = "", userfile = "",
 }
 
 get_allprojects <- function(token, server, everything = FALSE) {
+
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   resp <- curl_fetch_memory(paste0(server, "projects?per_page=100"), h)
+
   if (checkerr(resp$status_code) == FALSE) {
     message("SERVER_ERROR: Problem getting projects")
     return(list(status="SERVER_ERROR",message=fromJSON(rawToChar(resp$content))$message))
@@ -655,11 +657,29 @@ if (main_git__) {
   # remove_project(token, id, server)
 
   ## removing individual projects cloned to a student's account
-  # students <- read.csv(userfile)
+  # students <- read.csv(userfile, stringsAsFactors = FALSE)
   # for (i in 1:nrow(students)) {
   #   id <- projID(paste0(students[i, "userid"], "/rady-mgta-bc-2016-assignment1"), students[i,"token"], "https://gitlab.com/api/v3/")
   #   if (id$status == "OKAY")
   #     remove_project(students[i,"token"], id$project_id, "https://gitlab.com/api/v3/")
+  # }
+
+  ## check tokens
+  # userfile <- "~/bi/msba-students-2016.csv"
+  # students <- read.csv(userfile, stringsAsFactors = FALSE)
+  #
+  # for (i in 1:nrow(students)) {
+  #   token <- students[i,"token"]
+  #   if (token != "")
+  #     id <- get_allprojects(token, server)
+  #   else
+  #     id$status <- "EMPTY"
+  #
+  #   if (id$status == "OKAY") {
+  #     print(paste0("OKAY: ", students[i, "userid"], " ", token))
+  #   } else {
+  #     print(paste0("NOT OKAY: ", students[i, "userid"], " ", token))
+  #   }
   # }
 
   if (file.exists(file.path(directory, assignment))) {
