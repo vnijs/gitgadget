@@ -125,6 +125,10 @@ gitgadget <- function() {
       ),
       miniTabPanel("Sync", icon = icon("refresh"),
         miniContentPanel(
+          HTML("<h2>Sync with remote</h2>"),
+          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = ""),
+          actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
+          actionButton("sync_push", "Push", title = "Push all updated files to the remote repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\"\ngit push"),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
@@ -679,6 +683,27 @@ gitgadget <- function() {
         gsub("^upstream\\s+","", .) %>%
         gsub(" \\(fetch\\)$","", .)
     }
+
+    observeEvent(input$sync_pull, {
+      withProgress(message = "Pull changes from remote", value = 0, style = "old", {
+        system("git pull")
+        message("\nPull attempt completed. Check the console for messages\n")
+      })
+    })
+
+    observeEvent(input$sync_push, {
+      cmess <- input$sync_commit_message
+      if (is_empty(cmess))
+        cmess <- paste0("Updates: ", Sys.time())
+      else
+        cmess <- gsub("\"", "'", cmess)
+      withProgress(message = "Pushing changes to remote", value = 0, style = "old", {
+        system("git add .")
+        system(paste0("git commit -m \"", cmess, "\""))
+        system("git push")
+        message("\nPush attempt completed. Check the console for messages\n")
+      })
+    })
 
     observeEvent(input$sync, {
       if (!is_empty(input$sync_from)) {

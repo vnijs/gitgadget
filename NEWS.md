@@ -1,3 +1,7 @@
+# CHANGES IN radiant.data VERSION 0.2.5
+
+- Added push and pull to Sync tab
+
 # CHANGES IN radiant.data VERSION 0.2.3
 
 ## BUG FIXES
