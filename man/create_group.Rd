@@ -26,4 +26,3 @@ Create a group on gitlab using the API
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
-

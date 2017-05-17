@@ -30,4 +30,3 @@ Assign work to each student/team by creating a fork of the main repo
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
-

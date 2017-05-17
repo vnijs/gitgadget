@@ -4,6 +4,7 @@
 \name{gitgadget}
 \alias{gitgadget}
 \alias{gitgadget-package}
+\alias{gitgadget}
 \title{gitgadget}
 \usage{
 gitgadget()
@@ -16,4 +17,3 @@ Launch gitgadget in Rstudio viewer if available
 \details{
 See \url{https://github.com/vnijs/gitgadget} for documentation
 }
-

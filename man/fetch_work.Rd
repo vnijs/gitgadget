@@ -26,4 +26,3 @@ Fetch all merge requests as local branches and link to a remote
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
-

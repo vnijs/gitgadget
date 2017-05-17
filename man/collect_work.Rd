@@ -30,4 +30,3 @@ Create merge requests for each student/team
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
-

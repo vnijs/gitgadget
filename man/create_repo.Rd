@@ -28,4 +28,3 @@ Create the main repo from a local directory
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation
 }
-
