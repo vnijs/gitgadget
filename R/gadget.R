@@ -5,15 +5,6 @@
 #' @export
 gitgadget <- function() {
 
-  ## points to gitgadget project unfortunately
-  # if (rstudioapi::isAvailable()) {
-  #   projdir <- rstudioapi::getActiveProject()
-  #   basedir <- normalizePath(file.path(projdir, ".."))
-  # } else {
-  #   projdir <- getwd()
-  #   basedir <- normalizePath(file.path(projdir,".."))
-  # }
-
   os_type <- Sys.info()["sysname"]
 
   find_home <- function(os_type = Sys.info()["sysname"]) {
@@ -38,6 +29,26 @@ gitgadget <- function() {
   if (length(projdir) == 0)
     projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
 
+
+  choose.dir <- function(...) {
+    os_type <- Sys.info()["sysname"]
+    if (os_type == "Windows") {
+      utils::choose.dir(...)
+    } else if (os_type == "Darwin") {
+      pth <- file.path(system.file(package = "gitgadget"), "app/www/choose.dir.scpt")
+      dpath <- suppressWarnings(
+        system(paste0("osascript -l JavaScript ", pth), intern = TRUE)
+      )
+      if (length(dpath) > 0) {
+        gsub("Path\\(\"(.*)\"\\)", "\\1", dpath)
+      } else {
+        character(0)
+      }
+    } else {
+      stop("choose.dir not available for ", os_type)
+    }
+  }
+
   # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
   # help <- HTML("<button id='help' type='button' class='btn btn-default btn-sm action-button'>Help</button>")
 
@@ -49,9 +60,13 @@ gitgadget <- function() {
       miniTabPanel("Introduce", icon = icon("hand-paper-o"),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
-          textInput("intro_user_name","User name:", value = getOption("git.user", "")),
-          textInput("intro_user_email","User email:", value = getOption("git.email", "")),
-          textInput("intro_git_home","Git directory:", value = getOption("git.home", basedir)),
+          textInput("intro_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide your GitLab or GitHub user name"),
+          textInput("intro_user_email","User email:", value = getOption("git.email", ""), placeholder = "Provide account email address"),
+          textInput("intro_git_home","Git directory:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repos"),
+          # fillRow(height = "70px", width = "475px",
+          #   uiOutput("ui_intro_git_home"),
+          #   actionButton("intro_directory_find", "Open", title = "Browse and select a local directory ")
+          # ),
           uiOutput("ui_intro_buttons"),
           hr(),
           verbatimTextOutput("introduce_output")
@@ -70,7 +85,7 @@ gitgadget <- function() {
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
-            actionButton("create_directory_find", "Open", title = "Browse and select a file inside the local repo directory")
+            actionButton("create_directory_find", "Open", title = "Browse and select a local repo directory")
           ),
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
           fillRow(height = "70px", width = "475px",
@@ -92,9 +107,9 @@ gitgadget <- function() {
       miniTabPanel("Clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
-          textInput("clone_from","Clone from:", value = ""),
-          textInput("clone_into","Clone into:", value = getOption("git.home", basedir)),
-          textInput("clone_to","Clone to:", value = ""),
+          textInput("clone_from","Clone from:", placeholder = "Provide https link to repo", value = ""),
+          textInput("clone_into","Clone into:", value = getOption("git.home", basedir), placeholde = "Choose directory to store repo"),
+          textInput("clone_to","Clone to:", placeholder = "Use for custom directory only", value = ""),
           actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name of the local repo, provide an alternative in the 'Clone to' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
@@ -104,7 +119,7 @@ gitgadget <- function() {
         miniContentPanel(
           br(),
           HTML("<h4>Create a new branch</h4>"),
-          textInput("branch_create_name", NULL, value = ""),
+          textInput("branch_create_name", NULL, value = "", placeholder = "Provide a name for the new branch"),
           actionButton("branch_create", "Create local", title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"),
           actionButton("branch_link", "Link remote", title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"),
           HTML("<h4>Check out a branch</h4>"),
@@ -125,10 +140,14 @@ gitgadget <- function() {
       ),
       miniTabPanel("Sync", icon = icon("refresh"),
         miniContentPanel(
+          HTML("<h2>Commit changes locally</h2>"),
+          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", placeholder = "Provide a commit message"),
+          actionButton("sync_commit", "Commit", title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""),
           HTML("<h2>Sync with remote</h2>"),
-          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = ""),
+          # textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = ""),
           actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
-          actionButton("sync_push", "Push", title = "Push all updated files to the remote repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\"\ngit push"),
+          actionButton("sync_push", "Push", title = "Push all updated files to the remote repo\n\nGit command: git push"),
+          actionButton("sync_reset", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands: git --fetch all\ngit reset --hard origin/master"),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
@@ -365,14 +384,12 @@ gitgadget <- function() {
 
     create_directory_find <- reactive({
       if(not_pressed(input$create_directory_find)) return(c())
-      ## R doesn't have a cross platform dir.choose option
-      ## user must select a file in the directory they want
-      dirname(file.choose())
+      choose.dir()
     })
 
     output$ui_create_directory <- renderUI({
       init <- create_directory_find() %>% {ifelse (length(.) == 0, projdir, .)}
-      textInput("create_directory","Local directory:", value = init)
+      textInput("create_directory","Local directory:", value = init, placeholder = "Base directory for the git repo")
     })
 
     create_file_find <- reactive({
@@ -383,7 +400,7 @@ gitgadget <- function() {
     output$ui_create_user_file <- renderUI({
       init <- getOption("git.userfile", default = "")
       init <- create_file_find() %>% {ifelse (length(.) == 0, init, .)}
-      textInput("create_user_file","User file:", value = init)
+      textInput("create_user_file","User file:", value = init, placeholder = "Choose CSV file with student tokens")
     })
 
     remove_git <- observeEvent(input$remove_git, {
@@ -684,6 +701,19 @@ gitgadget <- function() {
         gsub(" \\(fetch\\)$","", .)
     }
 
+    observeEvent(input$sync_commit, {
+      cmess <- input$sync_commit_message
+      if (is_empty(cmess))
+        cmess <- paste0("Updates: ", Sys.time())
+      else
+        cmess <- gsub("\"", "'", cmess)
+      withProgress(message = "Committing all changes locally", value = 0, style = "old", {
+        system("git add .")
+        system(paste0("git commit -m \"", cmess, "\""))
+        message("\nCommit attempt completed. Check the console for messages\n")
+      })
+    })
+
     observeEvent(input$sync_pull, {
       withProgress(message = "Pull changes from remote", value = 0, style = "old", {
         system("git pull")
@@ -692,16 +722,18 @@ gitgadget <- function() {
     })
 
     observeEvent(input$sync_push, {
-      cmess <- input$sync_commit_message
-      if (is_empty(cmess))
-        cmess <- paste0("Updates: ", Sys.time())
-      else
-        cmess <- gsub("\"", "'", cmess)
       withProgress(message = "Pushing changes to remote", value = 0, style = "old", {
-        system("git add .")
-        system(paste0("git commit -m \"", cmess, "\""))
         system("git push")
         message("\nPush attempt completed. Check the console for messages\n")
+      })
+    })
+
+    observeEvent(input$sync_reset, {
+      withProgress(message = "Resetting local repo to remote master branch", value = 0, style = "old", {
+        ## Add confirmation dialog
+        # system("git fetch --all")
+        # system("git reset --hard origin/master")
+        message("\nReset attempt completed. Check the console for messages\n")
       })
     })
 
@@ -732,7 +764,7 @@ gitgadget <- function() {
 
     output$ui_sync_from <- renderUI({
       init <- upstream_info()
-      textInput("sync_from","Sync from:", value = ifelse (length(init) == 0, "", init[1]))
+      textInput("sync_from","Sync from:", value = ifelse (length(init) == 0, "", init[1]), placeholder = "Provide https link to repo")
     })
 
     output$sync_output <- renderPrint({
@@ -798,7 +830,7 @@ gitgadget <- function() {
     output$ui_collect_user_file <- renderUI({
       init <- getOption("git.userfile", default = "")
       init <- collect_file_find() %>% {ifelse(length(.) == 0, init, .)}
-      textInput("collect_user_file","User file:", value = init)
+      textInput("collect_user_file","User file:", value = init, placeholder = "Choose CSV file with student tokens")
     })
 
     collect <- eventReactive(input$collect, {

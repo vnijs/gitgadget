@@ -1,6 +1,8 @@
 # CHANGES IN radiant.data VERSION 0.2.5
 
-- Added push and pull to Sync tab
+- Added commit, push, pull, and reset, to Sync tab
+- Added placeholders for text inputs
+- Added choose.dir script for mac
 
 # CHANGES IN radiant.data VERSION 0.2.3
 
