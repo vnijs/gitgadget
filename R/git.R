@@ -401,6 +401,17 @@ create_repo <- function(username, password, groupname, assignment, directory,
   ## initialize git repo if it doesn't exist yet
   if (!dir.exists(".git")) system2("git", "init")
 
+  ## make sure .gitignore is added before create
+  if (!file.exists(".gitignore"))
+    cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n", file = ".gitignore")
+
+  ## make project file if needed
+  rproj <- list.files(path = adir, pattern = "*.Rproj")
+  if (length(rproj) == 0) {
+    "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTeX\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n" %>%
+      cat(file = paste0(basename(adir), ".Rproj"))
+  }
+
   if (gn == "") gn <- username
   # murl <- paste0("https://", username, ":", password,"@gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
   murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
@@ -499,6 +510,7 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 
   udat$user_id <- userIDs(udat$userid, token, server)
   resp <- sapply(udat$token, merger, project_id, server)
+  message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
 
 #' Fetch all merge requests as local branches and link to a remote
@@ -560,7 +572,15 @@ fetch_work <- function(username, password, groupname, assignment,
 
   create_branch <- function(dat) {
     if (any(grepl(dat[["un"]], branches))) {
-      cat("Branch", dat[["un"]], "already exists. To update this branch first delete the current branch in the Branch tab and then click the Fetch button again\n")
+      # cat("Branch", dat[["un"]], "already exists. To update this branch first delete the current branch in the Branch tab and then click the Fetch button again\n")
+      system(paste0("git checkout ", dat[["un"]]))
+      system(paste0("git merge origin/merge-requests/", dat[["id"]], " ", dat[["un"]]))
+      ## the next two steps will commit, even if there is a merge conflict
+      ## that way the process won't stop for a single branch/MR with a conflict
+      system("git add .")
+      system("git commit -m \"Update local branch with MR\"")
+      system(paste0("git branch -d -r origin/merge-requests/", dat[["id"]]))
+      system(paste0("git push"))
     } else {
       cat("Creating local and remote branch for ", dat[["un"]], "\n")
       system(paste0("git checkout -b ", dat[["un"]], " origin/merge-requests/", dat[["id"]]))
@@ -570,6 +590,7 @@ fetch_work <- function(username, password, groupname, assignment,
   }
 
   tmp <- apply(mrdat, 1, create_branch)
+  message("Finished fetch attempt. Check the console for messages\n")
 }
 
 remove_group <- function(token, groupname, server) {
@@ -651,10 +672,17 @@ if (main_git__) {
   ## uncomment to cleanup
   # token <- connect(username, password, server)$token
   # remove_group(token, "rady-mgta-bc-2016", server)
+
+  ## uncomment to remove all student projects!
+  ## highly destructive!
   # remove_student_projects(userfile, server)
+
   ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
   # remove_project(token, id, server)
+
+  ## To remove students from a group go to the group page, click on members,
+  ## search for the students you want and click the delete icon
 
   ## removing individual projects cloned to a student's account
   # students <- read.csv(userfile, stringsAsFactors = FALSE)

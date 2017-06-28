@@ -29,7 +29,6 @@ gitgadget <- function() {
   if (length(projdir) == 0)
     projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
 
-
   choose.dir <- function(...) {
     os_type <- Sys.info()["sysname"]
     if (os_type == "Windows") {
@@ -45,77 +44,86 @@ gitgadget <- function() {
         character(0)
       }
     } else {
-      stop("choose.dir not available for ", os_type)
+      dirname(file.choose())
     }
   }
 
+  ## Reset confirmation model
   # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
   # help <- HTML("<button id='help' type='button' class='btn btn-default btn-sm action-button'>Help</button>")
 
   ui <- miniPage(
     # gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")"), left = miniTitleBarButton("help", "Help", primary = FALSE)),
-    gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
+    # gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
+    miniTitleBar(
+      paste0("GITGADGET (", packageVersion("gitgadget"), ")"),
+      right = miniTitleBarButton("done", "Done", primary = TRUE),
+      left = miniTitleBarButton("help", "Help", primary = FALSE)
+    ),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
-    miniTabstripPanel(
-      miniTabPanel("Introduce", icon = icon("hand-paper-o"),
+    miniTabstripPanel(id = "tabs",
+      miniTabPanel("Introduce", value = "intro", icon = icon("hand-paper-o"),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
-          textInput("intro_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide your GitLab or GitHub user name"),
-          textInput("intro_user_email","User email:", value = getOption("git.email", ""), placeholder = "Provide account email address"),
-          textInput("intro_git_home","Git directory:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repos"),
-          # fillRow(height = "70px", width = "475px",
-          #   uiOutput("ui_intro_git_home"),
-          #   actionButton("intro_directory_find", "Open", title = "Browse and select a local directory ")
-          # ),
+          textInput("intro_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
+          textInput("intro_user_email","User email:", value = getOption("git.email", ""), placeholder = "Provide GitLab/GitHub user email"),
+          radioButtons("intro_user_type", "User type:", c("student","faculty"), getOption("git.user.type", "student"), inline = TRUE),
+          fillRow(height = "70px", width = "475px",
+            uiOutput("ui_intro_git_home"),
+            actionButton("intro_git_home_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
+          ),
           uiOutput("ui_intro_buttons"),
           hr(),
           verbatimTextOutput("introduce_output")
         )
       ),
-      miniTabPanel("Create", icon = icon("git"),
+      miniTabPanel("Create", value = "create", icon = icon("git"),
         miniContentPanel(
-          HTML("<h2>Create a repo on gitlab</h2>"),
+          HTML("<h2>Create a repo on GitLab</h2>"),
           fillRow(height = "70px", width = "300px",
             textInput("create_user_name","User name:", value = getOption("git.user", "")),
             passwordInput("create_password","Password:", value = getOption("git.password", ""))
           ),
           fillRow(height = "70px", width = "300px",
             textInput("create_group","Group name:", value = getOption("git.group", "")),
-            textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
+            # textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
+            uiOutput("ui_create_pre")
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
             actionButton("create_directory_find", "Open", title = "Browse and select a local repo directory")
           ),
           textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
-          fillRow(height = "70px", width = "475px",
-              uiOutput("ui_create_user_file"),
-              actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
-          ),
-          conditionalPanel("input.create_user_file != ''",
-            radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
+          conditionalPanel("input.intro_user_type == 'faculty'",
+            fillRow(height = "70px", width = "475px",
+                uiOutput("ui_create_user_file"),
+                actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+            ),
+            conditionalPanel("input.create_user_file != ''",
+              radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
+            )
           ),
           HTML("<h4>Remove previous version of .git and repo on Gitlab</h4>"),
-          actionButton("remove_git", "Remove .git", title = "Remove previous .git directory if present"),
-          actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present"),
+          actionButton("remove_git_show", "Remove .git", title = "Remove previous .git directory if present", class = "btn-danger"),
+          actionButton("remove_gitlab_show", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"),
           HTML("<h4>Create local .git and remote repo on Gitlab</h4>"),
           actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
           hr(),
           verbatimTextOutput("create_output")
         )
       ),
-      miniTabPanel("Clone", icon = icon("clone"),
+      miniTabPanel("Clone", value = "clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
-          textInput("clone_from","Clone from:", placeholder = "Provide https link to repo", value = ""),
-          textInput("clone_into","Clone into:", value = getOption("git.home", basedir), placeholde = "Choose directory to store repo"),
-          textInput("clone_to","Clone to:", placeholder = "Use for custom directory only", value = ""),
-          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name of the local repo, provide an alternative in the 'Clone to' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
+          textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https link to repo", value = ""),
+          textInput("clone_into","Base directory to clone repo into:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repo"),
+          textInput("clone_to","Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
+          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
         )
       ),
-      miniTabPanel("Branch", icon = icon("code-fork"),
+      miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
         miniContentPanel(
           br(),
           HTML("<h4>Create a new branch</h4>"),
@@ -131,23 +139,22 @@ gitgadget <- function() {
           uiOutput("ui_branch_merge_branches"),
           actionButton("branch_merge", "Merge branches", title = "Merge the 'from' branch into the 'into' branch\n\nGit commands:\ngit checkout <from branch>\ngit merge <into branch>"),
           actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
-          HTML("<h4>Delete an existing branch</h4>"),
+          HTML("<h4>Delete existing branch(es)</h4>"),
           uiOutput("ui_branch_delete_name"),
-          actionButton("branch_unlink", "Unlink remote", title = "Unlink the local and the remote branch. The remote branch will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"),
-          actionButton("branch_delete", "Delete local", title = "Remove the local branch\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"),
+          actionButton("branch_unlink", "Unlink remote", title = "Unlink the local and the remote branch(es). The remote branch(es) will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"),
+          actionButton("branch_delete", "Delete local", title = "Remove the local branch(es)\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"),
           br(), br()
         )
       ),
-      miniTabPanel("Sync", icon = icon("refresh"),
+      miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
-          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", placeholder = "Provide a commit message"),
+          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", placeholder = "Provide a commit message that describes the changes you made to the repo"),
           actionButton("sync_commit", "Commit", title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""),
           HTML("<h2>Sync with remote</h2>"),
-          # textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = ""),
           actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
-          actionButton("sync_push", "Push", title = "Push all updated files to the remote repo\n\nGit command: git push"),
-          actionButton("sync_reset", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands: git --fetch all\ngit reset --hard origin/master"),
+          actionButton("sync_push", "Push", title = "Push all commited updates to the remote repo\n\nGit command: git push"),
+          actionButton("sync_reset_show", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master"),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
@@ -158,28 +165,37 @@ gitgadget <- function() {
           verbatimTextOutput("sync_output")
         )
       ),
-      miniTabPanel("Collect", icon = icon("cloud-download"),
+      miniTabPanel("Collect", value = "collect", icon = icon("cloud-download"),
         miniContentPanel(
-          HTML("<h2>Collect assignments</h2>"),
-          fillRow(height = "70px", width = "300px",
-            textInput("collect_user_name","User name:", value = getOption("git.user", "")),
-            passwordInput("collect_password","Password:", value = getOption("git.password", ""))
+          conditionalPanel("input.intro_user_type == 'faculty'",
+            HTML("<h2>Collect assignments</h2>"),
+            fillRow(height = "70px", width = "300px",
+              textInput("collect_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
+              passwordInput("collect_password","Password:", value = getOption("git.password", ""))
+            ),
+            fillRow(height = "70px", width = "500px",
+              textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
+              actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
+            ),
+            uiOutput("ui_collect_assignment"),
+            conditionalPanel("input.collect_assignment != undefined && input.collect_assignment != null &&
+                              input.collect_assignment.length > 0",
+              fillRow(height = "70px", width = "475px",
+                uiOutput("ui_collect_user_file"),
+                actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+              ),
+              textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
+              radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
+              actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
+              actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors")
+            ),
+            hr(),
+            verbatimTextOutput("collect_output")
           ),
-          fillRow(height = "70px", width = "500px",
-            textInput("collect_group","Group name:", value = getOption("git.group", "")),
-            actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
-          ),
-          uiOutput("ui_collect_assignment"),
-          fillRow(height = "70px", width = "475px",
-            uiOutput("ui_collect_user_file"),
-            actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
-          ),
-          textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
-          radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
-          actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
-          actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"),
-          hr(),
-          verbatimTextOutput("collect_output")
+          conditionalPanel("input.intro_user_type != 'faculty'",
+            HTML("<h2>Used only for assignment management by faculty</h2>"),
+            HTML("<h2>Change setting to 'faculty' in the Introduction tab if needed</h2>")
+          )
         )
       )
     )
@@ -193,7 +209,8 @@ gitgadget <- function() {
     })
 
     observeEvent(grep("([\\]+)|([/]{2,})", input$intro_git_home), {
-      updateTextInput(session = session, "intro_git_home", value = gsub("([\\]+)|([/]{2,})","/", input$intro_git_home))
+      if (!is_empty(input$intro_git_home))
+        updateTextInput(session = session, "intro_git_home", value = gsub("([\\]+)|([/]{2,})","/", input$intro_git_home))
     })
 
     observeEvent(grep("([\\]+)|([/]{2,})", input$create_directory), {
@@ -217,6 +234,7 @@ gitgadget <- function() {
     })
 
     observeEvent(input$intro_git, {
+
       if (!is_empty(input$intro_user_name)) {
         cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
         resp <- system(cmd, intern = TRUE)
@@ -230,7 +248,7 @@ gitgadget <- function() {
             paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
             cat(file = rprof)
         } else {
-          paste0("\noptions(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
+          paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
         }
       }
 
@@ -238,6 +256,17 @@ gitgadget <- function() {
         cmd <- paste("git config --global --replace-all user.email", input$intro_user_email)
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
+
+        rprof <- file.path(rprofdir, ".Rprofile")
+        if (file.exists(rprof)) {
+          readLines(rprof) %>%
+            .[!grepl("options\\(git.email\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\noptions(git.email = \"", input$intro_user_email, "\")\n") %>%
+            cat(file = rprof)
+        } else {
+          paste0("options(git.email = \"", input$intro_user_email, "\")\n") %>% cat(file = rprof)
+        }
       }
 
       ## set git.home option
@@ -252,21 +281,39 @@ gitgadget <- function() {
             paste0(., "\noptions(git.home = \"", git_home, "\")\n") %>%
             cat(file = rprof)
         } else {
-          paste0("\noptions(git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
+          paste0("options(git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
         }
-        cat("Updated .Rprofile. Restart Rstudio to see the changes\n")
+        cat("Updated git home in .Rprofile. Restart Rstudio to see the changes\n")
       }
 
-      ## Rstudio doesn't look for information in the Documents directory
-      if (
-        !file.exists(file.path(homedir, ".gitconfig")) &&
-        file.exists(file.path(homedir, "Documents/.gitconfig"))
-      ) {
+      ## set git.user.type option
+      git_user_type <- input$intro_user_type
+      # input <- list(intro_user_name = "me", intro_user_type = "student")
+      if (!is_empty(git_user_type) && git_user_type != getOption("git.user.type", "student")) {
+        rprof <- file.path(rprofdir, ".Rprofile")
+        if (file.exists(rprof)) {
+          readLines(rprof) %>%
+            .[!grepl("options\\(git.user.type\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\noptions(git.user.type = \"", git_user_type, "\")\n") %>%
+            cat(file = rprof)
+        } else {
+          paste0("options(git.user.type = \"", git_user_type, "\")\n") %>% cat(file = rprof)
+        }
+        cat("Updated user type in .Rprofile. Restart Rstudio to see the changes\n")
+      }
+
+      ## On Windows Rstudio doesn't look for information in the Documents
+      ## directory for some reason
+      if (!file.exists(file.path(homedir, ".gitconfig")) &&
+          file.exists(file.path(homedir, "Documents/.gitconfig"))) {
+
         file.copy(
           file.path(homedir, "Documents/.gitconfig"),
           file.path(homedir, ".gitconfig")
         )
       }
+      message("Introduction attempt completed. Check console for messages\n")
     })
 
     .ssh_exists <- reactive({
@@ -274,20 +321,38 @@ gitgadget <- function() {
       input$intro_ssh
       input$intro_keyname
 
-      keyname <- ifelse (is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+      keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
       .ssh_path <- file.path(homedir, ".ssh", paste0(keyname, ".pub"))
       if (file.exists(.ssh_path)) .ssh_path else ""
     })
 
-    output$ui_intro_buttons <- renderUI({
-      tagList(
-        fillRow(height = "70px", width = "300px",
-          textInput("intro_keyname","Key name:", value = "id_rsa"),
-          textInput("intro_passphrase","Pass-phrase:", value = "")
-        ),
-        actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
-        actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
+    intro_git_home <- reactive({
+      if (pressed(input$intro_git_home_open))
+        choose.dir()
+      else
+        return(c())
+    })
+
+    output$ui_intro_git_home <- renderUI({
+      init <- intro_git_home()
+      init <- ifelse(length(init) == 0, getOption("git.home", basedir), init)
+      textInput("intro_git_home","Base directory to clone repos into:",
+        value = init,
+        placeholder = "Choose directory to store repos"
       )
+    })
+
+    output$ui_intro_buttons <- renderUI({
+      ## intend to remove SSH functionality below
+      # tagList(
+      #   fillRow(height = "70px", width = "300px",
+      #     textInput("intro_keyname","Key name:", value = "id_rsa"),
+      #     textInput("intro_passphrase","Pass-phrase:", value = "")
+      #   ),
+      #   actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
+      #   actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
+      # )
+      actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
     })
 
     intro_ssh <- eventReactive(input$intro_ssh, {
@@ -303,7 +368,7 @@ gitgadget <- function() {
 
         if (is_empty(.ssh_exists())) {
           if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
-          keyname <- ifelse (is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+          keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
           paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
@@ -371,20 +436,27 @@ gitgadget <- function() {
           cat
       }
 
-      if (pressed(input$intro_ssh)) {
-        intro_ssh()
-      } else {
-        if (!is_empty(.ssh_exists()) ) {
-          cat("\nSSH keys seem to exist on your system. Click the 'SSH key' button to copy them to the clipboard")
-        } else {
-          cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
-        }
-      }
+      # if (pressed(input$intro_ssh)) {
+      #   intro_ssh()
+      # } else {
+      #   if (!is_empty(.ssh_exists()) ) {
+      #     cat("\nSSH keys seem to exist on your system. Click the 'SSH key' button to copy them to the clipboard")
+      #   } else {
+      #     cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
+      #   }
+      # }
+    })
+
+    output$ui_create_pre <- renderUI({
+      req(input$create_group)
+      textInput("create_pre","Prefix:", value = getOption("git.prefix", paste0(input$create_group,"-")))
     })
 
     create_directory_find <- reactive({
-      if(not_pressed(input$create_directory_find)) return(c())
-      choose.dir()
+      if(pressed(input$create_directory_find))
+        choose.dir()
+      else
+        return(c())
     })
 
     output$ui_create_directory <- renderUI({
@@ -393,19 +465,36 @@ gitgadget <- function() {
     })
 
     create_file_find <- reactive({
-      if (not_pressed(input$create_file_find)) return(c())
-      file.choose()
+      if (pressed(input$create_file_find))
+        file.choose()
+      else
+        return(c())
     })
 
     output$ui_create_user_file <- renderUI({
       init <- getOption("git.userfile", default = "")
-      init <- create_file_find() %>% {ifelse (length(.) == 0, init, .)}
-      textInput("create_user_file","User file:", value = init, placeholder = "Choose CSV file with student tokens")
+      init <- create_file_find() %>% {ifelse(length(.) == 0, init, .)}
+      textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+    })
+
+    ## Show remove_git modal when button is clicked.
+    observeEvent(input$remove_git_show, {
+      ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      showModal(
+        modalDialog(title = "Remove local .git directory",
+          span("Are you sure you want to remove the local .git directory? Use only if you want to destroy all local history and restart!"),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton("remove_git", "Remove .git", title = "Remove previous .git directory if present", class = "btn-danger")
+          )
+        )
+      )
     })
 
     remove_git <- observeEvent(input$remove_git, {
+      removeModal()
       if (!dir.exists(input$create_directory)) {
-        cat("The specified directory does not exist. Create the directory and try again")
+        cat("\nThe specified directory does not exist\n")
         return(invisible())
       }
 
@@ -417,8 +506,22 @@ gitgadget <- function() {
       }
     })
 
-    remove_gitlab <- observeEvent(input$remove_gitlab, {
+    ## Show remove_git modal when button is clicked.
+    observeEvent(input$remove_gitlab_show, {
+      ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      showModal(
+        modalDialog(title = "Remove remote GitLab repo",
+          span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger")
+          )
+        )
+      )
+    })
 
+    remove_gitlab <- observeEvent(input$remove_gitlab, {
+      removeModal()
       if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
         cat("User name and password are required to create a new repo")
         return(invisible())
@@ -433,7 +536,7 @@ gitgadget <- function() {
         create_group_lc <- tolower(input$create_group)
         create_pre_lc <- tolower(input$create_pre)
         repo <- basename(input$create_directory)
-        cat("Removing repo ...\n")
+        cat("Removing remote repo ...\n")
 
         token <- connect(input$create_user_name, input$create_password, input$create_server)$token
         id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), token, input$create_server)
@@ -497,7 +600,7 @@ gitgadget <- function() {
           )
         }
 
-        cat("\nCreate process complete. Check the console for messages")
+        message("\nCreate process complete. Check the console for messages\n")
       })
     })
 
@@ -544,13 +647,13 @@ gitgadget <- function() {
 
           rproj <- list.files(path = dir, pattern = "*.Rproj")
           if (length(rproj) == 0) {
-            "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nEncoding: UTF-8\n\nAutoAppendNewline: Yes\nStripTrailingWhitespace: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace" %>%
+            "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTex\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n" %>%
               cat(file = file.path(dir, paste0(basename(dir),".Rproj")))
           }
 
           gitignore <- list.files(path = dir, pattern = ".gitignore")
           if (length(gitignore) == 0)
-            cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n", file = file.path(dir, ".gitignore"))
+            cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n", file = file.path(dir, ".gitignore"))
 
           cat("Repo was sucessfully cloned into", dir)
         } else {
@@ -610,15 +713,20 @@ gitgadget <- function() {
     observeEvent(input$branch_unlink, {
       branch <- input$branch_delete_name
       if (is_empty(branch)) input$branch_create_name
-      if (!is_empty(branch)) system(paste0("git branch -d -r origin/", branch))
+      if (!is_empty(branch)) {
+        for (ib in branch) {
+          system(paste0("git branch -d -r origin/", ib))
+        }
+      }
     })
 
     observeEvent(input$branch_delete, {
       if (!is.null(input$branch_delete_name)) {
         withProgress(message = "Deleting branch", value = 0, style = "old", {
           system("git checkout master")
-          paste("git branch -D", input$branch_delete_name) %>%
-            system(.)
+          for (ib in input$branch_delete_name) {
+            system(paste("git branch -D", ib))
+          }
         })
       }
     })
@@ -680,7 +788,14 @@ gitgadget <- function() {
       if (length(resp) == 0) {
         HTML("<label>No branches available to delete</label>")
       } else {
-        selectInput("branch_delete_name", NULL, choices = resp)
+        # selectInput("branch_delete_name", NULL, choices = resp)
+        selectizeInput("branch_delete_name",
+          label = NULL,
+          selected = resp[1],
+          choices = resp,
+          multiple = TRUE,
+          options = list(placeholder = "Select branch(es) to delete", plugins = list("remove_button"))
+        )
       }
     })
 
@@ -728,11 +843,28 @@ gitgadget <- function() {
       })
     })
 
+    ## Show reset modal when button is clicked.
+    observeEvent(input$sync_reset_show, {
+      ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      showModal(
+        modalDialog(title = "Reset local repo",
+          span("Are you sure you want to reset the local repo? Only use this
+               option if you want to destroy the current state of the local repo
+               and make a copy of the remote repo!"),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton("sync_reset", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master")
+          )
+        )
+      )
+    })
+
     observeEvent(input$sync_reset, {
+      removeModal()
       withProgress(message = "Resetting local repo to remote master branch", value = 0, style = "old", {
         ## Add confirmation dialog
-        # system("git fetch --all")
-        # system("git reset --hard origin/master")
+        system("git fetch --all")
+        system("git reset --hard origin/master")
         message("\nReset attempt completed. Check the console for messages\n")
       })
     })
@@ -764,7 +896,7 @@ gitgadget <- function() {
 
     output$ui_sync_from <- renderUI({
       init <- upstream_info()
-      textInput("sync_from","Sync from:", value = ifelse (length(init) == 0, "", init[1]), placeholder = "Provide https link to repo")
+      textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse (length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
     })
 
     output$sync_output <- renderPrint({
@@ -811,12 +943,17 @@ gitgadget <- function() {
     })
 
     output$ui_collect_assignment <- renderUI({
-      resp <- get_assignments()
+
+      withProgress(message = "Generating list of available assignments", value = 0, style = "old", {
+        resp <- get_assignments()
+      })
+
       if (length(resp) == 0) {
         HTML("<label>No assignments available for specified input values</label>")
       } else {
         selectInput("collect_assignment","Assignment name:", choices = resp)
       }
+
     })
 
     collect_file_find <- reactive({
@@ -830,7 +967,7 @@ gitgadget <- function() {
     output$ui_collect_user_file <- renderUI({
       init <- getOption("git.userfile", default = "")
       init <- collect_file_find() %>% {ifelse(length(.) == 0, init, .)}
-      textInput("collect_user_file","User file:", value = init, placeholder = "Choose CSV file with student tokens")
+      textInput("collect_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
     })
 
     collect <- eventReactive(input$collect, {
@@ -851,33 +988,30 @@ gitgadget <- function() {
         )
       })
 
-      cat("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
+      message("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
     })
 
     collect_fetch <- eventReactive(input$collect_fetch, {
       remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
       if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
-        # cat("Your working directory is not set to the assignment directory or this repo was not created using gitgadget. Please navigate to the assignment directory or add \"fetch = +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*\" to the remote origin section in .git/config file")
         system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
       }
-      # } else {
 
       ## pre not used when called from the gadget interface because the full
       ## assignment name is retrieved from gitlab
-        withProgress(message = "Fetching merge requests", value = 0, style = "old", {
-          fetch_work(
-            input$collect_user_name, input$collect_password, input$collect_group,
-            input$collect_assignment, pre = "", server = input$collect_server
-          )
-        })
+      withProgress(message = "Fetching merge requests", value = 0, style = "old", {
+        fetch_work(
+          input$collect_user_name, input$collect_password, input$collect_group,
+          input$collect_assignment, pre = "", server = input$collect_server
+        )
+      })
 
-        cat("Use the Git tab in Rstudio (click refresh first) to switch between different assignments")
-      # }
+      message("\nUse the Git tab in R-studio (click refresh first) to switch between different student assignment submissions\n")
     })
 
     output$collect_output <- renderPrint({
-      if (is_empty(input$collect_assignment)) {
-       cat("Specify all required inputs to generate the list of available assignments. Then press the Collect button")
+      if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
+       cat("Provide user name, password, and the GitLab group name and then click the List button to show available assignments. Load the user file with GitLab tokens and press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
       } else {
         if (pressed(input$collect))
           ret <- collect()
@@ -890,8 +1024,31 @@ gitgadget <- function() {
       }
     })
 
+    # observe({
+    #   cat(input$tabs)
+    # })
+
+    ## Show remove_git modal when button is clicked.
+    observeEvent(input$help, {
+      ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      showModal(
+        modalDialog(title = "GitGadget Help",
+          markdown::markdownToHTML(
+            file.path(system.file(package = "gitgadget"), "app/help.md"),
+            fragment.only = TRUE,
+            options = "",
+            stylesheet = ""
+          ) %>%
+          gsub("<table>","<table class='table table-condensed table-hover'>",.) %>%
+          HTML,
+          footer = tagList(modalButton("OK")),
+          easyClose = TRUE
+        )
+      )
+    })
+
     observeEvent(input$done, {
-      stopApp(TRUE)
+      stopApp(cat("Stopped GitGadget"))
     })
   }
 
@@ -911,6 +1068,7 @@ gitgadget <- function() {
 
 ## test section
 main_gadget__ <- FALSE
+# main_gadget__ <- TRUE
 if (main_gadget__) {
 
   library(shiny)

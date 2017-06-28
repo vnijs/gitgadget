@@ -1,10 +1,18 @@
-# CHANGES IN radiant.data VERSION 0.2.5
+# CHANGES IN gitgadget VERSION 0.2.6
 
 - Added commit, push, pull, and reset, to Sync tab
 - Added placeholders for text inputs
 - Added choose.dir script for mac
+- Update documentation
+- Added confirmation dialog for destructive commands (red buttons)
+- Added help button to gadget header
+- Specify user type in Introduction tab
+- Hide inputs in Collect tab from students
+- Option to remove multiple (student) brances in Branch tab
+- Remove option to use SSH
+- Local branches will now be updated if student MR was updated
 
-# CHANGES IN radiant.data VERSION 0.2.3
+# CHANGES IN gitgadget VERSION 0.2.3
 
 ## BUG FIXES
 
@@ -19,6 +27,5 @@
 
 ## FEATURES 
 
-- Automatically replace any number of "\\" by "/" in input file paths
+- Automatically replace any number of "\\" by "/" in input file and directory paths
 - Added option to remove previous .git and remote repo before creating new local and remote repos
-
