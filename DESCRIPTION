@@ -20,6 +20,7 @@ Imports:
     curl (>= 0.9),
     jsonlite (>= 1.0),
     dplyr (>= 0.5),
+    markdown,
     methods
 Suggests:
     knitr,

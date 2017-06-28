@@ -8,6 +8,7 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server"))
 #' @import shiny miniUI curl dplyr
 #' @importFrom jsonlite fromJSON
 #' @importFrom rstudioapi isAvailable getActiveProject
+#' @importFrom markdown markdownToHTML
 #' @importFrom utils read.csv
 #' @importFrom stats na.omit
 #' @importFrom methods is
