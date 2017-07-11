@@ -315,7 +315,9 @@ assign_work <- function(username, password, groupname, assignment, userfile,
     dat
   }
 
-  resp <- student_data %>% group_by_("team") %>% do(setup(.))
+  resp <- student_data %>% 
+    group_by_at(.vars = "team") %>% 
+    do(setup(.))
 }
 
 maker <- function(repo_name, token, server, namespace = "") {
@@ -502,10 +504,11 @@ collect_work <- function(username, password, groupname, assignment, userfile,
   udat <- read.csv(userfile, stringsAsFactor = FALSE)
 
   if (type == "individual") {
-    udat$team <- paste("ind",1:nrow(udat))
+    udat$team <- paste("ind", 1:nrow(udat))
   } else {
     ## MR only from team lead
-    udat <- group_by_(udat, "team") %>% slice(1)
+    udat <- group_by_at(udat, .vars = "team") %>% 
+      slice(1)
   }
 
   udat$user_id <- userIDs(udat$userid, token, server)
@@ -526,7 +529,8 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 #'
 #' @export
 fetch_work <- function(username, password, groupname, assignment,
-                       pre = "", server = "https://gitlab.com/api/v3/") {
+                       pre = "", 
+                       server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')

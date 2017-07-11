@@ -1,3 +1,7 @@
+# CHANGES IN gitgadget VERSION 0.2.7.1
+
+* Upgraded dplyr dependency to 0.7.1
+
 # CHANGES IN gitgadget VERSION 0.2.6
 
 - Added commit, push, pull, and reset, to Sync tab
