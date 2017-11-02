@@ -88,7 +88,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
   resp <- curl_fetch_memory(murl,h)
   if (checkerr(resp$status_code) == FALSE) {
     mess <- fromJSON(rawToChar(resp$content))$message
-    if (grepl("already exists", mess, ignore.case = TRUE)) {
+    if (length(mess) > 0 && grepl("already exists", mess, ignore.case = TRUE)) {
       return(list(status = "OKAY", message = mess))
     } else {
       message("There was an error adding user to the group:", mess, "\n")
@@ -149,6 +149,7 @@ get_allprojects <- function(token, server, everything = FALSE) {
 
   if (checkerr(resp$status_code) == FALSE) {
     message("SERVER_ERROR: Problem getting projects")
+    message(rawToChar(resp$content))
     return(list(status="SERVER_ERROR",message=fromJSON(rawToChar(resp$content))$message))
   }
   nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
@@ -315,8 +316,8 @@ assign_work <- function(username, password, groupname, assignment, userfile,
     dat
   }
 
-  resp <- student_data %>% 
-    group_by_at(.vars = "team") %>% 
+  resp <- student_data %>%
+    group_by_at(.vars = "team") %>%
     do(setup(.))
 }
 
@@ -441,7 +442,7 @@ merger <- function(token, to, server,
                    frombranch = "master",
                    tobranch = "master") {
 
-  resp <- get_allprojects(token, server)
+  resp <- get_allprojects(token[1], server)
   forked <- resp$repo[resp$repo$forked_from_project$id == to,]
   from <- na.omit(forked$id)[1]
 
@@ -452,7 +453,7 @@ merger <- function(token, to, server,
 
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
-  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  handle_setheaders(h, "PRIVATE-TOKEN" = token[1])
   murl <- paste0(server, "projects/", from, "/merge_requests?source_branch=",
                  frombranch, "&target_branch=", tobranch, "&title=", title,
                  "&target_project_id=", to)
@@ -460,13 +461,13 @@ merger <- function(token, to, server,
   resp <- curl_fetch_memory(murl, h)
   resp$content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
-    message("Generating merge request")
+    message("Generating merge request for", token[2])
     list(status = "OKAY", content = resp$content)
   } else if (grepl("This merge request already exists", resp$content)) {
-    message("Merge request already exists")
+    message("Merge request already exists for ", token[2])
     list(status = "OKAY", content = resp$content)
   } else {
-    message("Error creating merge request ", resp$status_code)
+    message("Error creating merge request for ", token[2], " ", resp$status_code)
     list(status = "ERROR", content = rawToChar(resp$content))
   }
 }
@@ -507,12 +508,13 @@ collect_work <- function(username, password, groupname, assignment, userfile,
     udat$team <- paste("ind", 1:nrow(udat))
   } else {
     ## MR only from team lead
-    udat <- group_by_at(udat, .vars = "team") %>% 
+    udat <- group_by_at(udat, .vars = "team") %>%
       slice(1)
   }
 
   udat$user_id <- userIDs(udat$userid, token, server)
-  resp <- sapply(udat$token, merger, project_id, server)
+  # resp <- sapply(udat$token, merger, project_id, server)
+  resp <- apply(udat[,c("token","userid")], 1, merger, project_id, server)
   message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
 
@@ -529,7 +531,7 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 #'
 #' @export
 fetch_work <- function(username, password, groupname, assignment,
-                       pre = "", 
+                       pre = "",
                        server = "https://gitlab.com/api/v3/") {
 
   resp <- connect(username, password, server)
@@ -697,22 +699,23 @@ if (main_git__) {
   # }
 
   ## check tokens
-  # userfile <- "~/bi/msba-students-2016.csv"
-  # students <- read.csv(userfile, stringsAsFactors = FALSE)
-  #
-  # for (i in 1:nrow(students)) {
-  #   token <- students[i,"token"]
-  #   if (token != "")
-  #     id <- get_allprojects(token, server)
-  #   else
-  #     id$status <- "EMPTY"
-  #
-  #   if (id$status == "OKAY") {
-  #     print(paste0("OKAY: ", students[i, "userid"], " ", token))
-  #   } else {
-  #     print(paste0("NOT OKAY: ", students[i, "userid"], " ", token))
-  #   }
-  # }
+  userfile <- "~/ict/msba2017-gitlab.csv"
+  # userfile <- "~/ict/msba-test-gitlab.csv"
+  students <- read.csv(userfile, stringsAsFactors = FALSE)
+
+  for (i in seq_len(nrow(students))) {
+    token <- students[i, "token"]
+    if (token != "")
+      id <- get_allprojects(token, server)
+    else
+      id$status <- "EMPTY"
+
+    if (id$status == "OKAY") {
+      print(paste0("OKAY: ", students[i, "userid"], " ", token))
+    } else {
+      print(paste0("NOT OKAY: ", students[i, "userid"], " ", token))
+    }
+  }
 
   if (file.exists(file.path(directory, assignment))) {
     unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)

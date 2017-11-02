@@ -29,24 +29,24 @@ gitgadget <- function() {
   if (length(projdir) == 0)
     projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
 
-  choose.dir <- function(...) {
-    os_type <- Sys.info()["sysname"]
-    if (os_type == "Windows") {
-      utils::choose.dir(...)
-    } else if (os_type == "Darwin") {
-      pth <- file.path(system.file(package = "gitgadget"), "app/www/choose.dir.scpt")
-      dpath <- suppressWarnings(
-        system(paste0("osascript -l JavaScript ", pth), intern = TRUE)
-      )
-      if (length(dpath) > 0) {
-        gsub("Path\\(\"(.*)\"\\)", "\\1", dpath)
-      } else {
-        character(0)
-      }
-    } else {
-      dirname(file.choose())
-    }
-  }
+  # choose.dir <- function(...) {
+  #   os_type <- Sys.info()["sysname"]
+  #   if (os_type == "Windows") {
+  #     utils::choose.dir(...)
+  #   } else if (os_type == "Darwin") {
+  #     pth <- file.path(system.file(package = "gitgadget"), "app/www/choose.dir.scpt")
+  #     dpath <- suppressWarnings(
+  #       system(paste0("osascript -l JavaScript ", pth), intern = TRUE)
+  #     )
+  #     if (length(dpath) > 0) {
+  #       gsub("Path\\(\"(.*)\"\\)", "\\1", dpath)
+  #     } else {
+  #       character(0)
+  #     }
+  #   } else {
+  #     dirname(file.choose())
+  #   }
+  # }
 
   ## Reset confirmation model
   # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
@@ -116,8 +116,15 @@ gitgadget <- function() {
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
           textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https link to repo", value = ""),
-          textInput("clone_into","Base directory to clone repo into:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repo"),
+          # textInput("clone_into","Base directory to clone repo into:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repo"),
+          fillRow(height = "70px", width = "475px",
+            # uiOutput("ui_intro_git_home"),
+            uiOutput("ui_clone_into"),
+            actionButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
+          ),
+
           textInput("clone_to","Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
+          radioButtons("clone_proj", "Open project in:", c("current session" = "curr", "new session" = "new"), "curr", inline = TRUE),
           actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
@@ -328,7 +335,7 @@ gitgadget <- function() {
 
     intro_git_home <- reactive({
       if (pressed(input$intro_git_home_open))
-        choose.dir()
+        rstudioapi::selectDirectory()
       else
         return(c())
     })
@@ -341,6 +348,7 @@ gitgadget <- function() {
         placeholder = "Choose directory to store repos"
       )
     })
+
 
     output$ui_intro_buttons <- renderUI({
       ## intend to remove SSH functionality below
@@ -454,7 +462,7 @@ gitgadget <- function() {
 
     create_directory_find <- reactive({
       if(pressed(input$create_directory_find))
-        choose.dir()
+        rstudioapi::selectDirectory()
       else
         return(c())
     })
@@ -466,7 +474,7 @@ gitgadget <- function() {
 
     create_file_find <- reactive({
       if (pressed(input$create_file_find))
-        file.choose()
+        rstudioapi::selectFile(filter = "All files (*)")
       else
         return(c())
     })
@@ -632,6 +640,22 @@ gitgadget <- function() {
       }
     })
 
+    clone_into_home <- reactive({
+      if (pressed(input$clone_into_open))
+        rstudioapi::selectDirectory()
+      else
+        return(c())
+    })
+
+    output$ui_clone_into <- renderUI({
+      init <- clone_into_home()
+      init <- ifelse(length(init) == 0, getOption("git.home", basedir), init)
+      textInput("clone_into","Base directory to clone repo into:",
+        value = init,
+        placeholder = "Choose directory to store repo"
+      )
+    })
+
     output$clone_output <- renderPrint({
       input$clone
       ret <- clone()
@@ -656,6 +680,14 @@ gitgadget <- function() {
             cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n", file = file.path(dir, ".gitignore"))
 
           cat("Repo was sucessfully cloned into", dir)
+
+          if (length(rproj) == 0)
+            rproj <- list.files(path = dir, pattern = "*.Rproj", full.names = TRUE)[1]
+          else
+            rproj <- file.path(dir, rproj[1])
+
+          rstudioapi::openProject(rproj, newSession = input$clone_proj == "new")
+
         } else {
           cat("There was an error cloning the repo. Check the R console for output")
         }
@@ -958,7 +990,7 @@ gitgadget <- function() {
 
     collect_file_find <- reactive({
       if (input$collect_file_find == 0) return(c())
-      file.choose()
+      rstudioapi::selectFile(filter = "All files (*)")
     })
 
     ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
@@ -1054,17 +1086,25 @@ gitgadget <- function() {
 
   resp <- runGadget(shinyApp(ui, server), viewer = paneViewer())
 
-  ## attempt to run in separate process
-  # resp <- runGadget(shinyApp(ui, server), viewer = browserViewer())
-  # resp <- runApp(shinyApp(ui, server), launch.browser = FALSE, port = 1234)
-  # resp <- runApp(shinyApp(ui, server), launch.browser = TRUE)
-  # viewer("http://127.0.0.1:4444")
-}
+  # Launch Shiny app in another process, without blocking
+  # https://github.com/rstudio/rstudioapi/issues/17#issuecomment-321958223
+  # callr::r_bg(function() {
+  #   shiny::shinyApp(
+  #     ui = ui,
+  #     server = server,
+  #     options = list(port = 3131, launch.browser = FALSE)
+  #   )
+  # })
+  # # # Give Shiny a second to start
+  # Sys.sleep(1)
+  # # # Launch viewer
+  # getOption("viewer")("http://localhost:3131/")
 
-## blocks Rstudio console
-# gitgadget::gitgadget()
-## attempt to run in separate process
-# system(paste0(Sys.which("R"), " -e \"gitgadget:::gitgadget()\""))
+  ## attempt to run in separate process
+  # callr::r_bg(function() {
+  #   resp <- runApp(shinyApp(ui, server), launch.browser = FALSE, port = 3131)
+  # })
+}
 
 ## test section
 main_gadget__ <- FALSE
@@ -1081,4 +1121,6 @@ if (main_gadget__) {
   source("R/git.R", local = TRUE)
 
   gitgadget()
+  # Sys.sleep(1)
+  # getOption("viewer")("http://localhost:3131/")
 }
