@@ -67,7 +67,8 @@ groupr <- function(groupname, path, token, server) {
   murl <- paste0(server, "groups?name=", groupname, "&path=", path, "&visibility_level=0")
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE)
-    return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
+    return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
+    # return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
 
   group_id <- fromJSON(rawToChar(resp$content))$id
   list(status = "OKAY", group_id = group_id)
@@ -140,7 +141,7 @@ create_group <- function(username, password, groupname = "", userfile = "",
   }
 }
 
-get_allprojects <- function(token, server, everything = FALSE) {
+get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
 
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
@@ -148,9 +149,20 @@ get_allprojects <- function(token, server, everything = FALSE) {
   resp <- curl_fetch_memory(paste0(server, "projects?per_page=100"), h)
 
   if (checkerr(resp$status_code) == FALSE) {
-    message("SERVER_ERROR: Problem getting projects")
-    message(rawToChar(resp$content))
-    return(list(status="SERVER_ERROR",message=fromJSON(rawToChar(resp$content))$message))
+    if (turn < 6) {
+      message("SERVER_ERROR: Problem getting projects")
+      message("Sleeping for 5 seconds and then trying again")
+      Sys.sleep(5)
+      return(get_allprojects(token, server, everything = FALSE, turn = turn + 1))
+    } else {
+      message("****************************************************************************")
+      message("Tried 5 times and failed to get list of projects. Gitlab message shown below")
+      message("****************************************************************************")
+      message(rawToChar(resp$content))
+    }
+
+    return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
+    # return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
   }
   nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
     .[grepl("X-Total-Pages",.)] %>%
@@ -189,7 +201,8 @@ forkRepo <- function(token, project_id, server) {
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem forking")
-    list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message)
+    list(status = "SERVER_ERROR", message = rawToChar(resp$content))
+    # list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message)
   } else {
     content <- fromJSON(rawToChar(resp$content))
     list(status = "OKAY", content = content)
@@ -205,7 +218,8 @@ renameRepo <- function(project_id, token, newname, server) {
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem changing repo name")
-    list(status='SERVER_ERROR', message = fromJSON(rawToChar(resp$content))$message)
+    list(status = "SERVER_ERROR", message = rawToChar(resp$content))
+    # list(status='SERVER_ERROR', message = fromJSON(rawToChar(resp$content))$message)
   } else {
     list(status = "OKAY", name = fromJSON(rawToChar(resp$content))$name)
   }
@@ -263,8 +277,8 @@ add_team <- function(proj_id, token, team_mates, server) {
       list(status = "OKAY", content = content)
     } else {
       message("Error adding ", otherid, " to team: server code ", resp$status_code)
-      content <- fromJSON(rawToChar(resp$content))
-      list(status = "SERVER_ERROR", content = content)
+      # content <- fromJSON(rawToChar(resp$content))
+      list(status = "SERVER_ERROR", content = rawToChar(resp$content))
     }
   })
 }
@@ -444,6 +458,13 @@ merger <- function(token, to, server,
 
   resp <- get_allprojects(token[1], server)
   forked <- resp$repo[resp$repo$forked_from_project$id == to,]
+
+  if (length(forked) == 0) {
+    message("Error trying to find fork")
+    message(resp)
+    return(list(status = "ERROR", content = resp))
+  }
+
   from <- na.omit(forked$id)[1]
 
   if (length(from) == 0) {
