@@ -461,14 +461,15 @@ merger <- function(token, to, server,
   resp <- curl_fetch_memory(murl, h)
   resp$content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
-    message("Generating merge request for", token[2])
+    message("Generating merge request for ", token[2])
     list(status = "OKAY", content = resp$content)
   } else if (grepl("This merge request already exists", resp$content)) {
     message("Merge request already exists for ", token[2])
     list(status = "OKAY", content = resp$content)
   } else {
-    message("Error creating merge request for ", token[2], " ", resp$status_code)
-    list(status = "ERROR", content = rawToChar(resp$content))
+    message("Error creating merge request for ", token[2], " Code: ", resp$status_code)
+    message(resp$content)
+    list(status = "ERROR", content = resp$content)
   }
 }
 
