@@ -1,3 +1,8 @@
+# CHANGES IN gitgadget VERSION 0.2.8.2
+
+* Open project in new or existing session on clone
+* Open to remove local git repo, remote gitlab repo, and student forks after confirmation
+
 # CHANGES IN gitgadget VERSION 0.2.7.1
 
 * Upgraded dplyr dependency to 0.7.1

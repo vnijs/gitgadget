@@ -201,6 +201,7 @@ forkRepo <- function(token, project_id, server) {
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem forking")
+    message(rawToChar(resp$content))
     list(status = "SERVER_ERROR", message = rawToChar(resp$content))
     # list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message)
   } else {
@@ -712,13 +713,8 @@ if (main_git__) {
   ## To remove students from a group go to the group page, click on members,
   ## search for the students you want and click the delete icon
 
-  ## removing individual projects cloned to a student's account
-  # students <- read.csv(userfile, stringsAsFactors = FALSE)
-  # for (i in 1:nrow(students)) {
-  #   id <- projID(paste0(students[i, "userid"], "/rady-mgta-bc-2016-assignment1"), students[i,"token"], "https://gitlab.com/api/v3/")
-  #   if (id$status == "OKAY")
-  #     remove_project(students[i,"token"], id$project_id, "https://gitlab.com/api/v3/")
-  # }
+  ## To remove individual projects cloned to a student's account
+  ## use the Create tab and load the file with student information
 
   ## check tokens
   userfile <- "~/ict/msba2017-gitlab.csv"

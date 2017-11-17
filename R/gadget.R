@@ -521,8 +521,14 @@ gitgadget <- function() {
         modalDialog(title = "Remove remote GitLab repo",
           span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
           footer = tagList(
-            modalButton("Cancel"),
-            actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger")
+            with(tags, table(
+              align = "right",
+              td(modalButton("Cancel")),
+              td(conditionalPanel("input.create_user_file != ''",
+                actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
+              )),
+              td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
+            ))
           )
         )
       )
@@ -531,7 +537,7 @@ gitgadget <- function() {
     remove_gitlab <- observeEvent(input$remove_gitlab, {
       removeModal()
       if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
-        cat("User name and password are required to create a new repo")
+        cat("User name and password are required to remove remote repo")
         return(invisible())
       }
 
@@ -544,8 +550,8 @@ gitgadget <- function() {
         create_group_lc <- tolower(input$create_group)
         create_pre_lc <- tolower(input$create_pre)
         repo <- basename(input$create_directory)
-        cat("Removing remote repo ...\n")
 
+        cat("Removing remote repo ...\n")
         token <- connect(input$create_user_name, input$create_password, input$create_server)$token
         id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), token, input$create_server)
         if (id$status == "OKAY") {
@@ -559,6 +565,38 @@ gitgadget <- function() {
         }
       })
     })
+
+    remove_forks <- observeEvent(input$remove_forks, {
+      removeModal()
+      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
+        cat("User name and password are required to remove student forks")
+        return(invisible())
+      }
+
+      if (!dir.exists(input$create_directory)) {
+        cat("The specified directory does not exist. Create the directory and try again")
+        return(invisible())
+      }
+
+      withProgress(message = "Removing student forks", value = 0, style = "old", {
+        create_group_lc <- tolower(input$create_group)
+        create_pre_lc <- tolower(input$create_pre)
+        repo <- basename(input$create_directory)
+
+        message("Removing student forks ...\n")
+
+        students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
+        for (i in seq_len(nrow(students))) {
+          id <- projID(paste0(students[i, "userid"], "/", create_pre_lc, repo), students[i, "token"], "https://gitlab.com/api/v3/")
+          if (id$status == "OKAY") {
+            remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v3/")
+            message(paste0("\nProject ", id$project_id, " fork removed for ", students[i, "userid"], " in ", students[i, "team"]))
+          }
+        }
+        message("\nFork removal process complete. Check the console for messages\n")
+      })
+    })
+
 
     create <- eventReactive(input$create, {
 
