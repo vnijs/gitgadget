@@ -67,6 +67,7 @@ gitgadget <- function() {
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput("intro_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
           textInput("intro_user_email","User email:", value = getOption("git.email", ""), placeholder = "Provide GitLab/GitHub user email"),
+          passwordInput("intro_token","Token:", value = getOption("git.token", "")),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), getOption("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_intro_git_home"),
@@ -82,11 +83,10 @@ gitgadget <- function() {
           HTML("<h2>Create a repo on GitLab</h2>"),
           fillRow(height = "70px", width = "300px",
             textInput("create_user_name","User name:", value = getOption("git.user", "")),
-            passwordInput("create_password","Password:", value = getOption("git.password", ""))
+            passwordInput("create_token","Token:", value = getOption("git.token", ""))
           ),
           fillRow(height = "70px", width = "300px",
             textInput("create_group","Group name:", value = getOption("git.group", "")),
-            # textInput("create_pre","Prefix:", value = getOption("git.prefix", ""))
             uiOutput("ui_create_pre")
           ),
           fillRow(height = "70px", width = "475px",
@@ -176,10 +176,10 @@ gitgadget <- function() {
         miniContentPanel(
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
-            fillRow(height = "70px", width = "300px",
-              textInput("collect_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
-              passwordInput("collect_password","Password:", value = getOption("git.password", ""))
-            ),
+            # fillRow(height = "70px", width = "300px",
+              # textInput("collect_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
+              passwordInput("collect_token","Token:", value = getOption("git.token", "")),
+            # ),
             fillRow(height = "70px", width = "500px",
               textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
               actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
@@ -273,6 +273,19 @@ gitgadget <- function() {
             cat(file = rprof)
         } else {
           paste0("options(git.email = \"", input$intro_user_email, "\")\n") %>% cat(file = rprof)
+        }
+      }
+
+      if (!is_empty(input$intro_token)) {
+        rprof <- file.path(rprofdir, ".Rprofile")
+        if (file.exists(rprof)) {
+          readLines(rprof) %>%
+            .[!grepl("options\\(git.token\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\noptions(git.token = \"", input$intro_token, "\")\n") %>%
+            cat(file = rprof)
+        } else {
+          paste0("options(git.user = \"", input$intro_token, "\")\n") %>% cat(file = rprof)
         }
       }
 
@@ -536,8 +549,10 @@ gitgadget <- function() {
 
     remove_gitlab <- observeEvent(input$remove_gitlab, {
       removeModal()
-      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
-        cat("User name and password are required to remove remote repo")
+      # if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
+      if (is_empty(input$create_token)) {
+        # cat("User name and password are required to remove remote repo")
+        cat("Token required to remove remote repo")
         return(invisible())
       }
 
@@ -552,10 +567,11 @@ gitgadget <- function() {
         repo <- basename(input$create_directory)
 
         cat("Removing remote repo ...\n")
-        token <- connect(input$create_user_name, input$create_password, input$create_server)$token
-        id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), token, input$create_server)
+        # token <- connect(input$create_user_name, input$create_password, input$create_server)$token
+        # token <- connect(token = input$create_token)$token
+        id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), input$create_token, input$create_server)
         if (id$status == "OKAY") {
-          resp <- remove_project(token, id$project_id, input$create_server)
+          resp <- remove_project(input$create_token, id$project_id, input$create_server)
           if (checkerr(resp$status_code))
             cat("\nRemote repo successfully removed\n")
           else
@@ -568,8 +584,9 @@ gitgadget <- function() {
 
     remove_forks <- observeEvent(input$remove_forks, {
       removeModal()
-      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
-        cat("User name and password are required to remove student forks")
+      # if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
+      if (is_empty(input$create_token)) {
+        cat("Token required to remove student forks")
         return(invisible())
       }
 
@@ -600,8 +617,8 @@ gitgadget <- function() {
 
     create <- eventReactive(input$create, {
 
-      if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
-        cat("User name and password are required to create a new repo")
+      if (is_empty(input$create_user_name) || is_empty(input$create_token)) {
+        cat("Username and token required to create a new repo")
         return(invisible())
       }
 
@@ -618,7 +635,7 @@ gitgadget <- function() {
         if (create_group_lc != "" && create_group_lc != getOption("git.user", "")) {
           cat("Creating group ...\n")
           create_group(
-            input$create_user_name, input$create_password, create_group_lc, input$create_user_file,
+            input$create_token, create_group_lc, input$create_user_file,
             permission = 20, server = input$create_server
           )
         }
@@ -634,13 +651,13 @@ gitgadget <- function() {
         cat("Creating repo ...\n")
 
         create_repo(
-          input$create_user_name, input$create_password, create_group_lc, repo, directory,
+          input$create_user_name, input$create_token, create_group_lc, repo, directory,
           pre = create_pre_lc, server = input$create_server
         )
         if (!is_empty(input$create_user_file)) {
           cat("Assigning work ...\n")
           assign_work(
-            input$create_user_name, input$create_password, create_group_lc, repo,
+            input$create_token, create_group_lc, repo,
             input$create_user_file, type = input$create_type, pre = create_pre_lc,
             server = input$create_server
           )
@@ -976,39 +993,17 @@ gitgadget <- function() {
     get_assignments <- eventReactive(input$collect_list, {
 
       username <- input$collect_user_name
-      password <- input$collect_password
+      token <- input$collect_token
       group <- input$collect_group
       server <- input$collect_server
-      if (is_empty(username) || is_empty(password) || is_empty(group) ||
+      if (is_empty(username) || is_empty(token) || is_empty(group) ||
           is_empty(server)) {
         message("Specify all required inputs to retrieve available assignments")
         return(invisible())
       }
 
-      h <- new_handle()
-      handle_setopt(h, customrequest = "POST")
-      murl <- paste0(server, "session?login=", username, "&password=", password)
-      resp <- curl_fetch_memory(murl, h)
-
-      if (checkerr(resp$status_code) == FALSE) {
-        message("Server Error on login")
-        stop("Server Error: ", fromJSON(rawToChar(resp$content))$error)
-      }
-
-      token <- fromJSON(rawToChar(resp$content))$private_token
-      if (is.null(token))
-        stop("Server Error: user token not accessible")
-
-      handle_setopt(h, customrequest = "GET")
-      handle_setheaders(h, "PRIVATE-TOKEN" = token)
-      resp <- curl_fetch_memory(paste0(server, "projects"), h)
-
-      if (checkerr(resp$status_code) == FALSE)
-        stop("Server Error: ", fromJSON(rawToChar(resp$content))$message)
-
-      proj <- fromJSON(rawToChar(resp$content))
+      proj <- get_allprojects(token, server = "https://gitlab.com/api/v4/", everything = TRUE)$repos
       proj <- proj[proj$namespace$name == group,]
-      names(proj)
 
       if (length(proj) == 0) {
         message("No assignments found for specified groupname")
@@ -1048,7 +1043,7 @@ gitgadget <- function() {
 
     collect <- eventReactive(input$collect, {
       req(
-        input$collect_user_name, input$collect_password, input$collect_group,
+        input$collect_token, input$collect_group,
         input$collect_server, input$collect_user_file
       )
 
@@ -1058,7 +1053,7 @@ gitgadget <- function() {
       ## assignment name is retrieved from gitlab
       withProgress(message = "Generating merge requests", value = 0, style = "old", {
         collect_work(
-          input$collect_user_name, input$collect_password, input$collect_group,
+          input$collect_token, input$collect_group,
           input$collect_assignment, input$collect_user_file,
           type = input$collect_type, pre = "", server = input$collect_server
         )
@@ -1077,7 +1072,7 @@ gitgadget <- function() {
       ## assignment name is retrieved from gitlab
       withProgress(message = "Fetching merge requests", value = 0, style = "old", {
         fetch_work(
-          input$collect_user_name, input$collect_password, input$collect_group,
+          input$collect_token, input$collect_group,
           input$collect_assignment, pre = "", server = input$collect_server
         )
       })
@@ -1087,7 +1082,7 @@ gitgadget <- function() {
 
     output$collect_output <- renderPrint({
       if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
-       cat("Provide user name, password, and the GitLab group name and then click the List button to show available assignments. Load the user file with GitLab tokens and press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
+       cat("Provide GitLab token and the group name and then click the List button to show available assignments. Load the user file with GitLab tokens and press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
       } else {
         if (pressed(input$collect))
           ret <- collect()
