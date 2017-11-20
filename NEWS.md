@@ -1,7 +1,8 @@
-# CHANGES IN gitgadget VERSION 0.2.8.2
+# CHANGES IN gitgadget VERSION 0.2.8.3
 
 * Open project in new or existing session on clone
 * Open to remove local git repo, remote gitlab repo, and student forks after confirmation
+* Better messages on login failure
 
 # CHANGES IN gitgadget VERSION 0.2.7.1
 

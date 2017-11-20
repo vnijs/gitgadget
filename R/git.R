@@ -4,7 +4,7 @@ is_empty <- function(x, empty = "\\s*") if (is_not(x) || grepl(paste0("^",empty,
 not_pressed <- function(x) if (is.null(x) || x == 0) TRUE else FALSE
 pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
 
-connect <- function(username, password, server = "https://gitlab.com/api/v3/") {
+connect <- function(username, password, server = "https://gitlab.com/api/v4/") {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   murl <- paste0(server, "session?login=", username, "&password=", password)
@@ -115,7 +115,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
 #' @export
 create_group <- function(username, password, groupname = "", userfile = "",
                          permission = 20,
-                         server = "https://gitlab.com/api/v3/") {
+                         server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(username, password, server)
   if (resp$status != "OKAY")
@@ -300,7 +300,7 @@ add_team <- function(proj_id, token, team_mates, server) {
 #' @export
 assign_work <- function(username, password, groupname, assignment, userfile,
                         type = "individual", pre = "",
-                        server = "https://gitlab.com/api/v3/") {
+                        server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
@@ -391,7 +391,7 @@ maker <- function(repo_name, token, server, namespace = "") {
 #'
 #' @export
 create_repo <- function(username, password, groupname, assignment, directory,
-                        pre = "", server = "https://gitlab.com/api/v3/") {
+                        pre = "", server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(username, password, server);
   if (resp$status != 'OKAY')
@@ -511,7 +511,7 @@ merger <- function(token, to, server,
 #' @export
 collect_work <- function(username, password, groupname, assignment, userfile,
                          type = "individual", pre = "",
-                         server = "https://gitlab.com/api/v3/") {
+                         server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
@@ -555,7 +555,7 @@ collect_work <- function(username, password, groupname, assignment, userfile,
 #' @export
 fetch_work <- function(username, password, groupname, assignment,
                        pre = "",
-                       server = "https://gitlab.com/api/v3/") {
+                       server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(username, password, server)
   if (resp$status != 'OKAY')
@@ -681,7 +681,7 @@ if (main_git__) {
   library(dplyr)
 
   ## settings
-  server <- getOption("git.server", default = "https://gitlab.com/api/v3/")
+  server <- getOption("git.server", default = "https://gitlab.com/api/v4/")
   username <- getOption("git.user", default = "")
   password <- getOption("git.password", default = "")
   groupname <- "rady-mgta-bc-2016"

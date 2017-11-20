@@ -93,7 +93,7 @@ gitgadget <- function() {
             uiOutput("ui_create_directory"),
             actionButton("create_directory_find", "Open", title = "Browse and select a local repo directory")
           ),
-          textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
+          textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v4/")),
           conditionalPanel("input.intro_user_type == 'faculty'",
             fillRow(height = "70px", width = "475px",
                 uiOutput("ui_create_user_file"),
@@ -191,7 +191,7 @@ gitgadget <- function() {
                 uiOutput("ui_collect_user_file"),
                 actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
               ),
-              textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v3/")),
+              textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v4/")),
               radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
               actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
               actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors")
@@ -587,9 +587,9 @@ gitgadget <- function() {
 
         students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
         for (i in seq_len(nrow(students))) {
-          id <- projID(paste0(students[i, "userid"], "/", create_pre_lc, repo), students[i, "token"], "https://gitlab.com/api/v3/")
+          id <- projID(paste0(students[i, "userid"], "/", create_pre_lc, repo), students[i, "token"], "https://gitlab.com/api/v4/")
           if (id$status == "OKAY") {
-            remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v3/")
+            remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v4/")
             message(paste0("\nProject ", id$project_id, " fork removed for ", students[i, "userid"], " in ", students[i, "team"]))
           }
         }
@@ -990,19 +990,25 @@ gitgadget <- function() {
       murl <- paste0(server, "session?login=", username, "&password=", password)
       resp <- curl_fetch_memory(murl, h)
 
-      if (checkerr(resp$status_code) == FALSE)
-        message("Server Error: ", fromJSON(rawToChar(resp$content))$message)
+      if (checkerr(resp$status_code) == FALSE) {
+        message("Server Error on login")
+        stop("Server Error: ", fromJSON(rawToChar(resp$content))$error)
+      }
 
       token <- fromJSON(rawToChar(resp$content))$private_token
+      if (is.null(token))
+        stop("Server Error: user token not accessible")
+
       handle_setopt(h, customrequest = "GET")
       handle_setheaders(h, "PRIVATE-TOKEN" = token)
       resp <- curl_fetch_memory(paste0(server, "projects"), h)
 
       if (checkerr(resp$status_code) == FALSE)
-        message("Server Error: ", fromJSON(rawToChar(resp$content))$message)
+        stop("Server Error: ", fromJSON(rawToChar(resp$content))$message)
 
       proj <- fromJSON(rawToChar(resp$content))
       proj <- proj[proj$namespace$name == group,]
+      names(proj)
 
       if (length(proj) == 0) {
         message("No assignments found for specified groupname")
