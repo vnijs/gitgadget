@@ -914,6 +914,7 @@ gitgadget <- function() {
         system(paste0("git commit -m \"", cmess, "\""))
         message("\nCommit attempt completed. Check the console for messages\n")
       })
+      updateTextInput(session = session, "sync_commit_message", value = "")
     })
 
     observeEvent(input$sync_pull, {
@@ -992,12 +993,10 @@ gitgadget <- function() {
 
     get_assignments <- eventReactive(input$collect_list, {
 
-      username <- input$collect_user_name
       token <- input$collect_token
       group <- input$collect_group
       server <- input$collect_server
-      if (is_empty(username) || is_empty(token) || is_empty(group) ||
-          is_empty(server)) {
+      if (is_empty(token) || is_empty(group) || is_empty(server)) {
         message("Specify all required inputs to retrieve available assignments")
         return(invisible())
       }
