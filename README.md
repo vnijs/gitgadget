@@ -1,12 +1,16 @@
 # Git Gadget
 
-[![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget)
+<!-- [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget) -->
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for GitHub, bitbucket, etc. are welcome.
 
 `gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. It's goal is to provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
 
-Please use the issue tracker on GitHub to suggest enhancements or report problems: https://github.com/vnijs/gitgadget/issues.
+`gitgadget` requires Rstudio version 1.1 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
+
+```r
+install.packages("gitgadget", repos = "https://radiant-rstats.github.io/minicran/")
+```
 
 > Note: Hover over any button in the application for additional information about what clicking the button will accomplish
 

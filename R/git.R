@@ -5,11 +5,20 @@ not_pressed <- function(x) if (is.null(x) || x == 0) TRUE else FALSE
 pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
 
 connect <- function(token = getOption("git.token", default = ""), server = "https://gitlab.com/api/v4/") {
-  # token <- getOption("git.token", default = "")
   if (is_empty(token)) {
     stop("Token not available")
   } else {
     list(status = "OKAY", token = token)
+  }
+}
+
+read_ufile <- function(userfile) {
+  users <- read.csv(userfile, stringsAsFactors = FALSE)
+  cols <- c("userid", "team", "token")
+  if (sum(cols %in% colnames(users)) < 3) {
+    stop("Userfile must include the columns ", paste0(cols, collapse = ", "))
+  } else {
+    users
   }
 }
 
@@ -66,7 +75,6 @@ groupr <- function(groupname, path, token, server) {
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE)
     return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
-    # return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
 
   group_id <- fromJSON(rawToChar(resp$content))$id
   list(status = "OKAY", group_id = group_id)
@@ -130,10 +138,10 @@ create_group <- function(token, groupname = "", userfile = "",
   }
 
   ## must give users permission in order to fork repo for them
-  userfile
   if (!is_empty(userfile)) {
     course_id <- resp$group_id
-    udat <- read.csv(userfile, stringsAsFactor = FALSE)
+    # udat <- read.csv(userfile, stringsAsFactor = FALSE)
+    udat <- read_ufile(userfile)
     uids <- userIDs(udat$userid, token, server)
     add_users(uids, course_id, token, permission, server)
   }
@@ -144,7 +152,6 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  # resp <- curl_fetch_memory(paste0(server, "projects/?per_page=100"), h)
   resp <- curl_fetch_memory(paste0(server, "projects?owned=true&per_page=100"), h)
   rawToChar(resp$headers)
 
@@ -162,7 +169,6 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
     }
 
     return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
-    # return(list(status = "SERVER_ERROR", message = fromJSON(rawToChar(resp$content))$message))
   }
   nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
     .[grepl("X-Total-Pages",.)] %>%
@@ -219,7 +225,6 @@ renameRepo <- function(project_id, token, newname, server) {
   if (checkerr(resp$status_code) == FALSE) {
     message("Problem changing repo name")
     list(status = "SERVER_ERROR", message = rawToChar(resp$content))
-    # list(status='SERVER_ERROR', message = fromJSON(rawToChar(resp$content))$message)
   } else {
     list(status = "OKAY", name = fromJSON(rawToChar(resp$content))$name)
   }
@@ -277,7 +282,6 @@ add_team <- function(proj_id, token, team_mates, server) {
       list(status = "OKAY", content = content)
     } else {
       message("Error adding ", otherid, " to team: server code ", resp$status_code)
-      # content <- fromJSON(rawToChar(resp$content))
       list(status = "SERVER_ERROR", content = rawToChar(resp$content))
     }
   })
@@ -312,7 +316,8 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  student_data <- read.csv(userfile, stringsAsFactor = FALSE)
+  # student_data <- read.csv(userfile, stringsAsFactor = FALSE)
+  student_data <- read_ufile(userfile)
   student_data$user_id <- userIDs(student_data$userid, token, server)
 
   if (type == "individual")
@@ -362,8 +367,6 @@ maker <- function(repo_name, token, server, namespace = "") {
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
-  # murl <- paste0(server, "projects?owned=true&", "name=", repo_name, "&namespace_id=", namespace_id)
-  # murl <- paste0(server, "projects?", "name=", repo_name, "&namespace_id=", namespace_id)
   murl <- paste0(server, "projects?", "name=", repo_name)
   if (!is_empty(namespace_id))
     murl <- paste0(murl, "&namespace_id=", namespace_id)
@@ -526,7 +529,8 @@ collect_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  udat <- read_ufile(userfile)
 
   if (type == "individual") {
     udat$team <- paste("ind", 1:nrow(udat))
@@ -537,7 +541,6 @@ collect_work <- function(token, groupname, assignment, userfile,
   }
 
   udat$user_id <- userIDs(udat$userid, token, server)
-  # resp <- sapply(udat$token, merger, project_id, server)
   resp <- apply(udat[,c("token","userid")], 1, merger, project_id, server)
   message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
@@ -574,7 +577,6 @@ fetch_work <- function(token, groupname, assignment,
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
   ## collecting information on (max) 100 merge requests
-  # resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&page=1&per_page=100"), h)
   resp <- curl_fetch_memory(paste0(server, "projects/", project_id, "/merge_requests?state=all&per_page=100"), h)
 
   nr_pages <- strsplit(rawToChar(resp$headers), "\n")[[1]] %>%
@@ -593,14 +595,12 @@ fetch_work <- function(token, groupname, assignment,
     ungroup %>%
     mutate(id = as.character(id))   ## needed to ensure there are no spaces in branch name
 
-  # system("git fetch origin")
   system("git fetch origin +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
 
   branches <- system("git branch ", intern = TRUE) %>% gsub("[\\* ]+", "", .)
 
   create_branch <- function(dat) {
     if (any(grepl(dat[["un"]], branches))) {
-      # cat("Branch", dat[["un"]], "already exists. To update this branch first delete the current branch in the Branch tab and then click the Fetch button again\n")
       system(paste0("git checkout ", dat[["un"]]))
       system(paste0("git merge origin/merge-requests/", dat[["id"]], " ", dat[["un"]]))
       ## the next two steps will commit, even if there is a merge conflict
@@ -646,7 +646,8 @@ remove_project <- function(token, id, server) {
 }
 
 remove_student_projects <- function(userfile, server) {
-  udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  udat <- read_ufile(userfile)
   sapply(udat$token, remove_projects, server)
 }
 
@@ -656,7 +657,8 @@ update_file <- function(userfile, assignment, file, path, add = "\n\nAll finishe
 
   content <- paste0(readLines(path), collapse = "\n") %>% paste0(add) %>% base64_enc
 
-  udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
+  udat <- read_ufile(userfile)
   udat <- slice(udat, 1)
   id <- projID(paste0(udat$userid,"/",pre, assignment), udat$token, server)$project_id
 
@@ -682,7 +684,6 @@ if (main_git__) {
   ## settings
   server <- getOption("git.server", default = "https://gitlab.com/api/v4/")
   username <- getOption("git.user", default = "")
-  # password <- getOption("git.password", default = "")
   token <- getOption("git.token", default = "")
   # groupname <- "rady-mgta-bc-2016"
   groupname <- getOption("git.group", default = "")
@@ -718,10 +719,8 @@ if (main_git__) {
 
   ## check tokens
   userfile <- "~/Desktop/git/msba-students-test.csv"
-  # userfile <- "~/Desktop/git/msba2017-gitlab-fall.csv"
-  # userfile <- "~/ict/msba-test-gitlab.csv"
-  students <- read.csv(userfile, stringsAsFactors = FALSE)
-  # students <- students[1:3,]
+  # students <- read.csv(userfile, stringsAsFactors = FALSE)
+  students <- read_ufile(userfile)
 
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {
@@ -794,9 +793,6 @@ if (main_git__) {
     fetch_work(
       token, groupname, assignment, pre = pre, server = server
     )
-
-    # unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
-    # dir.exists(file.path(directory, assignment, ".git"))
   } else {
     cat("Assignment does not exist")
   }
@@ -805,7 +801,7 @@ if (main_git__) {
   groupname <- ""
   pre <- ""
   repo <- assignment
-  # repo <- "agitgadget-test-repo"
+  # repo <- "gitgadget-test-repo"
   # directory <- "/Users/vnijs/Desktop/Github"
   if (file.exists(file.path(directory, repo))) {
     unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
@@ -814,7 +810,5 @@ if (main_git__) {
       username, token, groupname, repo, directory, pre = pre,
       server = server
     )
-    # unlink(file.path(directory, repo, ".git"), recursive = TRUE, force = TRUE)
-    # dir.exists(file.path(directory, repo, ".git"))
   }
 }

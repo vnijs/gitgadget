@@ -23,38 +23,15 @@ gitgadget <- function() {
   rprofdir <- Sys.getenv("HOME")
   projdir <- basedir <- NULL
 
-  if (rstudioapi::isAvailable())
+  if (rstudioapi::isAvailable()) {
     projdir <- basedir <- rstudioapi::getActiveProject()
+    if (rstudioapi::getVersion() < "1.1") stop("GitGadget requires Rstudio version 1.1 or later")
+  }
 
   if (length(projdir) == 0)
     projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
 
-  # choose.dir <- function(...) {
-  #   os_type <- Sys.info()["sysname"]
-  #   if (os_type == "Windows") {
-  #     utils::choose.dir(...)
-  #   } else if (os_type == "Darwin") {
-  #     pth <- file.path(system.file(package = "gitgadget"), "app/www/choose.dir.scpt")
-  #     dpath <- suppressWarnings(
-  #       system(paste0("osascript -l JavaScript ", pth), intern = TRUE)
-  #     )
-  #     if (length(dpath) > 0) {
-  #       gsub("Path\\(\"(.*)\"\\)", "\\1", dpath)
-  #     } else {
-  #       character(0)
-  #     }
-  #   } else {
-  #     dirname(file.choose())
-  #   }
-  # }
-
-  ## Reset confirmation model
-  # help <- function() HTML("<i title='View documentation' class='fa fa-question action-button shiny-bound-input' href='https://github.com/vnijs/gitgadget' id='gg_help'></i>")
-  # help <- HTML("<button id='help' type='button' class='btn btn-default btn-sm action-button'>Help</button>")
-
   ui <- miniPage(
-    # gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")"), left = miniTitleBarButton("help", "Help", primary = FALSE)),
-    # gadgetTitleBar(paste0("GITGADGET (", packageVersion("gitgadget"), ")")),
     miniTitleBar(
       paste0("GITGADGET (", packageVersion("gitgadget"), ")"),
       right = miniTitleBarButton("done", "Done", primary = TRUE),
@@ -103,9 +80,9 @@ gitgadget <- function() {
               radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
             )
           ),
-          HTML("<h4>Remove previous version of .git and repo on Gitlab</h4>"),
-          actionButton("remove_git_show", "Remove .git", title = "Remove previous .git directory if present", class = "btn-danger"),
+          HTML("<h4>Remove previous version of repo on Gitlab or local .git</h4>"),
           actionButton("remove_gitlab_show", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"),
+          actionButton("remove_git_show", "Remove .git", title = "Remove previous .git directory if present", class = "btn-danger"),
           HTML("<h4>Create local .git and remote repo on Gitlab</h4>"),
           actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
           hr(),
@@ -116,9 +93,7 @@ gitgadget <- function() {
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
           textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https link to repo", value = ""),
-          # textInput("clone_into","Base directory to clone repo into:", value = getOption("git.home", basedir), placeholder = "Choose directory to store repo"),
           fillRow(height = "70px", width = "475px",
-            # uiOutput("ui_intro_git_home"),
             uiOutput("ui_clone_into"),
             actionButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
           ),
@@ -176,10 +151,7 @@ gitgadget <- function() {
         miniContentPanel(
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
-            # fillRow(height = "70px", width = "300px",
-              # textInput("collect_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
-              passwordInput("collect_token","Token:", value = getOption("git.token", "")),
-            # ),
+            passwordInput("collect_token","Token:", value = getOption("git.token", "")),
             fillRow(height = "70px", width = "500px",
               textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
               actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
@@ -426,7 +398,7 @@ gitgadget <- function() {
         return(invisible())
       } else {
 
-        ptext <- if(not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
+        ptext <- if (not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
         withProgress(message = ptext, value = 0, style = "old", {
 
           crh <- system("git config --global --list", intern = TRUE) %>%
@@ -474,14 +446,15 @@ gitgadget <- function() {
     })
 
     create_directory_find <- reactive({
-      if(pressed(input$create_directory_find))
+      if (pressed(input$create_directory_find)) {
         rstudioapi::selectDirectory()
-      else
-        return(c())
+      } else {
+        c()
+      }
     })
 
     output$ui_create_directory <- renderUI({
-      init <- create_directory_find() %>% {ifelse (length(.) == 0, projdir, .)}
+      init <- create_directory_find() %>% {ifelse(length(.) == 0, projdir, .)}
       textInput("create_directory","Local directory:", value = init, placeholder = "Base directory for the git repo")
     })
 
@@ -549,9 +522,7 @@ gitgadget <- function() {
 
     remove_gitlab <- observeEvent(input$remove_gitlab, {
       removeModal()
-      # if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
       if (is_empty(input$create_token)) {
-        # cat("User name and password are required to remove remote repo")
         cat("Token required to remove remote repo")
         return(invisible())
       }
@@ -567,8 +538,6 @@ gitgadget <- function() {
         repo <- basename(input$create_directory)
 
         cat("Removing remote repo ...\n")
-        # token <- connect(input$create_user_name, input$create_password, input$create_server)$token
-        # token <- connect(token = input$create_token)$token
         id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), input$create_token, input$create_server)
         if (id$status == "OKAY") {
           resp <- remove_project(input$create_token, id$project_id, input$create_server)
@@ -584,7 +553,6 @@ gitgadget <- function() {
 
     remove_forks <- observeEvent(input$remove_forks, {
       removeModal()
-      # if (is_empty(input$create_user_name) || is_empty(input$create_password)) {
       if (is_empty(input$create_token)) {
         cat("Token required to remove student forks")
         return(invisible())
@@ -791,7 +759,6 @@ gitgadget <- function() {
     observeEvent(input$branch_link, {
       if (input$branch_create_name != "") {
         ## would prefer to do this without 'push' -- however then I can't unlink for some reason
-        # paste0("git branch --set-upstream-to origin ", input$branch_create_name) %>%
         paste("git push --set-upstream origin", input$branch_create_name) %>%
           system(.)
       }
@@ -862,7 +829,6 @@ gitgadget <- function() {
     observeEvent(input$branch_checkout, {
       if (!is.null(input$branch_checkout_name)) {
         ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
-
         withProgress(message = "Checkout branch", value = 0, style = "old", {
           system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
         })
@@ -875,7 +841,6 @@ gitgadget <- function() {
       if (length(resp) == 0) {
         HTML("<label>No branches available to delete</label>")
       } else {
-        # selectInput("branch_delete_name", NULL, choices = resp)
         selectizeInput("branch_delete_name",
           label = NULL,
           selected = resp[1],
@@ -984,7 +949,7 @@ gitgadget <- function() {
 
     output$ui_sync_from <- renderUI({
       init <- upstream_info()
-      textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse (length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
+      textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
     })
 
     output$sync_output <- renderPrint({
@@ -1094,10 +1059,6 @@ gitgadget <- function() {
       }
     })
 
-    # observe({
-    #   cat(input$tabs)
-    # })
-
     ## Show remove_git modal when button is clicked.
     observeEvent(input$help, {
       ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
@@ -1159,6 +1120,4 @@ if (main_gadget__) {
   source("R/git.R", local = TRUE)
 
   gitgadget()
-  # Sys.sleep(1)
-  # getOption("viewer")("http://localhost:3131/")
 }
