@@ -12,7 +12,9 @@ Please use the issue tracker on GitHub to suggest enhancements or report problem
 
 ## Introduce
 
-To start using git and `gitgadget` [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-caching.html) for additional information.
+To start using git and `gitgadget` [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-ching.html) for additional information. 
+
+To create and fork repos and collect merge requests you will also need to provide a GitLab personal access token. First create the token on GitLab (https://gitlab.com/profile/personal_access_tokens) and then copy-and-paste it in the `Token` input.
 
 <!-- If available, `gitgadget` will put `~/.ssh/id_rsa.pub` into the clipboard when you click the `SSH key` button. Provide the key to github or gitlab for authentication. -->
 
@@ -48,7 +50,7 @@ If the repo you are working on is a fork you probably want to make sure it is up
 
 Collect assignments from students/teams using Merge Requests (MR) on GitLab. Inputs will only be shown if the user type in the _Introduce_ tab is set to `faculty`. 
 
-First, provide `User name`, `Password`, and the GitLab `Group name`. Then click the `List` button to show available assignments. Select the desired assignment name from the dropdown and the load the user file with student GitLab tokens and press the `Collect` button to generate Merge Requests
+First, provide `User name`, `Token`, and the GitLab `Group name`. Then click the `List` button to show available assignments. Select the desired assignment name from the dropdown and the load the user file with student GitLab tokens and press the `Collect` button to generate Merge Requests
  for all students (or team leads). Once this step is completed you can review and comment on the MRs using the GitLab UI.
  
 To view, run, and edit the MRs locally press the `Fetch` button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in R-studio or the _Synch_ tab in `gitgadget` to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.
@@ -94,11 +96,11 @@ Gitgadget supports the following input from an .Rprofile file in your home direc
 ```bash
 options(git.user = "yourgitlabid")
 options(git.email = "yourgitlabemail@gmail.com")
-options(git.password = "")
+options(git.token = "")
 options(git.home = "/Users/you/Desktop/git")
 options(git.server = "https://gitlab.com/api/v3/")
-options(git.group = "school-courseid-2016")
-options(git.prefix = "school-courseid-2016-")
+options(git.group = "school-courseid-2017")
+options(git.prefix = "school-courseid-2017-")
 options(git.userfile = "path-to-user-file.csv")
 options(git.user.type = "faculty")
 ```

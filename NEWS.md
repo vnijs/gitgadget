@@ -2,7 +2,8 @@
 
 * Open project in new or existing session on clone
 * Open to remove local git repo, remote gitlab repo, and student forks after confirmation
-* Better messages on login failure
+* Better error messages
+* Updated to work with V4 of the gitlab API
 
 # CHANGES IN gitgadget VERSION 0.2.7.1
 
