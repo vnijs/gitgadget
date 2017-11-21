@@ -4,13 +4,11 @@
 \alias{fetch_work}
 \title{Fetch all merge requests as local branches and link to a remote}
 \usage{
-fetch_work(username, password, groupname, assignment, pre = "",
-  server = "https://gitlab.com/api/v3/")
+fetch_work(token, groupname, assignment, pre = "",
+  server = "https://gitlab.com/api/v4/")
 }
 \arguments{
-\item{username}{Gitlab username}
-
-\item{password}{Gitlab password}
+\item{token}{Gitlab token}
 
 \item{groupname}{Group containing the assignment}
 

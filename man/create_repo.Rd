@@ -4,13 +4,13 @@
 \alias{create_repo}
 \title{Create the main repo from a local directory}
 \usage{
-create_repo(username, password, groupname, assignment, directory, pre = "",
-  server = "https://gitlab.com/api/v3/")
+create_repo(username, token, groupname, assignment, directory, pre = "",
+  server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{username}{Gitlab username}
 
-\item{password}{Gitlab password}
+\item{token}{Gitlab token}
 
 \item{groupname}{Group to create on gitlab (defaults to user's namespace)}
 
