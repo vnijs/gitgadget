@@ -77,6 +77,7 @@ gitgadget <- function() {
                 actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
             ),
             conditionalPanel("input.create_user_file != ''",
+              actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
               radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
             )
           ),
@@ -469,6 +470,13 @@ gitgadget <- function() {
       init <- getOption("git.userfile", default = "")
       init <- create_file_find() %>% {ifelse(length(.) == 0, init, .)}
       textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+    })
+
+    observeEvent(input$create_check_tokens, {
+      withProgress(message = "Checking student tokens on GitLab", value = 0, style = "old", {
+        check_tokens(input$create_user_file)
+      })
+      message("\nToken check completed. Check the console for messages\n")
     })
 
     ## Show remove_git modal when button is clicked.
@@ -1085,6 +1093,12 @@ gitgadget <- function() {
 
   resp <- runGadget(shinyApp(ui, server), viewer = paneViewer())
 
+  ## Try using Rstudio terminal to start gitgadget in a separate process
+  # https://github.com/rstudio/rstudioapi/blob/e1e466ba16a6c22c6be2e25ed1808906d4031c86/docs/articles/terminal.R
+  # probably also has some stuff to show gitgadget in the viewer once it is running
+  ## even if this works ... where would messages etc. be shown ... too much work
+  ## to update at the moment
+
   # Launch Shiny app in another process, without blocking
   # https://github.com/rstudio/rstudioapi/issues/17#issuecomment-321958223
   # callr::r_bg(function() {
@@ -1103,21 +1117,11 @@ gitgadget <- function() {
   # callr::r_bg(function() {
   #   resp <- runApp(shinyApp(ui, server), launch.browser = FALSE, port = 3131)
   # })
-}
 
-## test section
-main_gadget__ <- FALSE
-# main_gadget__ <- TRUE
-if (main_gadget__) {
-
-  library(shiny)
-  library(miniUI)
-  library(rstudioapi)
-  library(curl)
-  library(jsonlite)
-  library(dplyr)
-
-  source("R/git.R", local = TRUE)
-
-  gitgadget()
+  # example from https://github.com/rstudio/rstudioapi/issues/17#issuecomment-321958223
+  # callr::r_bg(function() { shiny::runExample("01_hello", port = 3131, launch.browser = FALSE) })
+  # # Give Shiny a second to start
+  # Sys.sleep(1)
+  # # Launch viewer
+  # getOption("viewer")("http://localhost:3131/")
 }

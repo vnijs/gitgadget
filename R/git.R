@@ -651,25 +651,24 @@ remove_student_projects <- function(userfile, server) {
   sapply(udat$token, remove_projects, server)
 }
 
-update_file <- function(userfile, assignment, file, path, add = "\n\nAll finished!") {
-  file <- "assignment.Rmd"
-  path <- file.path(directory, assignment, file)
+check_tokens <- function(userfile, server = getOption("git.server", default = "https://gitlab.com/api/v4/")) {
 
-  content <- paste0(readLines(path), collapse = "\n") %>% paste0(add) %>% base64_enc
+  students <- read_ufile(userfile)
 
-  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
-  udat <- read_ufile(userfile)
-  udat <- slice(udat, 1)
-  id <- projID(paste0(udat$userid,"/",pre, assignment), udat$token, server)$project_id
+  ## testing if student tokens work
+  for (i in seq_len(nrow(students))) {
+    token <- students[i, "token"]
+    if (token != "")
+      id <- get_allprojects(token, server)
+    else
+      id$status <- "EMPTY"
 
-  h <- new_handle()
-  handle_setopt(h, customrequest = "POST")
-  handle_setheaders(h, "PRIVATE-TOKEN" = udat$token)
-  resp <-
-    curl_fetch_memory(
-      paste0(server, "projects/", id,"/repository/files?file_path=", file, "&branch_name=master&encoding=base64&commit_message=update file&content=", content)
-      ,h
-    )
+    if (id$status == "OKAY") {
+      print(paste0("OKAY: ", students[i, "userid"], " ", token))
+    } else {
+      print(paste0("NOT OKAY: ", students[i, "userid"], " ", token))
+    }
+  }
 }
 
 ## test section

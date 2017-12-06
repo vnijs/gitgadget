@@ -1,9 +1,10 @@
-# CHANGES IN gitgadget VERSION 0.2.8.3
+# CHANGES IN gitgadget VERSION 0.2.8.4
 
 * Open project in new or existing session on clone
 * Open to remove local git repo, remote gitlab repo, and student forks after confirmation
 * Better error messages
 * Updated to work with V4 of the gitlab API
+* Added _Check tokens_ button in Create tab. Button is shown when file with student tokens specified. All student tokens will then be checked on GitLab
 
 # CHANGES IN gitgadget VERSION 0.2.7.1
 
