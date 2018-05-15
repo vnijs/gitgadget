@@ -113,6 +113,7 @@ gitgadget <- function() {
           textInput("branch_create_name", NULL, value = "", placeholder = "Provide a name for the new branch"),
           actionButton("branch_create", "Create local", title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"),
           actionButton("branch_link", "Link remote", title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"),
+          actionButton("branch_create_from_mr", "Create from MR", title = "Create a local branch from a Merge/Pull request\n"),
           HTML("<h4>Check out a branch</h4>"),
           fillRow(height = "40px", width = "420px",
             uiOutput("ui_branch_checkout_name"),
@@ -134,10 +135,11 @@ gitgadget <- function() {
           HTML("<h2>Commit changes locally</h2>"),
           textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", placeholder = "Provide a commit message that describes the changes you made to the repo"),
           actionButton("sync_commit", "Commit", title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""),
+          actionButton("sync_undo_commit_show", "Undo", class = "btn-danger", title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"),
           HTML("<h2>Sync with remote</h2>"),
           actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
           actionButton("sync_push", "Push", title = "Push all commited updates to the remote repo\n\nGit command: git push"),
-          actionButton("sync_reset_show", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master"),
+          actionButton("sync_reset_show", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
@@ -153,10 +155,10 @@ gitgadget <- function() {
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
             passwordInput("collect_token","Token:", value = getOption("git.token", "")),
-            fillRow(height = "70px", width = "500px",
-              textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
-              actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
-            ),
+            # fillRow(height = "70px", width = "500px",
+            #   textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
+            #   actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
+            # ),
             uiOutput("ui_collect_assignment"),
             conditionalPanel("input.collect_assignment != undefined && input.collect_assignment != null &&
                               input.collect_assignment.length > 0",
@@ -541,11 +543,19 @@ gitgadget <- function() {
       }
 
       withProgress(message = "Removing remote repo", value = 0, style = "old", {
-        create_group_lc <- tolower(input$create_group)
+        create_group_lc <- tolower(input$create_group) %>%
+          {ifelse(is_empty(.), getOption("git.user", default = ""), .)}
+
+        if (is_empty(create_group_lc)) {
+          cat("No group or user name provided. Please provide this information and try again")
+          return(invisible())
+        }
+
         create_pre_lc <- tolower(input$create_pre)
         repo <- basename(input$create_directory)
 
         cat("Removing remote repo ...\n")
+
         id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), input$create_token, input$create_server)
         if (id$status == "OKAY") {
           resp <- remove_project(input$create_token, id$project_id, input$create_server)
@@ -589,7 +599,6 @@ gitgadget <- function() {
         message("\nFork removal process complete. Check the console for messages\n")
       })
     })
-
 
     create <- eventReactive(input$create, {
 
@@ -749,6 +758,15 @@ gitgadget <- function() {
       }
     })
 
+    observeEvent(input$branch_create_from_mr, {
+      remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
+      if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
+        system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
+      }
+      # system("git fetch origin +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
+      # branches <- system("git branch ", intern = TRUE) %>% gsub("[\\* ]+", "", .)
+    })
+
     observeEvent(input$branch_merge, {
       from <- input$branch_merge_from
       into <- input$branch_merge_into
@@ -868,6 +886,19 @@ gitgadget <- function() {
       )
     }
 
+    assignment_name <- function(server = "https://gitlab.com") {
+      server = "https://gitlab.com"
+      assignment <- capture.output(remote_info())[-1:-2] %>%
+        gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", .) %>%
+        unique()
+      if (any(grepl("https://github.com", assignment))) {
+        message("GitGadget does not (yet) support assignment management on GitHub.com")
+        return("")
+      } else{
+        return(assignment)
+      }
+    }
+
     upstream_info <- function() {
       input$sync; input$sync_unlink
       system("git remote -v", intern = TRUE) %>%
@@ -888,6 +919,35 @@ gitgadget <- function() {
         message("\nCommit attempt completed. Check the console for messages\n")
       })
       updateTextInput(session = session, "sync_commit_message", value = "")
+    })
+
+    ## Show reset modal when button is clicked.
+    observeEvent(input$sync_undo_commit_show, {
+      ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      showModal(
+        modalDialog(title = "Undo latest local commit",
+          span("Are you sure you want to undo the latest local commit? This will
+               leave the latest changes un-staged (see Rstudio Git tab) so you can
+               edit them or revert the changes"),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton("sync_undo_commit", "Undo", class = "btn-danger", title = "Undo the latest local commit\n\nGit command:\ngit reset HEAD~")
+          )
+        )
+      )
+    })
+
+    observeEvent(input$sync_undo_commit, {
+      withProgress(message = "Undo the latest local commit", value = 0, style = "old", {
+        system("git reset HEAD~")
+        message("\nPrevious changes are now unstaged. Check the Git tab in Rstudio\n")
+      })
+      removeModal()
+      updateTextInput(
+        session = session,
+        "sync_commit_message",
+        value = system("git log -1 --pretty=%B", intern = TRUE)
+      )
     })
 
     observeEvent(input$sync_pull, {
@@ -969,8 +1029,9 @@ gitgadget <- function() {
       token <- input$collect_token
       group <- input$collect_group
       server <- input$collect_server
-      if (is_empty(token) || is_empty(group) || is_empty(server)) {
-        message("Specify all required inputs to retrieve available assignments")
+      # if (is_empty(token) || is_empty(group) || is_empty(server)) {
+      if (is_empty(token) || is_empty(server)) {
+        message("Please specify all required inputs to retrieve available assignments")
         return(invisible())
       }
 
@@ -987,9 +1048,11 @@ gitgadget <- function() {
 
     output$ui_collect_assignment <- renderUI({
 
-      withProgress(message = "Generating list of available assignments", value = 0, style = "old", {
-        resp <- get_assignments()
-      })
+      # withProgress(message = "Generating list of available assignments", value = 0, style = "old", {
+      #   resp <- get_assignments()
+      # })
+
+      resp <- assignment_name()
 
       if (length(resp) == 0) {
         HTML("<label>No assignments available for specified input values</label>")
@@ -1014,20 +1077,18 @@ gitgadget <- function() {
     })
 
     collect <- eventReactive(input$collect, {
-      req(
-        input$collect_token, input$collect_group,
-        input$collect_server, input$collect_user_file
-      )
+      req(input$collect_token, input$collect_server, input$collect_user_file)
 
       cat("Generating merge requests ...\n")
 
       ## pre not used when called from the gadget interface because the full
       ## assignment name is retrieved from gitlab
+      # input$collect_token, input$collect_group,
       withProgress(message = "Generating merge requests", value = 0, style = "old", {
         collect_work(
-          input$collect_token, input$collect_group,
-          input$collect_assignment, input$collect_user_file,
-          type = input$collect_type, pre = "", server = input$collect_server
+          input$collect_token, input$collect_assignment,
+          input$collect_user_file,
+          type = input$collect_type, server = input$collect_server
         )
       })
 
@@ -1040,12 +1101,14 @@ gitgadget <- function() {
         system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
       }
 
+
+      # input$collect_token, input$collect_group,
       ## pre not used when called from the gadget interface because the full
       ## assignment name is retrieved from gitlab
       withProgress(message = "Fetching merge requests", value = 0, style = "old", {
         fetch_work(
-          input$collect_token, input$collect_group,
-          input$collect_assignment, pre = "", server = input$collect_server
+          input$collect_token, input$collect_assignment,
+          server = input$collect_server
         )
       })
 
@@ -1054,7 +1117,7 @@ gitgadget <- function() {
 
     output$collect_output <- renderPrint({
       if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
-       cat("Provide GitLab token and the group name and then click the List button to show available assignments. Load the user file with GitLab tokens and press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
+       cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the Rstudio project used to create and for the assignment repo (i.e., check is the Assignment name shown is correct). Then press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
       } else {
         if (pressed(input$collect))
           ret <- collect()
@@ -1063,7 +1126,7 @@ gitgadget <- function() {
           ret <- collect_fetch()
         }
         if (not_pressed(input$collect) && not_pressed(input$collect_fetch))
-          cat("Specify all required inputs and then press the Collect button")
+          cat("Specify GitLab token and the user file with GitLab tokens. Then press the Collect button")
       }
     })
 

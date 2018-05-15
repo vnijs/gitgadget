@@ -1,8 +1,11 @@
 checkerr <- function(code) floor(code/100) == 2
-is_not <- function(x) length(x) == 0 || is.na(x)
-is_empty <- function(x, empty = "\\s*") if (is_not(x) || grepl(paste0("^",empty,"$"), x)) TRUE else FALSE
-not_pressed <- function(x) if (is.null(x) || x == 0) TRUE else FALSE
-pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
+is_not <- function(x) length(x) == 0 || (length(x) == 1 && is.na(x))
+is_empty <- function(x, empty = "\\s*") {
+  is_not(x) || (length(x) == 1 && grepl(paste0("^", empty, "$"), x))
+}
+not_pressed <- function(x) is.null(x) || x == 0
+# pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
+pressed <- function(x) !is.null(x) && x > 0
 
 connect <- function(token = getOption("git.token", default = ""), server = "https://gitlab.com/api/v4/") {
   if (is_empty(token)) {
@@ -505,16 +508,14 @@ merger <- function(token, to, server,
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token Gitlab token
-#' @param groupname Group containing the assignment
-#' @param assignment Name of the assigment. file.path(directory, assignment) should exist
+#' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param type Individual or Team work
-#' @param pre Pre-amble for the assignment name, usually groupname + "-"
 #' @param server The gitlab API server
 #'
 #' @export
-collect_work <- function(token, groupname, assignment, userfile,
-                         type = "individual", pre = "",
+collect_work <- function(token, assignment, userfile,
+                         type = "individual",
                          server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(token, server)
@@ -522,11 +523,13 @@ collect_work <- function(token, groupname, assignment, userfile,
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
-  resp <- projID(upstream_name, token, server)
+  # upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
+  # resp <- projID(upstream_name, token, server)
+  resp <- projID(assignment, token, server)
 
   if (resp$status != "OKAY")
-    stop("Error getting assignment ", upstream_name)
+    stop("Error getting assignment ", assignment)
+    # stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
   # udat <- read.csv(userfile, stringsAsFactor = FALSE)
@@ -550,25 +553,24 @@ collect_work <- function(token, groupname, assignment, userfile,
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token Gitlab token
-#' @param groupname Group containing the assignment
-#' @param assignment Name of the assigment
-#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
 #' @param server The gitlab API server
 #'
 #' @export
-fetch_work <- function(token, groupname, assignment,
-                       pre = "", server = "https://gitlab.com/api/v4/") {
+fetch_work <- function(token, assignment,
+                       server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(token, server)
   if (resp$status != 'OKAY')
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
-  resp <- projID(upstream_name, token, server)
+  # upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
+  # resp <- projID(upstream_name, token, server)
+  resp <- projID(assignment, token, server)
 
   if (resp$status != "OKAY")
-    stop("Error getting assignment ", upstream_name)
+    stop("Error getting assignment ", assignment)
 
   project_id <- resp$project_id
 

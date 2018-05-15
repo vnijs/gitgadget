@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
-Version: 0.2.8.4
-Date: 2017-12-6
+Version: 0.2.8.5
+Date: 2018-5-14
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -30,4 +30,5 @@ BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 LazyData: true
 RoxygenNote: 6.0.1
+Encoding: UTF-8
 VignetteBuilder: knitr

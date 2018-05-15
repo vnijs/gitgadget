@@ -9,7 +9,7 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server"))
 #' @importFrom jsonlite fromJSON
 #' @importFrom rstudioapi isAvailable getActiveProject selectFile selectDirectory openProject
 #' @importFrom markdown markdownToHTML
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv capture.output
 #' @importFrom stats na.omit
 #' @importFrom methods is
 #' @importFrom utils packageVersion browseURL

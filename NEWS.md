@@ -1,4 +1,4 @@
-# CHANGES IN gitgadget VERSION 0.2.8.4
+# gitgadget 0.2.8.5
 
 * Open project in new or existing session on clone
 * Open to remove local git repo, remote gitlab repo, and student forks after confirmation
@@ -6,11 +6,11 @@
 * Updated to work with V4 of the gitlab API
 * Added _Check tokens_ button in Create tab. Button is shown when file with student tokens specified. All student tokens will then be checked on GitLab
 
-# CHANGES IN gitgadget VERSION 0.2.7.1
+# gitgadget 0.2.7.1
 
 * Upgraded dplyr dependency to 0.7.1
 
-# CHANGES IN gitgadget VERSION 0.2.6
+# gitgadget 0.2.6.0
 
 - Added commit, push, pull, and reset, to Sync tab
 - Added placeholders for text inputs
@@ -24,9 +24,9 @@
 - Remove option to use SSH
 - Local branches will now be updated if student MR was updated
 
-# CHANGES IN gitgadget VERSION 0.2.3
+# gitgadget 0.2.3.0
 
-## BUG FIXES
+## Bug fixes
 
 - Fix for `create_repo` when group already exists
 - Updated links to source code and issue tracker
@@ -37,7 +37,7 @@
 - Update branch list on collect and fetch
 - Get full remote orgin list from .git/config
 
-## FEATURES 
+## Features 
 
 - Automatically replace any number of "\\" by "/" in input file and directory paths
 - Added option to remove previous .git and remote repo before creating new local and remote repos

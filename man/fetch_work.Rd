@@ -4,17 +4,12 @@
 \alias{fetch_work}
 \title{Fetch all merge requests as local branches and link to a remote}
 \usage{
-fetch_work(token, groupname, assignment, pre = "",
-  server = "https://gitlab.com/api/v4/")
+fetch_work(token, assignment, server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{token}{Gitlab token}
 
-\item{groupname}{Group containing the assignment}
-
-\item{assignment}{Name of the assigment}
-
-\item{pre}{Pre-amble for the assignment name, usually groupname + "-"}
+\item{assignment}{Name of the assigment (e.g., "class345/class345-assignment1")}
 
 \item{server}{The gitlab API server}
 }

@@ -4,21 +4,17 @@
 \alias{collect_work}
 \title{Create merge requests for each student/team}
 \usage{
-collect_work(token, groupname, assignment, userfile, type = "individual",
-  pre = "", server = "https://gitlab.com/api/v4/")
+collect_work(token, assignment, userfile, type = "individual",
+  server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{token}{Gitlab token}
 
-\item{groupname}{Group containing the assignment}
-
-\item{assignment}{Name of the assigment. file.path(directory, assignment) should exist}
+\item{assignment}{Name of the assigment (e.g., "class345/class345-assignment1")}
 
 \item{userfile}{A csv file with student information (i.e., username and token)}
 
 \item{type}{Individual or Team work}
-
-\item{pre}{Pre-amble for the assignment name, usually groupname + "-"}
 
 \item{server}{The gitlab API server}
 }
