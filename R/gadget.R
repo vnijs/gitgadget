@@ -741,20 +741,35 @@ gitgadget <- function(port = get_port()) {
         cmd <- paste("git clone", clone_from)
         cmdclean <- paste("git clone", input$clone_from)
 
-        cloneto <- input$clone_to
-        if (!is_empty(cloneto)) {
-          cmd <- paste(cmd, cloneto)
-          cmdclean <- paste(cmdclean, cloneto)
+        clone_to <- input$clone_to
+        if (!is_empty(clone_to)) {
+          cmd <- paste(cmd, clone_to)
+          cmdclean <- paste(cmdclean, clone_to)
+          cloneto <- file.path(getwd(), clone_to)
+        } else {
+          clone_to <- file.path(getwd(), basename(clone_from) %>% tools::file_path_sans_ext())
         }
         cat("Used:", cmdclean, "\n\n")
 
         withProgress(message = "Cloning repo", value = 0, style = "old", {
-          if (!is_empty(input$intro_passwd)) {
-            cmd <- strsplit(cmd, "//")[[1]]
-            # cmd <- paste0(cmd[1], "//", input$intro_user_name, ":", input$intro_passwd, "@", cmd[2])
-            cmd <- paste0(cmd[1], "//", input$intro_user_name, "@", cmd[2])
+          ret <- suppressWarnings(system(paste(cmd, "2>&1"), intern = TRUE))
+          if (any(grepl("rpostback-askpass", ret))) {
+            tid <- rstudioapi::terminalVisible()
+            if (length(tid) == 0) {
+              tid <- rstudioapi::terminalList()[1]
+            }
+            if (length(tid) > 0) {
+              rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
+              showModal(
+                modalDialog(
+                  title = "Provide user name and password",
+                  span("Click on the 'Terminal' tab in Rstudio to provide user name and password to access GitLab (GitHub)")
+                )
+              )
+            }
+          } else {
+            cat(ret, sep = "\n")
           }
-          system(cmd)
         })
       }
     })
@@ -804,7 +819,6 @@ gitgadget <- function(port = get_port()) {
             rproj <- file.path(dir, rproj[1])
 
           rstudioapi::openProject(rproj, newSession = input$clone_proj == "new")
-
         } else {
           cat("There was an error cloning the repo. Check the R console for output")
         }
