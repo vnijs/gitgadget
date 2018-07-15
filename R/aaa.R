@@ -10,7 +10,6 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server"))
 #' @importFrom rstudioapi isAvailable getActiveProject selectFile selectDirectory openProject
 #' @importFrom markdown markdownToHTML
 #' @importFrom utils read.csv capture.output
-#' @importFrom stats na.omit
-#' @importFrom methods is
+#' @importFrom stats na.omit setNames
 #' @importFrom utils packageVersion browseURL
 NULL

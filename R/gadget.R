@@ -1,9 +1,30 @@
+## copied from https://github.com/rstudio/shiny
+## as not exported
+get_port <- function() {
+  randomInt <- function(min, max) {
+    min + sample(max-min, 1)-1
+  }
+
+  while (TRUE) {
+    port <- randomInt(3000, 8000)
+    # Reject ports in this range that are considered unsafe by Chrome
+    # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
+    # https://github.com/rstudio/shiny/issues/1784
+    if (!port %in% c(3659, 4045, 6000, 6665:6669, 6697)) {
+      break
+    }
+  }
+  port
+}
+
 #' Launch gitgadget in Rstudio viewer if available
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for documentation
 #'
+#' @param port Port to use for the app
+#'
 #' @export
-gitgadget <- function() {
+gitgadget <- function(port = get_port()) {
 
   os_type <- Sys.info()["sysname"]
 
@@ -23,13 +44,29 @@ gitgadget <- function() {
   rprofdir <- Sys.getenv("HOME")
   projdir <- basedir <- NULL
 
+  ## setting up volumes for shinyFiles
+  gg_volumes <- c(Home = homedir)
+
+  git_home <- Sys.getenv("git.home", "")
+
+  ## setting up volumes for shinyFiles
+  if (git_home != "") {
+    gg_volumes <- setNames(c(git_home, gg_volumes), c(basename(git_home), names(gg_volumes)))
+  }
+
+  setNames(1:3, letters[1:3])
+
   if (rstudioapi::isAvailable()) {
     projdir <- basedir <- rstudioapi::getActiveProject()
     if (rstudioapi::getVersion() < "1.1") stop("GitGadget requires Rstudio version 1.1 or later")
   }
 
-  if (length(projdir) == 0)
-    projdir <- basedir <- file.path(getOption("git.home", default = normalizePath(file.path(getwd(), ".."), winslash = "/")))
+  ## setting up volumes for shinyFiles
+  if (length(projdir) == 0) {
+    projdir <- basedir <- file.path(Sys.getenv("git.home", normalizePath(file.path(getwd(), ".."), winslash = "/")))
+  } else {
+    gg_volumes <- setNames(c(projdir, gg_volumes), c(basename(projdir), names(gg_volumes)))
+  }
 
   ui <- miniPage(
     miniTitleBar(
@@ -42,14 +79,14 @@ gitgadget <- function() {
       miniTabPanel("Introduce", value = "intro", icon = icon("hand-paper-o"),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
-          textInput("intro_user_name","User name:", value = getOption("git.user", ""), placeholder = "Provide GitLab/GitHub user name"),
-          textInput("intro_user_email","User email:", value = getOption("git.email", ""), placeholder = "Provide GitLab/GitHub user email"),
-          passwordInput("intro_token","Token:", value = getOption("git.token", "")),
-          radioButtons("intro_user_type", "User type:", c("student","faculty"), getOption("git.user.type", "student"), inline = TRUE),
+          textInput("intro_user_name","User name:", value = Sys.getenv("git.user"), placeholder = "Provide GitLab/GitHub user name"),
+          textInput("intro_user_email","User email:", value = Sys.getenv("git.email"), placeholder = "Provide GitLab/GitHub user email"),
+          passwordInput("intro_token","Token:", value = Sys.getenv("git.token")),
+          radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_intro_git_home"),
-            actionButton("intro_git_home_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
-          ),
+            shinyFiles::shinyDirButton("intro_git_home_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
+         ),
           uiOutput("ui_intro_buttons"),
           hr(),
           verbatimTextOutput("introduce_output")
@@ -59,22 +96,22 @@ gitgadget <- function() {
         miniContentPanel(
           HTML("<h2>Create a repo on GitLab</h2>"),
           fillRow(height = "70px", width = "300px",
-            textInput("create_user_name","User name:", value = getOption("git.user", "")),
-            passwordInput("create_token","Token:", value = getOption("git.token", ""))
+            textInput("create_user_name","User name:", value = Sys.getenv("git.user")),
+            passwordInput("create_token","Token:", value = Sys.getenv("git.token"))
           ),
           fillRow(height = "70px", width = "300px",
-            textInput("create_group","Group name:", value = getOption("git.group", "")),
+            textInput("create_group","Group name:", value = Sys.getenv("git.group")),
             uiOutput("ui_create_pre")
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
-            actionButton("create_directory_find", "Open", title = "Browse and select a local repo directory")
+            shinyFiles::shinyDirButton("create_directory_find", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
           ),
-          textInput("create_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v4/")),
+          textInput("create_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
           conditionalPanel("input.intro_user_type == 'faculty'",
             fillRow(height = "70px", width = "475px",
                 uiOutput("ui_create_user_file"),
-                actionButton("create_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+                shinyFiles::shinyFilesButton("create_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
             ),
             conditionalPanel("input.create_user_file != ''",
               actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
@@ -96,7 +133,8 @@ gitgadget <- function() {
           textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https link to repo", value = ""),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_clone_into"),
-            actionButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
+            # actionButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
+            shinyFiles::shinyDirButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
           ),
 
           textInput("clone_to","Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
@@ -154,9 +192,9 @@ gitgadget <- function() {
         miniContentPanel(
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
-            passwordInput("collect_token","Token:", value = getOption("git.token", "")),
+            passwordInput("collect_token","Token:", value = Sys.getenv("git.token")),
             # fillRow(height = "70px", width = "500px",
-            #   textInput("collect_group","Group name:", value = getOption("git.group", ""), placeholder = "Enter group name on GitLab"),
+            #   textInput("collect_group","Group name:", value = Sys.getenv("git.group", ""), placeholder = "Enter group name on GitLab"),
             #   actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
             # ),
             uiOutput("ui_collect_assignment"),
@@ -164,9 +202,9 @@ gitgadget <- function() {
                               input.collect_assignment.length > 0",
               fillRow(height = "70px", width = "475px",
                 uiOutput("ui_collect_user_file"),
-                actionButton("collect_file_find", "Open", title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+                shinyFiles::shinyFilesButton("collect_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
               ),
-              textInput("collect_server","API server:", value = getOption("git.server", "https://gitlab.com/api/v4/")),
+              textInput("collect_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
               radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
               actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
               actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors")
@@ -184,6 +222,31 @@ gitgadget <- function() {
   )
 
   server <- function(input, output, session) {
+
+    observeEvent(input$edit_r_files, {
+      usethis::edit_r_environ()
+      usethis::edit_r_profile()
+    })
+
+    if (Sys.getenv("git.user") != "") {
+      showModal(
+        modalDialog(title = "Move git settings to .Renviron",
+          span("All git related settings should be moved from .Rprofile to .Renviron. Click on the
+          \"edit .R files\" button to open both .Rprofile and .Renviron. Move all lines that
+          contain 'git.' out of .Rprofile and to the .Renviron file. Then remove 'options' from the
+          new lines in .Renviron. For example: \"options(git.user = 'abc123')\" in .Rprofile should
+          be \"git.user = 'abc123'\" in .Renviron."),
+          br(), br(),
+          span("If you run into any problems, please
+          post an issue to"),
+          HTML("<a href='https://github.com/vnijs/gitgadget/issues' target='_blank'>https://github.com/vnijs/gitgadget/issues</a>"),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton("edit_r_files", "Edit .R files")
+          )
+        )
+      )
+    }
 
     observeEvent(input$help, {
       viewer <- getOption("viewer", default = browseURL)
@@ -222,15 +285,18 @@ gitgadget <- function() {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
 
-        rprof <- file.path(rprofdir, ".Rprofile")
+        # rprof <- file.path(rprofdir, ".Rprofile")
+        rprof <- file.path(rprofdir, ".Renviron")
         if (file.exists(rprof)) {
           readLines(rprof) %>%
-            .[!grepl("options\\(git.user\\s*=",.)] %>%
+            .[!grepl("git.user\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
+            # paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
+            paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n") %>%
             cat(file = rprof)
         } else {
-          paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
+          # paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
+          paste0("git.user = \"", input$intro_user_name, "\"\n") %>% cat(file = rprof)
         }
       }
 
@@ -239,75 +305,76 @@ gitgadget <- function() {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
 
-        rprof <- file.path(rprofdir, ".Rprofile")
+        # rprof <- file.path(rprofdir, ".Rprofile")
+        rprof <- file.path(rprofdir, ".Renviron")
         if (file.exists(rprof)) {
           readLines(rprof) %>%
-            .[!grepl("options\\(git.email\\s*=",.)] %>%
+            # .[!grepl("options\\(git.email\\s*=",.)] %>%
+            .[!grepl("git.email\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            paste0(., "\noptions(git.email = \"", input$intro_user_email, "\")\n") %>%
+            # paste0(., "\noptions(git.email = \"", input$intro_user_email, "\")\n") %>%
+            paste0(., "\ngit.email = \"", input$intro_user_email, "\"\n") %>%
             cat(file = rprof)
         } else {
-          paste0("options(git.email = \"", input$intro_user_email, "\")\n") %>% cat(file = rprof)
+          # paste0("options(git.email = \"", input$intro_user_email, "\")\n") %>% cat(file = rprof)
+          paste0("git.email = \"", input$intro_user_email, "\"\n") %>% cat(file = rprof)
         }
       }
 
       if (!is_empty(input$intro_token)) {
-        rprof <- file.path(rprofdir, ".Rprofile")
+        # rprof <- file.path(rprofdir, ".Rprofile")
+        rprof <- file.path(rprofdir, ".Renviron")
         if (file.exists(rprof)) {
           readLines(rprof) %>%
-            .[!grepl("options\\(git.token\\s*=",.)] %>%
+            # .[!grepl("options\\(git.token\\s*=",.)] %>%
+            .[!grepl("git.token\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            paste0(., "\noptions(git.token = \"", input$intro_token, "\")\n") %>%
+            # paste0(., "\noptions(git.token = \"", input$intro_token, "\")\n") %>%
+            paste0(., "\ngit.token = \"", input$intro_token, "\"\n") %>%
             cat(file = rprof)
         } else {
-          paste0("options(git.user = \"", input$intro_token, "\")\n") %>% cat(file = rprof)
+          paste0("git.user = \"", input$intro_token, "\"\n") %>% cat(file = rprof)
         }
       }
 
       ## set git.home option
       git_home <- gsub("^\\s+|\\s+$", "", input$intro_git_home)
-      if (!is_empty(git_home) && git_home != getOption("git.home", "")) {
+      if (!is_empty(git_home) && git_home != Sys.getenv("git.home")) {
         if (!dir.exists(git_home)) dir.create(git_home, recursive = TRUE)
-        rprof <- file.path(rprofdir, ".Rprofile")
+        rprof <- file.path(rprofdir, ".Renviron")
         if (file.exists(rprof)) {
           readLines(rprof) %>%
-            .[!grepl("options\\(git.home\\s*=",.)] %>%
+            .[!grepl("git.home\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            paste0(., "\noptions(git.home = \"", git_home, "\")\n") %>%
+            paste0(., "\ngit.home = \"", git_home, "\"\n") %>%
             cat(file = rprof)
         } else {
-          paste0("options(git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
+          paste0("git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
         }
-        cat("Updated git home in .Rprofile. Restart Rstudio to see the changes\n")
+        cat("Updated git home in .Renviron. Restart Rstudio to see the changes\n")
       }
 
       ## set git.user.type option
       git_user_type <- input$intro_user_type
-      # input <- list(intro_user_name = "me", intro_user_type = "student")
-      if (!is_empty(git_user_type) && git_user_type != getOption("git.user.type", "student")) {
-        rprof <- file.path(rprofdir, ".Rprofile")
+      if (!is_empty(git_user_type) && git_user_type != Sys.getenv("git.user.type", "student")) {
+        # rprof <- file.path(rprofdir, ".Rprofile")
+        rprof <- file.path(rprofdir, ".Renviron")
         if (file.exists(rprof)) {
           readLines(rprof) %>%
-            .[!grepl("options\\(git.user.type\\s*=",.)] %>%
+            # .[!grepl("options\\(git.user.type\\s*=",.)] %>%
+            .[!grepl("git.user.type\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            paste0(., "\noptions(git.user.type = \"", git_user_type, "\")\n") %>%
+            # paste0(., "\noptions(git.user.type = \"", git_user_type, "\")\n") %>%
+            paste0(., "\ngit.user.type = \"", git_user_type, "\"\n") %>%
             cat(file = rprof)
         } else {
-          paste0("options(git.user.type = \"", git_user_type, "\")\n") %>% cat(file = rprof)
+          # paste0("options(git.user.type = \"", git_user_type, "\")\n") %>% cat(file = rprof)
+          paste0("git.user.type = \"", git_user_type, "\"\n") %>% cat(file = rprof)
         }
-        cat("Updated user type in .Rprofile. Restart Rstudio to see the changes\n")
+        # cat("Updated user type in .Rprofile. Restart Rstudio to see the changes\n")
+        cat("Updated user type in .Renviron. Restart Rstudio to see the changes\n")
       }
 
-      ## On Windows Rstudio doesn't look for information in the Documents
-      ## directory for some reason
-      if (!file.exists(file.path(homedir, ".gitconfig")) &&
-          file.exists(file.path(homedir, "Documents/.gitconfig"))) {
-
-        file.copy(
-          file.path(homedir, "Documents/.gitconfig"),
-          file.path(homedir, ".gitconfig")
-        )
-      }
       message("Introduction attempt completed. Check console for messages\n")
     })
 
@@ -321,16 +388,14 @@ gitgadget <- function() {
       if (file.exists(.ssh_path)) .ssh_path else ""
     })
 
-    intro_git_home <- reactive({
-      if (pressed(input$intro_git_home_open))
-        rstudioapi::selectDirectory()
-      else
-        return(c())
-    })
+    shinyFiles::shinyDirChoose(input, "intro_git_home_open", roots = gg_volumes)
 
     output$ui_intro_git_home <- renderUI({
-      init <- intro_git_home()
-      init <- ifelse(length(init) == 0, getOption("git.home", basedir), init)
+      init <- Sys.getenv("git.home", basedir)
+      if (!is.integer(input$intro_git_home_open)) {
+        init <- shinyFiles::parseDirPath(gg_volumes, input$intro_git_home_open)
+      }
+
       textInput("intro_git_home","Base directory to clone repos into:",
         value = init,
         placeholder = "Choose directory to store repos"
@@ -394,8 +459,12 @@ gitgadget <- function() {
 
     output$introduce_output <- renderPrint({
       input$intro_git
-      ret <- system("git config --global --list", intern = TRUE) %>%
-        .[grepl("^user",.)]
+      if (file.exists(file.path(find_home(), ".gitconfig"))) {
+        ret <- system("git config --global --list", intern = TRUE) %>%
+          .[grepl("^user",.)]
+      } else {
+        ret <- c()
+      }
       if (length(ret) == 0) {
         cat("No user information set. Enter a user name and email and click the 'Introduce' button\n\nSet user.name : git config --global user.name 'Your Name'\nSet user.email: git config --global user.email 'myemail@gmail.com'\n")
         return(invisible())
@@ -428,7 +497,7 @@ gitgadget <- function() {
 
         paste(c(ret, crh), collapse = "\n") %>%
           paste0("Show settings: git config --global --list\n\n", ., "\n") %>%
-          paste0("git.home=", getOption("git.home", "<restart Rstudio to view updates>"),"\n") %>%
+          paste0("git.home=", Sys.getenv("git.home", "<restart Rstudio to view updates>"),"\n") %>%
           cat
       }
 
@@ -445,32 +514,35 @@ gitgadget <- function() {
 
     output$ui_create_pre <- renderUI({
       req(input$create_group)
-      textInput("create_pre","Prefix:", value = getOption("git.prefix", paste0(input$create_group,"-")))
+      textInput("create_pre","Prefix:", value = Sys.getenv("git.prefix", paste0(input$create_group,"-")))
     })
 
-    create_directory_find <- reactive({
-      if (pressed(input$create_directory_find)) {
-        rstudioapi::selectDirectory()
-      } else {
-        c()
-      }
-    })
+    shinyFiles::shinyDirChoose(input, "create_directory_find", roots = gg_volumes)
 
     output$ui_create_directory <- renderUI({
-      init <- create_directory_find() %>% {ifelse(length(.) == 0, projdir, .)}
+      init <- projdir
+      if (!is.integer(input$create_directory_find)) {
+        init <- shinyFiles::parseDirPath(gg_volumes, input$create_directory_find)
+      }
       textInput("create_directory","Local directory:", value = init, placeholder = "Base directory for the git repo")
     })
 
-    create_file_find <- reactive({
-      if (pressed(input$create_file_find))
-        rstudioapi::selectFile(filter = "All files (*)")
-      else
-        return(c())
-    })
+    create_uploadfile <- shinyFiles::shinyFileChoose(
+      input = input,
+      id = "create_file_find",
+      roots = gg_volumes,
+      session = session,
+      filetype = "csv"
+    )
 
     output$ui_create_user_file <- renderUI({
-      init <- getOption("git.userfile", default = "")
-      init <- create_file_find() %>% {ifelse(length(.) == 0, init, .)}
+      init <- Sys.getenv("git.userfile")
+      if (!is.integer(input$create_file_find)) {
+        chosen <- shinyFiles::parseFilePaths(gg_volumes, input$create_file_find)
+        if (nrow(chosen) > 0) {
+          init <- chosen$datapath
+        }
+      }
       textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
     })
 
@@ -544,7 +616,7 @@ gitgadget <- function() {
 
       withProgress(message = "Removing remote repo", value = 0, style = "old", {
         create_group_lc <- tolower(input$create_group) %>%
-          {ifelse(is_empty(.), getOption("git.user", default = ""), .)}
+          {ifelse(is_empty(.), Sys.getenv("git.user", ""), .)}
 
         if (is_empty(create_group_lc)) {
           cat("No group or user name provided. Please provide this information and try again")
@@ -593,7 +665,7 @@ gitgadget <- function() {
           id <- projID(paste0(students[i, "userid"], "/", create_pre_lc, repo), students[i, "token"], "https://gitlab.com/api/v4/")
           if (id$status == "OKAY") {
             remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v4/")
-            message(paste0("\nProject ", id$project_id, " fork removed for ", students[i, "userid"], " in ", students[i, "team"]))
+            message(paste0("Project fork ", id$project_id, " removed for ", students[i, "userid"], " in ", students[i, "team"]))
           }
         }
         message("\nFork removal process complete. Check the console for messages\n")
@@ -617,7 +689,7 @@ gitgadget <- function() {
         create_group_lc <- tolower(input$create_group)
         create_pre_lc <- tolower(input$create_pre)
 
-        if (create_group_lc != "" && create_group_lc != getOption("git.user", "")) {
+        if (create_group_lc != "" && create_group_lc != Sys.getenv("git.user")) {
           cat("Creating group ...\n")
           create_group(
             input$create_token, create_group_lc, input$create_user_file,
@@ -680,16 +752,14 @@ gitgadget <- function() {
       }
     })
 
-    clone_into_home <- reactive({
-      if (pressed(input$clone_into_open))
-        rstudioapi::selectDirectory()
-      else
-        return(c())
-    })
+    shinyFiles::shinyDirChoose(input, "clone_into_open", roots = gg_volumes)
 
     output$ui_clone_into <- renderUI({
-      init <- clone_into_home()
-      init <- ifelse(length(init) == 0, getOption("git.home", basedir), init)
+      init <- Sys.getenv("git.home", basedir)
+      if (!is.integer(input$clone_into_open)) {
+        init <- shinyFiles::parseDirPath(gg_volumes, input$clone_into_open)
+      }
+
       textInput("clone_into","Base directory to clone repo into:",
         value = init,
         placeholder = "Choose directory to store repo"
@@ -1029,7 +1099,6 @@ gitgadget <- function() {
       token <- input$collect_token
       group <- input$collect_group
       server <- input$collect_server
-      # if (is_empty(token) || is_empty(group) || is_empty(server)) {
       if (is_empty(token) || is_empty(server)) {
         message("Please specify all required inputs to retrieve available assignments")
         return(invisible())
@@ -1048,12 +1117,7 @@ gitgadget <- function() {
 
     output$ui_collect_assignment <- renderUI({
 
-      # withProgress(message = "Generating list of available assignments", value = 0, style = "old", {
-      #   resp <- get_assignments()
-      # })
-
       resp <- assignment_name()
-
       if (length(resp) == 0) {
         HTML("<label>No assignments available for specified input values</label>")
       } else {
@@ -1062,18 +1126,26 @@ gitgadget <- function() {
 
     })
 
-    collect_file_find <- reactive({
-      if (input$collect_file_find == 0) return(c())
-      rstudioapi::selectFile(filter = "All files (*)")
-    })
+   collect_file_find <- shinyFiles::shinyFileChoose(
+      input = input,
+      id = "collect_file_find",
+      roots = gg_volumes,
+      session = session,
+      filetype = "csv"
+    )
 
     ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
     ## setup a branch switcher so you can easily do "git checkout origin/merge-requests/1" for each PR
     ## can you push back tot the PR as well?
     output$ui_collect_user_file <- renderUI({
-      init <- getOption("git.userfile", default = "")
-      init <- collect_file_find() %>% {ifelse(length(.) == 0, init, .)}
-      textInput("collect_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+      init <- Sys.getenv("git.userfile")
+      if (!is.integer(input$collect_file_find)) {
+        chosen <- shinyFiles::parseFilePaths(gg_volumes, input$collect_file_find)
+        if (nrow(chosen) > 0) {
+          init <- chosen$datapath
+        }
+      }
+      textInput("collect_user_file", "Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
     })
 
     collect <- eventReactive(input$collect, {
@@ -1117,8 +1189,7 @@ gitgadget <- function() {
 
     output$collect_output <- renderPrint({
       if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
-       cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the Rstudio project used to create and for the assignment repo (i.e., check is the Assignment name shown is correct). Then press the Collect button to generate Merge Requests. Click the Fetch button to review the Merge Requests locally")
-      } else {
+       cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the\nRstudio project used to create and for the assignment repo (i.e., check is the\nAssignment name shown is correct). Then press the Collect button to generate Merge\nRequests. Click the Fetch button to review the Merge Requests locally") } else {
         if (pressed(input$collect))
           ret <- collect()
         if (pressed(input$collect_fetch)) {
@@ -1154,37 +1225,22 @@ gitgadget <- function() {
     })
   }
 
-  resp <- runGadget(shinyApp(ui, server), viewer = paneViewer())
+  # runGadget(shinyApp(ui, server), port = port, viewer = shiny::paneViewer(minHeight = "maximize"))
+  runGadget(shinyApp(ui, server), port = port, viewer = shiny::paneViewer(minHeight = 725))
+}
 
-  ## Try using Rstudio terminal to start gitgadget in a separate process
-  # https://github.com/rstudio/rstudioapi/blob/e1e466ba16a6c22c6be2e25ed1808906d4031c86/docs/articles/terminal.R
-  # probably also has some stuff to show gitgadget in the viewer once it is running
-  ## even if this works ... where would messages etc. be shown ... too much work
-  ## to update at the moment
-
-  # Launch Shiny app in another process, without blocking
-  # https://github.com/rstudio/rstudioapi/issues/17#issuecomment-321958223
-  # callr::r_bg(function() {
-  #   shiny::shinyApp(
-  #     ui = ui,
-  #     server = server,
-  #     options = list(port = 3131, launch.browser = FALSE)
-  #   )
-  # })
-  # # # Give Shiny a second to start
-  # Sys.sleep(1)
-  # # # Launch viewer
-  # getOption("viewer")("http://localhost:3131/")
-
-  ## attempt to run in separate process
-  # callr::r_bg(function() {
-  #   resp <- runApp(shinyApp(ui, server), launch.browser = FALSE, port = 3131)
-  # })
-
-  # example from https://github.com/rstudio/rstudioapi/issues/17#issuecomment-321958223
-  # callr::r_bg(function() { shiny::runExample("01_hello", port = 3131, launch.browser = FALSE) })
-  # # Give Shiny a second to start
-  # Sys.sleep(1)
-  # # Launch viewer
-  # getOption("viewer")("http://localhost:3131/")
+#' Launch gitgadget in a separate process
+#'
+#' @details Using the \code{callr} package to launch gitgadget in a separate process so
+#'   the console is not blocked. Rstudio viewer is used if available. See
+#'   \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#'  @importFrom callr r_bg
+#'
+#' @export
+gitgadget_callr <- function() {
+  port <- get_port()
+  callr::r_bg(function(port) { gitgadget::gitgadget(port = port)}, args = list(port), user_profile = TRUE)
+  Sys.sleep(1)
+  getOption("viewer")(paste0("http://localhost:", port, "/"))
 }

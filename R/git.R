@@ -3,11 +3,10 @@ is_not <- function(x) length(x) == 0 || (length(x) == 1 && is.na(x))
 is_empty <- function(x, empty = "\\s*") {
   is_not(x) || (length(x) == 1 && grepl(paste0("^", empty, "$"), x))
 }
-not_pressed <- function(x) is.null(x) || x == 0
-# pressed <- function(x) if (!is.null(x) && x > 0) TRUE else FALSE
-pressed <- function(x) !is.null(x) && x > 0
+pressed <- function(x) !is.null(x) && (is.list(x) || x > 0)
+not_pressed <- function(x) !pressed(x)
 
-connect <- function(token = getOption("git.token", default = ""), server = "https://gitlab.com/api/v4/") {
+connect <- function(token = Sys.getenv("git.token"), server = "https://gitlab.com/api/v4/") {
   if (is_empty(token)) {
     stop("Token not available")
   } else {
@@ -143,7 +142,6 @@ create_group <- function(token, groupname = "", userfile = "",
   ## must give users permission in order to fork repo for them
   if (!is_empty(userfile)) {
     course_id <- resp$group_id
-    # udat <- read.csv(userfile, stringsAsFactor = FALSE)
     udat <- read_ufile(userfile)
     uids <- userIDs(udat$userid, token, server)
     add_users(uids, course_id, token, permission, server)
@@ -181,8 +179,9 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
 
   mainproj <- fromJSON(rawToChar(resp$content))
 
-  if (everything == FALSE)
-    mainproj <- select(mainproj, which(names(mainproj) %in% c("id","name","path_with_namespace","forked_from_project")))
+  if (everything == FALSE && length(mainproj) > 0) {
+    mainproj <- select_at(mainproj, c("id", "name", "path_with_namespace", "forked_from_project"))
+  }
 
   list(status = "OKAY", repos = mainproj)
 }
@@ -191,14 +190,18 @@ projID <- function(path_with_namespace, token, server) {
 
   resp <- get_allprojects(token, server)
   if (resp$status != "OKAY") return(resp)
-
   mainproj <- resp$repos
-  mainproj <- mainproj[mainproj$path_with_namespace == path_with_namespace,]
-  if (length(mainproj$id) == 0) {
-    message("No such repo: ", path_with_namespace, "  Status code: ", mainproj$message)
+  if (is_empty(mainproj)) {
+    message("No such repo: ", path_with_namespace)
     list(status = "NO_SUCH_REPO", message = "No such repo")
   } else {
-    list(status = "OKAY", project_id = mainproj$id[1])
+    mainproj <- mainproj[mainproj$path_with_namespace == path_with_namespace,]
+    if (length(mainproj$id) == 0) {
+      message("No such repo: ", path_with_namespace, "  Status code: ", mainproj$message)
+      list(status = "NO_SUCH_REPO", message = "No such repo")
+    } else {
+      list(status = "OKAY", project_id = mainproj$id[1])
+    }
   }
 }
 
@@ -233,29 +236,33 @@ renameRepo <- function(project_id, token, newname, server) {
   }
 }
 
-setupteam <- function(token, others, project_id, server) {
+setupteam <- function(token, leader, others, git_leader, git_others, project_id, server) {
   ##fork if needed for team lead
   resp <- get_allprojects(token, server, everything = TRUE)
 
   if (!"forked_from_project" %in% names(resp$repos) ||
-      !project_id %in% resp$repos$forked_from_project$id) {
-    message("\nCreating fork for team lead")
+    is_empty(resp$repos$forked_from_project) ||
+    !project_id %in% resp$repos$forked_from_project$id) {
+
+    message("Creating fork for ", leader)
 
     resp <- forkRepo(token, project_id, server)
     if (resp$status != "OKAY") {
-      message("\nError forking for leader")
+      message("\nError forking for ", leader)
       return(invisible())
     }
+
     leader_project_id <- resp$content$id
     leader_project_name <- resp$content$name
     upstream_name <- resp$content$name
   } else {
-    message("Team lead already forked the assignment")
+    message("Assignment was already forked for ", leader)
     id <- which(resp$repos$forked_from_project$id == project_id)
     if (length(id) == 0) {
-      message("Can't find repo ID for team lead")
+      message("Can't find repo ID for ", leader)
       return()
     }
+
     leader_project_id <- resp$repos$id[id]
     leader_project_name <- resp$repos$name[id]
     upstream_name <- resp$repos$forked_from_project$name[id]
@@ -263,12 +270,10 @@ setupteam <- function(token, others, project_id, server) {
 
   #add others as users
   if (length(others) > 0) {
-    message("Adding team members to lead's repo")
-    add_team(leader_project_id, token, others, server)
-  } else {
-    message("No one to add to team")
+    message("Adding ", paste0(others, collapse = ", "), " to ", leader, "'s repo")
+    add_team(leader_project_id, token, data.frame(others, git_others), server)
   }
-  return(invisible())
+  invisible()
 }
 
 add_team <- function(proj_id, token, team_mates, server) {
@@ -276,15 +281,14 @@ add_team <- function(proj_id, token, team_mates, server) {
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
-  sapply(team_mates, function(otherid) {
-    murl <- paste0(server, "projects/", proj_id, "/members?user_id=", otherid, "&access_level=40")
+  apply(team_mates, 1, function(others) {
+    murl <- paste0(server, "projects/", proj_id, "/members?user_id=", others[2], "&access_level=40")
     resp <- curl_fetch_memory(murl, h)
     if (checkerr(resp$status_code) == TRUE) {
       content <- fromJSON(rawToChar(resp$content))
-      message("Adding user ", content$name, " to team")
       list(status = "OKAY", content = content)
     } else {
-      message("Error adding ", otherid, " to team: server code ", resp$status_code)
+      message("Error adding user ", others[1], " to team: server code ", resp$status_code)
       list(status = "SERVER_ERROR", content = rawToChar(resp$content))
     }
   })
@@ -319,17 +323,19 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  # student_data <- read.csv(userfile, stringsAsFactor = FALSE)
+  student_data <- read.csv(userfile, stringsAsFactor = FALSE)
+
   student_data <- read_ufile(userfile)
-  student_data$user_id <- userIDs(student_data$userid, token, server)
+  student_data$git_id <- userIDs(student_data$userid, token, server)
 
   if (type == "individual")
-    student_data$team <- paste("team",1:nrow(student_data))
+    student_data$team <- paste0("team", seq_len(nrow(student_data)))
 
   setup <- function(dat) {
-    dat$rownum <- 1:nrow(dat); leader <- 1
+    dat$rownum <- seq_len(nrow(dat))
+    leader <- 1
     teamname <- dat$team[leader]
-    setupteam(dat$token[leader], dat$user_id[-leader], project_id, server)
+    setupteam(dat$token[leader], dat$userid[leader], dat$userid[-leader], dat$git_id[leader], dat$git_id[-leader], project_id, server)
     dat$teamname <- teamname
     dat$leader <- dat$userid[leader]
     dat
@@ -523,16 +529,12 @@ collect_work <- function(token, assignment, userfile,
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  # upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
-  # resp <- projID(upstream_name, token, server)
   resp <- projID(assignment, token, server)
 
   if (resp$status != "OKAY")
     stop("Error getting assignment ", assignment)
-    # stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
   udat <- read_ufile(userfile)
 
   if (type == "individual") {
@@ -565,8 +567,6 @@ fetch_work <- function(token, assignment,
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  # upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
-  # resp <- projID(upstream_name, token, server)
   resp <- projID(assignment, token, server)
 
   if (resp$status != "OKAY")
@@ -648,22 +648,22 @@ remove_project <- function(token, id, server) {
 }
 
 remove_student_projects <- function(userfile, server) {
-  # udat <- read.csv(userfile, stringsAsFactor = FALSE)
   udat <- read_ufile(userfile)
   sapply(udat$token, remove_projects, server)
 }
 
-check_tokens <- function(userfile, server = getOption("git.server", default = "https://gitlab.com/api/v4/")) {
+check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")) {
 
   students <- read_ufile(userfile)
 
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {
     token <- students[i, "token"]
-    if (token != "")
+    if (token != "") {
       id <- get_allprojects(token, server)
-    else
+    } else {
       id$status <- "EMPTY"
+    }
 
     if (id$status == "OKAY") {
       print(paste0("OKAY: ", students[i, "userid"], " ", token))
@@ -683,12 +683,12 @@ if (main_git__) {
   library(dplyr)
 
   ## settings
-  server <- getOption("git.server", default = "https://gitlab.com/api/v4/")
-  username <- getOption("git.user", default = "")
-  token <- getOption("git.token", default = "")
+  server <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  username <- Sys.getenv("git.user")
+  token <- Sys.getenv("git.token")
   # groupname <- "rady-mgta-bc-2016"
-  groupname <- getOption("git.group", default = "")
-  userfile <- "~/bc/rady-mgta-bc-2016/msba-students.csv"
+  groupname <- Sys.getenv("git.group")
+  userfile <- "~/gl/test-gitlab.csv"
   stopifnot(file.exists(userfile))
 
   ## to debug code
@@ -702,7 +702,7 @@ if (main_git__) {
   directory <- paste0("~/bc/", groupname)
 
   ## uncomment to cleanup
-  # remove_group(token, "rady-mgta-bc-2016", server)
+  # remove_group(token, groupname, server)
 
   ## uncomment to remove all student projects!
   ## highly destructive!
