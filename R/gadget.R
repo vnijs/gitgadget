@@ -46,15 +46,12 @@ gitgadget <- function(port = get_port()) {
 
   ## setting up volumes for shinyFiles
   gg_volumes <- c(Home = homedir)
-
-  git_home <- Sys.getenv("git.home", "")
+  git_home <- Sys.getenv("git.home")
 
   ## setting up volumes for shinyFiles
   if (git_home != "") {
     gg_volumes <- setNames(c(git_home, gg_volumes), c(basename(git_home), names(gg_volumes)))
   }
-
-  setNames(1:3, letters[1:3])
 
   if (rstudioapi::isAvailable()) {
     projdir <- basedir <- rstudioapi::getActiveProject()
@@ -63,7 +60,11 @@ gitgadget <- function(port = get_port()) {
 
   ## setting up volumes for shinyFiles
   if (length(projdir) == 0) {
-    projdir <- basedir <- file.path(Sys.getenv("git.home", normalizePath(file.path(getwd(), ".."), winslash = "/")))
+    if (git_home == "") {
+      projdir <- basedir <- file.path(homedir, "GitLab")
+    } else {
+      projdir <- basedir <- git_home
+    }
   } else {
     gg_volumes <- setNames(c(projdir, gg_volumes), c(basename(projdir), names(gg_volumes)))
   }
