@@ -82,7 +82,7 @@ gitgadget <- function(port = get_port()) {
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput("intro_user_name","User name:", value = Sys.getenv("git.user"), placeholder = "Provide GitLab/GitHub user name"),
           textInput("intro_user_email","User email:", value = Sys.getenv("git.email"), placeholder = "Provide GitLab/GitHub user email"),
-          passwordInput("intro_passwd","Password:", value = ""),
+          # passwordInput("intro_passwd","Password:", value = ""),
           passwordInput("intro_token","Token:", value = Sys.getenv("git.token")),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
@@ -140,7 +140,7 @@ gitgadget <- function(port = get_port()) {
           ),
 
           textInput("clone_to","Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
-          radioButtons("clone_proj", "Open project in:", c("current session" = "curr", "new session" = "new"), "curr", inline = TRUE),
+          radioButtons("clone_proj", "Open project in:", c("current session" = "curr", "new session" = "new"), "new", inline = TRUE),
           actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
@@ -732,6 +732,7 @@ gitgadget <- function(port = get_port()) {
     })
 
     clone <- eventReactive(input$clone, {
+      to_return <- c()
       if (input$clone_from != "") {
         if (input$clone_into != "") {
           owd <- setwd(input$clone_into)
@@ -767,11 +768,15 @@ gitgadget <- function(port = get_port()) {
                 )
               )
             }
+          } else if (any(grepl("fatal:", ret))) {
+            cat(ret, sep = "\n")
           } else {
             cat(ret, sep = "\n")
+            to_return <- 0
           }
         })
       }
+      return(to_return)
     })
 
     shinyFiles::shinyDirChoose(input, "clone_into_open", roots = gg_volumes)
@@ -792,9 +797,9 @@ gitgadget <- function(port = get_port()) {
       input$clone
       ret <- clone()
       isolate({
-        if (length(ret) == 0) {
+        if (is_empty(input$clone_from)) {
           cat("Nothing was returned. Make sure you specified a repo to clone from")
-        } else if (ret == 0) {
+        } else if (length(ret) > 0 && ret == 0) {
           if (input$clone_to == "") {
             dir <- file.path(input$clone_into, gsub("\\.git\\s*$", "", basename(input$clone_from)))
           } else {
