@@ -748,7 +748,7 @@ gitgadget <- function(port = get_port()) {
         cat("Used:", cmdclean, "\n\n")
 
         withProgress(message = "Cloning repo", value = 0, style = "old", {
-          system(cmd)
+          system2(cmd)
         })
       }
     })
