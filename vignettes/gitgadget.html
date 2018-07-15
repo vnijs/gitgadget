@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Vincent Nijs" />
+
+<meta name="date" content="2018-07-09" />
+
+<title>Using Git Gadget</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using Git Gadget</h1>
+<h4 class="author"><em>Vincent Nijs</em></h4>
+<h4 class="date"><em>2018-07-09</em></h4>
+
+
+
+<div id="git-gadget" class="section level1">
+<h1>Git Gadget</h1>
+<!-- [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget) -->
+<p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for GitHub, bitbucket, etc. are welcome.</p>
+<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. It’s goal is to provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="http://happygitwithr.com/">happy git with R</a> by Jenny Bryan.</p>
+<p><code>gitgadget</code> requires Rstudio version 1.1 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;gitgadget&quot;</span>, <span class="dt">repos =</span> <span class="st">&quot;https://radiant-rstats.github.io/minicran/&quot;</span>)</a></code></pre></div>
+<blockquote>
+<p>Note: Hover over any button in the application for additional information about what clicking the button will accomplish</p>
+</blockquote>
+<div id="introduce" class="section level2">
+<h2>Introduce</h2>
+<p>To start using git and <code>gitgadget</code> <a href="http://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on credential helpers for your platform. See <a href="http://happygitwithr.com/credential-ching.html">http://happygitwithr.com/credential-caching.html</a> for additional information.</p>
+<p>To create and fork repos and collect merge requests you will also need to provide a GitLab personal access token. First create the token on GitLab (<a href="https://gitlab.com/profile/personal_access_tokens" class="uri">https://gitlab.com/profile/personal_access_tokens</a>) and then copy-and-paste it in the <code>Token</code> input.</p>
+<!-- If available, `gitgadget` will put `~/.ssh/id_rsa.pub` into the clipboard when you click the `SSH key` button. Provide the key to github or gitlab for authentication. -->
+<p>Unless you plan to use <code>gitgadget</code> to manage student assignments use <code>student</code> as the <code>User type</code>.</p>
+<blockquote>
+<p>To avoid possible authentication issues with SSH on GitLab we recommend you clone, push, pull, etc. using HTTPS</p>
+</blockquote>
+</div>
+<div id="create-gitlab-only" class="section level2">
+<h2>Create (GitLab only)</h2>
+<p>Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. For existing directories you can click the <code>Open</code> button and navigate to the desired directory. If a <code>Group name</code> is provided it will be used to place the repo on Gitlab. This is recommended if you are using <code>gitgadget</code> for assignment management. If left blank, the GitLab user name will be used as the group. A <code>Prefix</code> can be added and will default to the value of <code>git.prefix</code> in .Rprofile in your home directory (see <em>Initial settings</em> below). If a default value is not available, a “-” will be added to the provided <code>Group name</code>. The prefix is used for assignment management to avoid conflicting assignment names across classes.</p>
+<p>If you selected <code>faculty</code> as the <code>User type</code> in the <em>Introduce</em> tab you will have the option to upload a CSV file with student tokens (see below). If a user file is provided a radio button will be shown that can be used to indicate if the work should be completed individually or in teams.</p>
+</div>
+<div id="clone" class="section level2">
+<h2>Clone</h2>
+<p>Clone a repo from GitLab (or GitHub) (e.g., <a href="https://github.com/vnijs/gitgadget-test-repo" class="uri">https://github.com/vnijs/gitgadget-test-repo</a>). The name for the directory placed inside <code>Base directory to clone repo into</code> will be taken from the repo name unless a <code>Custom directory to clone repo into</code> is provided. If there is no R-studio project file (<code>.Rproj</code>) in the repo one will be created.</p>
+<blockquote>
+<p>To activate an HTTPS credential helper the very first time you clone a repo from GitHub or GitLab you should use a terminal and run git from the command line (i.e., git clone <a href="https://repo-to-clone" class="uri">https://repo-to-clone</a>)</p>
+</blockquote>
+</div>
+<div id="branch" class="section level2">
+<h2>Branch</h2>
+<p>Create a local branch from the active branch by providing a name for the new branch and clicking <code>Create local</code>. Link and push to the (GitLab) remote by clicking the <code>Link remote</code> button. If remote branches exists click the <code>Check out</code> button to work with a branch locally. If branches other than <code>master</code> exist you can <code>Merge branches</code> or delete them if they are no longer needed. To undo a merge-in-progress, e.g., with merge conflicts, click the <code>Abort merge</code> button. <code>Unlink remote</code> will not remove the local or the remote branch but only the link to the remote (i.e., the push/pull arrows in R-studio will gray-out).</p>
+<blockquote>
+<p>Changes to the list of available branches may only be visible in R-studio after clicking the <code>refresh</code> button in the Git tab.</p>
+</blockquote>
+</div>
+<div id="sync" class="section level2">
+<h2>Sync</h2>
+<p>To commit changes to the local copy of your repo provide a <code>Commit message</code> and then click the <code>Commit</code> button. If the remote repo contains changes you do not yet have locally press the <code>Pull</code> button. To add committed local changes to the remote repo, click the <code>Push</code> button. It you completely broke the local repo and want to start over with a clean copy of the remote repo, press the <code>Reset</code> button.</p>
+<p>If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the <code>upstream</code> repo you forked from. Copy the HTTPS link to clone the original repo into the <code>Sync repo with remote it was forked from</code> input in the <em>Sync</em> tab and then press <code>Sync</code>. The repo you forked will now be added as a <em>remote</em>. Click <code>Merge</code> to update your local version with any changes to the original remote repo. Fix merge conflicts if they pop up and proceed to work on the local repo. To undo a merge with merge conflicts click the <code>Abort merge</code> button.</p>
+</div>
+<div id="collect-gitlab-only" class="section level2">
+<h2>Collect (GitLab only)</h2>
+<p>Collect assignments from students/teams using Merge Requests (MR) on GitLab. Inputs will only be shown if the user type in the <em>Introduce</em> tab is set to <code>faculty</code>.</p>
+<p>First, provide <code>User name</code>, <code>Token</code>, and the GitLab <code>Group name</code>. Then click the <code>List</code> button to show available assignments. Select the desired assignment name from the dropdown and the load the user file with student GitLab tokens and press the <code>Collect</code> button to generate Merge Requests for all students (or team leads). Once this step is completed you can review and comment on the MRs using the GitLab UI.</p>
+<p>To view, run, and edit the MRs locally press the <code>Fetch</code> button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in R-studio or the <em>Synch</em> tab in <code>gitgadget</code> to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.</p>
+<p>If students update their assignment repo and you want to <code>Fetch</code> the updates for local review you should first delete the existing branches for one or more students. This can be done through the <em>Branch</em> tab by selecting all branches you want to delete and clicking the <code>Delete local</code> button.</p>
+</div>
+<div id="assignment-management" class="section level2">
+<h2>Assignment management</h2>
+<p>Key functions in <code>git.R</code> that can be accessed through the <code>gitgadget</code> interface are:</p>
+<p><code>create_group(...)</code></p>
+<p>Used to create a group for a course. The <code>Group name</code> variable should be set to something like “school-courseid-year”. This creates the group and adds students as <code>reporters</code> with read-only access on GitLab. Access this functionality through the <em>Create</em> tab in <code>gitgadget</code>. Creating a group requires an input file of the following form:</p>
+<table>
+<thead>
+<tr class="header">
+<th>userid</th>
+<th>team</th>
+<th>email</th>
+<th>token</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id1</td>
+<td>team1</td>
+<td><a href="mailto:student1@gmail.com">student1@gmail.com</a></td>
+<td>px…….</td>
+</tr>
+<tr class="even">
+<td>id2</td>
+<td>team1</td>
+<td><a href="mailto:student2@gmail.com">student2@gmail.com</a></td>
+<td>n9…….</td>
+</tr>
+<tr class="odd">
+<td>id3</td>
+<td>team2</td>
+<td><a href="mailto:student3@gmail.com">student3@gmail.com</a></td>
+<td>VR…….</td>
+</tr>
+</tbody>
+</table>
+<p>Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a></p>
+<p><code>create_repo(...)</code></p>
+<p>To create an assignment repo set <code>Local directory</code> to the directory with the assignment files. A <code>Prefix</code> should be added to avoid conflicts across courses that might use the same assignment name (e.g., assignment1). Access this functionality through the <em>Create</em> tab in <code>gitgadget</code>.</p>
+<p><code>assign_work(...)</code></p>
+<p>Forks the assignment repo uploaded by a faculty member or TA for each student/team and creates the appropriate groups for team work. Requires a csv file with the structure shown above, including the students’ (GitLab) private token. Getting access to these tokens will most likely require that student accounts are created centrally for the class/program.</p>
+<p><code>collect_work(...)</code></p>
+<p>Generates Merge Requests for all students or teams. Requires a csv file with the structure shown above.</p>
+<p><code>fetch_work(...)</code></p>
+<p>Fetch Merge Requests for all students or teams from the GitLab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.</p>
+</div>
+<div id="initial-settings" class="section level2">
+<h2>Initial settings</h2>
+<p>Gitgadget supports the following input from an .Rprofile file in your home directory:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">options</span>(git.user = <span class="st">&quot;yourgitlabid&quot;</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="ex">options</span>(git.email = <span class="st">&quot;yourgitlabemail@gmail.com&quot;</span>)</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="ex">options</span>(git.token = <span class="st">&quot;&quot;</span>)</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="ex">options</span>(git.home = <span class="st">&quot;/Users/you/Desktop/git&quot;</span>)</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="ex">options</span>(git.server = <span class="st">&quot;https://gitlab.com/api/v3/&quot;</span>)</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="ex">options</span>(git.group = <span class="st">&quot;school-courseid-2017&quot;</span>)</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="ex">options</span>(git.prefix = <span class="st">&quot;school-courseid-2017-&quot;</span>)</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="ex">options</span>(git.userfile = <span class="st">&quot;path-to-user-file.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="ex">options</span>(git.user.type = <span class="st">&quot;faculty&quot;</span>)</a></code></pre></div>
+<p>Use a text editor (e.g., notepad on Windows) to create or edit .Rprofile in your home directory.</p>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

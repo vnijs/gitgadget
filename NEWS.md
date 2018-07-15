@@ -1,3 +1,8 @@
+# gitgadget 0.2.9.0
+
+* Improved reporting when creating and forking repos
+* When credentials have not yet been stored in a keychain cloning (and creating) with throw an error in Rstudio (i.e., fatal: rpostback-askpass). If you start `gitgadget` to clone a repo it will switch to the terminal tab in Rstudio and insert a git clone command. That command will ask for credentials and clone the repo as requested. From then on, cloning and creating should work fine because credentials have been stored
+
 # gitgadget 0.2.8.5
 
 * Open project in new or existing session on clone

@@ -7,7 +7,10 @@
 \alias{gitgadget}
 \title{gitgadget}
 \usage{
-gitgadget()
+gitgadget(port = get_port())
+}
+\arguments{
+\item{port}{Port to use for the app}
 }
 \description{
 gitgadget
