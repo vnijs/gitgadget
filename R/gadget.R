@@ -751,7 +751,8 @@ gitgadget <- function(port = get_port()) {
         withProgress(message = "Cloning repo", value = 0, style = "old", {
           if (!is_empty(input$intro_passwd)) {
             cmd <- strsplit(cmd, "//")[[1]]
-            cmd <- paste0(cmd[1], "//", input$intro_user_name, ":", input$intro_passwd, "@", cmd[2])
+            # cmd <- paste0(cmd[1], "//", input$intro_user_name, ":", input$intro_passwd, "@", cmd[2])
+            cmd <- paste0(cmd[1], "//", input$intro_user_name, "@", cmd[2])
           }
           system(cmd)
         })
