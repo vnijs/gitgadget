@@ -82,6 +82,7 @@ gitgadget <- function(port = get_port()) {
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput("intro_user_name","User name:", value = Sys.getenv("git.user"), placeholder = "Provide GitLab/GitHub user name"),
           textInput("intro_user_email","User email:", value = Sys.getenv("git.email"), placeholder = "Provide GitLab/GitHub user email"),
+          passwordInput("intro_passwd","Password:", value = ""),
           passwordInput("intro_token","Token:", value = Sys.getenv("git.token")),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
@@ -748,6 +749,10 @@ gitgadget <- function(port = get_port()) {
         cat("Used:", cmdclean, "\n\n")
 
         withProgress(message = "Cloning repo", value = 0, style = "old", {
+          if (!is_empty(input$intro_passwd)) {
+            cmd <- strsplit(cmd, "//")[[1]]
+            cmd <- paste0(cmd[1], "//", input$intro_user_name, ":", input$intro_passwd, "@", cmd[2])
+          }
           system(cmd)
         })
       }
