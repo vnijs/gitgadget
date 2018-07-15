@@ -229,7 +229,7 @@ gitgadget <- function(port = get_port()) {
       usethis::edit_r_profile()
     })
 
-    if (Sys.getenv("git.user") != "") {
+    if (getOption("git.user") != "") {
       showModal(
         modalDialog(title = "Move git settings to .Renviron",
           span("All git related settings should be moved from .Rprofile to .Renviron. Click on the
