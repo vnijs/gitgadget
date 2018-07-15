@@ -7,7 +7,7 @@ if (grepl("[nN]", rvprompt))
   stop("Change R-version using Rstudio > Tools > Global Options > Rversion")
 
 ## build for windows
-app <- "gitgadget"
+app <- basename(getwd())
 path <- "../"
 devtools::install(file.path(path, app))
 f <- devtools::build(file.path(path, app))
