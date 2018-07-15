@@ -757,6 +757,7 @@ gitgadget <- function(port = get_port()) {
           if (any(grepl("rpostback-askpass", ret))) {
 
             rstudioapi::terminalActivate()
+            Sys.sleep(1)
             tid <- rstudioapi::terminalVisible()
             rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
             showModal(
