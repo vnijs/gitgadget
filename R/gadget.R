@@ -755,19 +755,16 @@ gitgadget <- function(port = get_port()) {
         withProgress(message = "Cloning repo", value = 0, style = "old", {
           ret <- suppressWarnings(system(paste(cmd, "2>&1"), intern = TRUE))
           if (any(grepl("rpostback-askpass", ret))) {
+
+            rstudioapi::terminalActivate()
             tid <- rstudioapi::terminalVisible()
-            if (length(tid) == 0) {
-              tid <- rstudioapi::terminalList()[1]
-            }
-            if (length(tid) > 0) {
-              rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
-              showModal(
-                modalDialog(
-                  title = "Provide user name and password",
-                  span("Click on the 'Terminal' tab in Rstudio to provide user name and password to access GitLab (GitHub)")
-                )
+            rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
+            showModal(
+              modalDialog(
+                title = "Provide user name and password",
+                span("Click on the 'Terminal' tab in Rstudio to provide user name and password to access GitLab (GitHub)")
               )
-            }
+            )
           } else if (any(grepl("fatal:", ret))) {
             cat(ret, sep = "\n")
           } else {
