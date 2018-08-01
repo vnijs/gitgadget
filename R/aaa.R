@@ -12,5 +12,5 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server"))
 #' @importFrom utils read.csv capture.output
 #' @importFrom stats na.omit setNames
 #' @importFrom utils packageVersion browseURL
-#' @importFrom usethis edit_r_environ edit_r_profile
+#' @importFrom usethis edit_r_environ edit_r_profile use_git use_github
 NULL

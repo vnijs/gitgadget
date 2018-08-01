@@ -4,21 +4,23 @@
 \alias{create_repo}
 \title{Create the main repo from a local directory}
 \usage{
-create_repo(username, token, groupname, assignment, directory, pre = "",
+create_repo(username = Sys.getenv("git.user"),
+  token = Sys.getenv("git.token"), repo = basename(getwd()),
+  base_dir = dirname(getwd()), groupname = "", pre = "",
   server = "https://gitlab.com/api/v4/")
 }
 \arguments{
-\item{username}{Gitlab username}
+\item{username}{Username}
 
-\item{token}{Gitlab token}
+\item{token}{Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))}
+
+\item{repo}{Name of the repo (assigment)}
+
+\item{base_dir}{Base directory for the repo. file.path(directory, assignment) should exist}
 
 \item{groupname}{Group to create on gitlab (defaults to user's namespace)}
 
-\item{assignment}{Name of the assigment (repo)}
-
-\item{directory}{Base directory for the repo. file.path(directory, assignment) should exist}
-
-\item{pre}{Pre-amble for the assignment name, usually groupname + "-"}
+\item{pre}{Pre-amble for the repo (assignment) name}
 
 \item{server}{The gitlab API server}
 }
