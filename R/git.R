@@ -396,17 +396,19 @@ maker <- function(repo_name, token, server, namespace = "") {
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param username Gitlab username
-#' @param token Gitlab token
+#' @param username Username
+#' @param token Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))
+#' @param repo Name of the repo (assigment)
+#' @param base_dir Base directory for the repo. file.path(directory, assignment) should exist
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
-#' @param assignment Name of the assigment (repo)
-#' @param directory Base directory for the repo. file.path(directory, assignment) should exist
-#' @param pre Pre-amble for the assignment name, usually groupname + "-"
+#' @param pre Pre-amble for the repo (assignment) name
 #' @param server The gitlab API server
 #'
 #' @export
-create_repo <- function(username, token, groupname, assignment, directory,
-                        pre = "", server = "https://gitlab.com/api/v4/") {
+create_repo <- function(
+  username = Sys.getenv("git.user"), token = Sys.getenv("git.token"), repo = basename(getwd()),
+  base_dir = dirname(getwd()), groupname = "", pre = "", server = "https://gitlab.com/api/v4/"
+) {
 
   resp <- connect(token, server);
   if (resp$status != 'OKAY')
@@ -415,14 +417,14 @@ create_repo <- function(username, token, groupname, assignment, directory,
   token <- resp$token
   gn <- ifelse (groupname == "" || groupname == username, "", groupname)
 
-  message("Making repo ", paste0(pre, assignment), " in group ", ifelse (gn == "", username, gn))
-  resp <- maker(paste0(pre, assignment), token, server, gn)
+  message("Making repo ", paste0(pre, repo), " in group ", ifelse (gn == "", username, gn))
+  resp <- maker(paste0(pre, repo), token, server, gn)
 
   if (resp$status == "NOSUCHGROUP")
-    stop("Add group ", gn, " before pushing assignment ", assignment)
+    stop("Add group ", gn, " before pushing ", repo)
 
   ## set directory and reset to current on function exit
-  adir <- file.path(directory, assignment)
+  adir <- file.path(base_dir, repo)
   if (!dir.exists(adir)) {
     dir.create(adir, recursive = TRUE)
     cat("New repo created by gitgadget", file = file.path(adir, "README.md"))
@@ -446,7 +448,7 @@ create_repo <- function(username, token, groupname, assignment, directory,
   }
 
   if (gn == "") gn <- username
-  murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, assignment), ".git")
+  murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, repo), ".git")
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
@@ -749,8 +751,8 @@ if (main_git__) {
 
     ## get or create a repo for assignments and cases
     create_repo(
-      username, token, groupname, assignment, directory, pre = pre,
-      server = server
+      username, token, assignment, directory, groupname,
+      pre = pre, server = server
     )
 
     assign_work(
@@ -770,8 +772,8 @@ if (main_git__) {
     dir.exists(file.path(directory, assignment, ".git"))
 
     create_repo(
-      username, token, groupname, assignment, directory, pre = pre,
-      server = server
+      username, token, assignment, directory, groupname,
+      pre = pre, server = server
     )
 
     assign_work(
@@ -808,8 +810,8 @@ if (main_git__) {
     unlink(file.path(directory, assignment, ".git"), recursive = TRUE, force = TRUE)
     dir.exists(file.path(directory, assignment, ".git"))
     create_repo(
-      username, token, groupname, repo, directory, pre = pre,
-      server = server
+      username, token, repo, directory, groupname,
+      pre = pre, server = server
     )
   }
 }

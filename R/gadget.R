@@ -41,7 +41,7 @@ gitgadget <- function(port = get_port()) {
   }
 
   homedir <- find_home()
-  rprofdir <- Sys.getenv("HOME")
+  renvirdir <- Sys.getenv("HOME")
   projdir <- basedir <- NULL
 
   ## setting up volumes for shinyFiles
@@ -97,8 +97,14 @@ gitgadget <- function(port = get_port()) {
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput("intro_user_name","User name:", value = Sys.getenv("git.user"), placeholder = "Provide GitLab/GitHub user name"),
           textInput("intro_user_email","User email:", value = Sys.getenv("git.email"), placeholder = "Provide GitLab/GitHub user email"),
-          # passwordInput("intro_passwd","Password:", value = ""),
-          passwordInput("intro_token","Token:", value = Sys.getenv("git.token")),
+          fillRow(height = "70px", width = "475px",
+            passwordInput("intro_token_gl","GitLab token:", value = Sys.getenv("git.token")),
+            actionButton("intro_token_gl_get", "Get", title = "Browse to GitLab to get a PAT", style = "margin-top: 25px;")
+          ),
+          fillRow(height = "70px", width = "475px",
+            passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
+            actionButton("intro_token_gh_get", "Get", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
+          ),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_intro_git_home"),
@@ -111,21 +117,27 @@ gitgadget <- function(port = get_port()) {
       ),
       miniTabPanel("Create", value = "create", icon = icon("git"),
         miniContentPanel(
-          HTML("<h2>Create a repo on GitLab</h2>"),
-          fillRow(height = "70px", width = "300px",
-            textInput("create_user_name","User name:", value = Sys.getenv("git.user")),
-            passwordInput("create_token","Token:", value = Sys.getenv("git.token"))
+          HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
+          selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
+          conditionalPanel("input.create_remote == 'GitLab'",
+            textInput("create_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
           ),
           fillRow(height = "70px", width = "300px",
-            textInput("create_group","Group name:", value = Sys.getenv("git.group")),
-            uiOutput("ui_create_pre")
+            textInput("create_user_name", "User name:", value = Sys.getenv("git.user")),
+            # passwordInput("create_token", "Token:", value = Sys.getenv("git.token"))
+            uiOutput("ui_create_token")
+          ),
+          conditionalPanel("input.create_remote == 'GitLab'",
+            fillRow(height = "70px", width = "300px",
+              textInput("create_group","Group name:", value = Sys.getenv("git.group")),
+              uiOutput("ui_create_pre")
+            )
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
             shinyFiles::shinyDirButton("create_directory_find", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
           ),
-          textInput("create_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
-          conditionalPanel("input.intro_user_type == 'faculty'",
+          conditionalPanel("input.intro_user_type == 'faculty' && input.create_remote == 'GitLab'",
             fillRow(height = "70px", width = "475px",
                 uiOutput("ui_create_user_file"),
                 shinyFiles::shinyFilesButton("create_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
@@ -135,10 +147,10 @@ gitgadget <- function(port = get_port()) {
               radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
             )
           ),
-          HTML("<h4>Remove previous version of repo on Gitlab or local .git</h4>"),
-          actionButton("remove_gitlab_show", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"),
-          actionButton("remove_git_show", "Remove .git", title = "Remove previous .git directory if present", class = "btn-danger"),
-          HTML("<h4>Create local .git and remote repo on Gitlab</h4>"),
+          HTML("<h4>Remove existing remote repo local .git directory</h4>"),
+          actionButton("remove_remote_show", "Remove remote", title = "Remove remote repo if present", class = "btn-danger"),
+          actionButton("remove_git_show", "Remove .git", title = "Remove local .git directory if present", class = "btn-danger"),
+          HTML("<h4>Create local .git and remote repo</h4>"),
           actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
           hr(),
           verbatimTextOutput("create_output")
@@ -295,6 +307,15 @@ gitgadget <- function(port = get_port()) {
       updateTextInput(session = session, "collect_user_file", value = gsub("([\\]+)|([/]{2,})","/", input$collect_user_file))
     })
 
+    observeEvent(input$intro_token_gl_get, {
+      utils::browseURL("https://gitlab.com/profile/personal_access_tokens")
+    })
+
+    observeEvent(input$intro_token_gh_get, {
+      ## based on usethis::browse_github_pat
+      utils::browseURL("https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT")
+    })
+
     observeEvent(input$intro_git, {
 
       if (!is_empty(input$intro_user_name)) {
@@ -302,18 +323,17 @@ gitgadget <- function(port = get_port()) {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
 
-        # rprof <- file.path(rprofdir, ".Rprofile")
-        rprof <- file.path(rprofdir, ".Renviron")
-        if (file.exists(rprof)) {
-          readLines(rprof) %>%
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
             .[!grepl("git.user\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             # paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
             paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n") %>%
-            cat(file = rprof)
+            cat(file = renvir)
         } else {
-          # paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = rprof)
-          paste0("git.user = \"", input$intro_user_name, "\"\n") %>% cat(file = rprof)
+          # paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = renvir)
+          paste0("git.user = \"", input$intro_user_name, "\"\n") %>% cat(file = renvir)
         }
       }
 
@@ -322,35 +342,37 @@ gitgadget <- function(port = get_port()) {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
 
-        # rprof <- file.path(rprofdir, ".Rprofile")
-        rprof <- file.path(rprofdir, ".Renviron")
-        if (file.exists(rprof)) {
-          readLines(rprof) %>%
-            # .[!grepl("options\\(git.email\\s*=",.)] %>%
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
             .[!grepl("git.email\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            # paste0(., "\noptions(git.email = \"", input$intro_user_email, "\")\n") %>%
             paste0(., "\ngit.email = \"", input$intro_user_email, "\"\n") %>%
-            cat(file = rprof)
+            cat(file = renvir)
         } else {
-          # paste0("options(git.email = \"", input$intro_user_email, "\")\n") %>% cat(file = rprof)
-          paste0("git.email = \"", input$intro_user_email, "\"\n") %>% cat(file = rprof)
+          paste0("git.email = \"", input$intro_user_email, "\"\n") %>% cat(file = renvir)
         }
       }
 
-      if (!is_empty(input$intro_token)) {
-        # rprof <- file.path(rprofdir, ".Rprofile")
-        rprof <- file.path(rprofdir, ".Renviron")
-        if (file.exists(rprof)) {
-          readLines(rprof) %>%
-            # .[!grepl("options\\(git.token\\s*=",.)] %>%
+      if (!is_empty(input$intro_token_gl)) {
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
             .[!grepl("git.token\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
-            # paste0(., "\noptions(git.token = \"", input$intro_token, "\")\n") %>%
-            paste0(., "\ngit.token = \"", input$intro_token, "\"\n") %>%
-            cat(file = rprof)
-        } else {
-          paste0("git.user = \"", input$intro_token, "\"\n") %>% cat(file = rprof)
+            paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n") %>%
+            cat(file = renvir)
+        }
+      }
+
+      if (!is_empty(input$intro_token_gh)) {
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
+            .[!grepl("GITHUB_PAT\\s*=",.)] %>%
+            paste0(collapse = "\n") %>%
+            paste0(., "\nGITHUB_PAT = \"", input$intro_token_gh, "\"\n") %>%
+            cat(file = renvir)
         }
       }
 
@@ -358,15 +380,15 @@ gitgadget <- function(port = get_port()) {
       git_home <- gsub("^\\s+|\\s+$", "", input$intro_git_home)
       if (!is_empty(git_home) && git_home != Sys.getenv("git.home")) {
         if (!dir.exists(git_home)) dir.create(git_home, recursive = TRUE)
-        rprof <- file.path(rprofdir, ".Renviron")
-        if (file.exists(rprof)) {
-          readLines(rprof) %>%
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
             .[!grepl("git.home\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\ngit.home = \"", git_home, "\"\n") %>%
-            cat(file = rprof)
+            cat(file = renvir)
         } else {
-          paste0("git.home = \"", git_home, "\")\n") %>% cat(file = rprof)
+          paste0("git.home = \"", git_home, "\")\n") %>% cat(file = renvir)
         }
         cat("Updated git home in .Renviron. Restart Rstudio to see the changes\n")
       }
@@ -374,19 +396,19 @@ gitgadget <- function(port = get_port()) {
       ## set git.user.type option
       git_user_type <- input$intro_user_type
       if (!is_empty(git_user_type) && git_user_type != Sys.getenv("git.user.type", "student")) {
-        # rprof <- file.path(rprofdir, ".Rprofile")
-        rprof <- file.path(rprofdir, ".Renviron")
-        if (file.exists(rprof)) {
-          readLines(rprof) %>%
+        # renvir <- file.path(renvirdir, ".Rprofile")
+        renvir <- file.path(renvirdir, ".Renviron")
+        if (file.exists(renvir)) {
+          readLines(renvir) %>%
             # .[!grepl("options\\(git.user.type\\s*=",.)] %>%
             .[!grepl("git.user.type\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             # paste0(., "\noptions(git.user.type = \"", git_user_type, "\")\n") %>%
             paste0(., "\ngit.user.type = \"", git_user_type, "\"\n") %>%
-            cat(file = rprof)
+            cat(file = renvir)
         } else {
-          # paste0("options(git.user.type = \"", git_user_type, "\")\n") %>% cat(file = rprof)
-          paste0("git.user.type = \"", git_user_type, "\"\n") %>% cat(file = rprof)
+          # paste0("options(git.user.type = \"", git_user_type, "\")\n") %>% cat(file = renvir)
+          paste0("git.user.type = \"", git_user_type, "\"\n") %>% cat(file = renvir)
         }
         # cat("Updated user type in .Rprofile. Restart Rstudio to see the changes\n")
         cat("Updated user type in .Renviron. Restart Rstudio to see the changes\n")
@@ -527,6 +549,16 @@ gitgadget <- function(port = get_port()) {
       #     cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
       #   }
       # }
+
+    })
+
+    output$ui_create_token <- renderUI({
+      req(input$create_remote)
+      if (input$create_remote == "GitLab") {
+        passwordInput("create_token", "GitLab token:", value = Sys.getenv("git.token"))
+      } else {
+        passwordInput("create_token", "GitHub token:", value = Sys.getenv("GITHUB_PAT"))
+      }
     })
 
     output$ui_create_pre <- renderUI({
@@ -600,23 +632,44 @@ gitgadget <- function(port = get_port()) {
     })
 
     ## Show remove_git modal when button is clicked.
-    observeEvent(input$remove_gitlab_show, {
+    observeEvent(input$remove_remote_show, {
+      req(input$create_remote)
       ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
-      showModal(
-        modalDialog(title = "Remove remote GitLab repo",
-          span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
-          footer = tagList(
-            with(tags, table(
-              align = "right",
-              td(modalButton("Cancel")),
-              td(conditionalPanel("input.create_user_file != ''",
-                actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
-              )),
-              td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
-            ))
+      if (input$create_remote == "GitLab") {
+        showModal(
+          modalDialog(title = "Remove remote GitLab repo",
+            span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
+            footer = tagList(
+              with(tags, table(
+                align = "right",
+                td(modalButton("Cancel")),
+                td(conditionalPanel("input.create_user_file != ''",
+                  actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
+                )),
+                td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
+              ))
+            )
           )
         )
-      )
+      } else {
+        showModal(
+          modalDialog(title = "Remove remote GitHub repo",
+            span("This feature has not yet been implemented for GitHub repos")
+            # span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
+            # footer = tagList(
+            #   with(tags, table(
+            #     align = "right",
+            #     td(modalButton("Cancel")),
+            #     td(conditionalPanel("input.create_user_file != ''",
+            #       actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
+            #     )),
+            #     td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
+            #   ))
+            # )
+          )
+        )
+
+      }
     })
 
     remove_gitlab <- observeEvent(input$remove_gitlab, {
@@ -701,44 +754,52 @@ gitgadget <- function(port = get_port()) {
         return(invisible())
       }
 
-      withProgress(message = "Creating and forking repo", value = 0, style = "old", {
+      repo <- basename(input$create_directory)
 
-        create_group_lc <- tolower(input$create_group)
-        create_pre_lc <- tolower(input$create_pre)
+      if (grepl("[^A-z0-9_\\.\\-]", repo)) {
+        cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
+        return(invisible())
+      }
 
-        if (create_group_lc != "" && create_group_lc != Sys.getenv("git.user")) {
-          cat("Creating group ...\n")
-          create_group(
-            input$create_token, create_group_lc, input$create_user_file,
-            permission = 20, server = input$create_server
+      directory <- dirname(input$create_directory)
+
+      if (input$create_remote == "GitLab") {
+        withProgress(message = "Creating and forking repo", value = 0, style = "old", {
+
+          create_group_lc <- tolower(input$create_group)
+          create_pre_lc <- tolower(input$create_pre)
+
+          if (create_group_lc != "" && create_group_lc != Sys.getenv("git.user")) {
+            cat("Creating group ...\n")
+            create_group(
+              input$create_token, create_group_lc, input$create_user_file,
+              permission = 20, server = input$create_server
+            )
+          }
+
+          cat("Creating repo ...\n")
+          create_repo(
+            input$create_user_name, input$create_token, repo, directory, create_group_lc,
+            pre = create_pre_lc, server = input$create_server
           )
-        }
-
-        repo <- basename(input$create_directory)
-
-        if (grepl("[^A-z0-9_\\.\\-]", repo)) {
-          cat("The repo name cannot contain spaces or symbols. Please change the name and try again")
-          return(invisible())
-        }
-
-        directory <- dirname(input$create_directory)
+          if (!is_empty(input$create_user_file)) {
+            cat("Assigning work ...\n")
+            assign_work(
+              input$create_token, create_group_lc, repo,
+              input$create_user_file, type = input$create_type, pre = create_pre_lc,
+              server = input$create_server
+            )
+          }
+        })
+      } else {
         cat("Creating repo ...\n")
+        curr <- setwd(input$create_directory)
+        on.exit(setwd(curr))
+        use_git()
+        usethis::use_github(protocol = "https", auth_token = input$create_token)
+      }
 
-        create_repo(
-          input$create_user_name, input$create_token, create_group_lc, repo, directory,
-          pre = create_pre_lc, server = input$create_server
-        )
-        if (!is_empty(input$create_user_file)) {
-          cat("Assigning work ...\n")
-          assign_work(
-            input$create_token, create_group_lc, repo,
-            input$create_user_file, type = input$create_type, pre = create_pre_lc,
-            server = input$create_server
-          )
-        }
-
-        message("\nCreate process complete. Check the console for messages\n")
-      })
+      message("\nCreate process complete. Check the console for messages\n")
     })
 
     output$create_output <- renderPrint({

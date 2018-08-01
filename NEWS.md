@@ -1,3 +1,8 @@
+# gitgadget 0.3.0.0
+
+* Option to provide GitLab or GitHub personal access tokens in _Introduce_
+* Create a repo on GitLab or GitHub in _Create_. `usethis::use_github` is used to create a repo on GitHub
+
 # gitgadget 0.2.9.0
 
 * Improved reporting when creating and forking repos
