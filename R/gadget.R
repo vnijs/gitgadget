@@ -101,10 +101,10 @@ gitgadget <- function(port = get_port()) {
             passwordInput("intro_token_gl","GitLab token:", value = Sys.getenv("git.token")),
             actionButton("intro_token_gl_get", "Get", title = "Browse to GitLab to get a PAT", style = "margin-top: 25px;")
           ),
-          fillRow(height = "70px", width = "475px",
-            passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
-            actionButton("intro_token_gh_get", "Get", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
-          ),
+          # fillRow(height = "70px", width = "475px",
+          #   passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
+          #   actionButton("intro_token_gh_get", "Get", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
+          # ),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_intro_git_home"),
@@ -118,7 +118,8 @@ gitgadget <- function(port = get_port()) {
       miniTabPanel("Create", value = "create", icon = icon("git"),
         miniContentPanel(
           HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
-          selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
+          selectInput("create_remote", NULL, choices = "GitLab", selected = "GitLab"),
+          # selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
           conditionalPanel("input.create_remote == 'GitLab'",
             textInput("create_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
           ),
@@ -444,19 +445,19 @@ gitgadget <- function(port = get_port()) {
 
     output$ui_intro_buttons <- renderUI({
       ## intend to remove SSH functionality below
-      # tagList(
-      #   fillRow(height = "70px", width = "300px",
-      #     textInput("intro_keyname","Key name:", value = "id_rsa"),
-      #     textInput("intro_passphrase","Pass-phrase:", value = "")
-      #   ),
-      #   actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
-      #   actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
-      # )
-      actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
+      tagList(
+        fillRow(height = "70px", width = "300px",
+          textInput("intro_keyname","Key name:", value = "id_rsa"),
+          textInput("intro_passphrase","Pass-phrase:", value = "")
+        ),
+        actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
+        actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
+      )
+      # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
     })
 
     intro_ssh <- eventReactive(input$intro_ssh, {
-      if (os_type == "Darwin") {
+      if (os_type != "Windows") {
         email <- system("git config --global --list", intern = TRUE) %>%
           .[grepl("^user.email",.)] %>%
           gsub("user.email=","",.)
@@ -466,26 +467,48 @@ gitgadget <- function(port = get_port()) {
           return(invisible())
         }
 
+        keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
         if (is_empty(.ssh_exists())) {
           if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
-          keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+          # keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
           paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
           key <- readLines(paste0("~/.ssh/",keyname,".pub"))
-          out <- pipe("pbcopy")
-          cat(key, file = out)
-          close(out)
-          cat("\nYour new public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
 
+          if (os_type == "Darwin") {
+            out <- pipe("pbcopy")
+            cat(key, file = out)
+            close(out)
+            cat("\nYour new public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+          } else {
+            cat(paste0("\n", key))
+            cat("\n\nCopy the new public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+          }
         } else {
           key <- readLines(.ssh_exists())
-          out <- pipe("pbcopy")
-          cat(key, file = out)
-          close(out)
-          cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+          if (os_type == "Darwin") {
+            out <- pipe("pbcopy")
+            cat(key, file = out)
+            close(out)
+            cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+          } else {
+            cat(paste0("\n", key))
+            cat("\n\nCopy the public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+          }
         }
-      } else if (os_type == "Windows") {
+
+        if (keyname != "id_rsa") {
+          cat("\nYou will also need to add the lines below to ~/.ssh/config")
+          cat("\nHost gitlab.com\n")
+          cat(paste0("    IdentityFile ~/.ssh/", keyname))
+          rstudioapi::navigateToFile("~/.ssh/config", line = 1000L)
+        }
+
+        browseURL("https://gitlab.com/profile/keys")
+
+      # } else if (os_type == "Windows") {
+      } else {
         if (!is_empty(.ssh_exists())) {
           key <- readLines(.ssh_exists())
           cat(key, file = "clipboard")
@@ -540,15 +563,15 @@ gitgadget <- function(port = get_port()) {
           cat
       }
 
-      # if (pressed(input$intro_ssh)) {
-      #   intro_ssh()
-      # } else {
-      #   if (!is_empty(.ssh_exists()) ) {
-      #     cat("\nSSH keys seem to exist on your system. Click the 'SSH key' button to copy them to the clipboard")
-      #   } else {
-      #     cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
-      #   }
-      # }
+      if (pressed(input$intro_ssh)) {
+        intro_ssh()
+      } else {
+        if (!is_empty(.ssh_exists()) ) {
+          cat("\nSSH keys seem to exist on your system. Click the 'SSH key' button to copy them to the clipboard")
+        } else {
+          cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
+        }
+      }
 
     })
 
@@ -795,7 +818,7 @@ gitgadget <- function(port = get_port()) {
         cat("Creating repo ...\n")
         curr <- setwd(input$create_directory)
         on.exit(setwd(curr))
-        use_git()
+        usethis::use_git()
         usethis::use_github(protocol = "https", auth_token = input$create_token)
       }
 
