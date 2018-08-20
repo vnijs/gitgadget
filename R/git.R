@@ -315,6 +315,9 @@ assign_work <- function(token, groupname, assignment, userfile,
   if (resp$status != 'OKAY')
     stop("Error connecting to server: check token/server")
 
+  if (is_empty(groupname))
+    stop("A groupname is required to assign work. Please add a groupname and try again")
+
   token <- resp$token
   upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
   resp <- projID(upstream_name, token, server)
@@ -323,8 +326,7 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  student_data <- read.csv(userfile, stringsAsFactor = FALSE)
-
+  # student_data <- read.csv(userfile, stringsAsFactor = FALSE)
   student_data <- read_ufile(userfile)
   student_data$git_id <- userIDs(student_data$userid, token, server)
 
@@ -695,7 +697,7 @@ if (main_git__) {
   token <- Sys.getenv("git.token")
   # groupname <- "rady-mgta-bc-2016"
   groupname <- Sys.getenv("git.group")
-  userfile <- "~/gl/test-gitlab.csv"
+  userfile <- "~/git/test-gitlab.csv"
   stopifnot(file.exists(userfile))
 
   ## to debug code
@@ -713,7 +715,10 @@ if (main_git__) {
 
   ## uncomment to remove all student projects!
   ## highly destructive!
-  # remove_student_projects(userfile, server)
+  userfile <- "~/git/msba-test-gitlab.csv"
+  students <- read_ufile(userfile)
+  students
+  remove_student_projects(userfile, server)
 
   ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
@@ -726,7 +731,7 @@ if (main_git__) {
   ## use the Create tab and load the file with student information
 
   ## check tokens
-  userfile <- "~/Desktop/git/msba-students-test.csv"
+  userfile <- "~/msba-test-gitlab.csv"
   # students <- read.csv(userfile, stringsAsFactors = FALSE)
   students <- read_ufile(userfile)
 

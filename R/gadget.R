@@ -587,7 +587,8 @@ gitgadget <- function(port = get_port()) {
 
     output$ui_create_pre <- renderUI({
       req(input$create_group)
-      textInput("create_pre","Prefix:", value = Sys.getenv("git.prefix", paste0(input$create_group,"-")))
+      # textInput("create_pre","Prefix:", value = Sys.getenv("git.prefix", paste0(input$create_group,"-")))
+      textInput("create_pre","Prefix:", value = Sys.getenv("git.prefix"))
     })
 
     shinyFiles::shinyDirChoose(input, "create_directory_find", roots = gg_volumes)
@@ -807,12 +808,17 @@ gitgadget <- function(port = get_port()) {
             pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE), server = input$create_server
           )
           if (!is_empty(input$create_user_file)) {
-            cat("Assigning work ...\n")
-            assign_work(
-              input$create_token, create_group_lc, repo,
-              input$create_user_file, type = input$create_type, pre = create_pre_lc,
-              server = input$create_server
-            )
+            if (is_empty(input$create_group)) {
+              cat("A groupname is required when assigning work.\n")
+              cat("Add a groupname and try again ...\n")
+            } else {
+              cat("Assigning work ...\n")
+              assign_work(
+                input$create_token, create_group_lc, repo,
+                input$create_user_file, type = input$create_type, pre = create_pre_lc,
+                server = input$create_server
+              )
+            }
           }
         })
       } else {
