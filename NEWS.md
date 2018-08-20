@@ -1,3 +1,7 @@
+# gitgadget 0.3.1.0
+
+* Use ssh keys with GitLab
+
 # gitgadget 0.3.0.0
 
 * Option to provide GitLab or GitHub personal access tokens in _Introduce_

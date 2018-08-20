@@ -123,6 +123,7 @@ gitgadget <- function(port = get_port()) {
           conditionalPanel("input.create_remote == 'GitLab'",
             textInput("create_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
           ),
+          radioButtons("create_ssh", "Authentication type:", c("ssh","https"), "ssh", inline = TRUE),
           fillRow(height = "70px", width = "300px",
             textInput("create_user_name", "User name:", value = Sys.getenv("git.user")),
             # passwordInput("create_token", "Token:", value = Sys.getenv("git.token"))
@@ -803,7 +804,7 @@ gitgadget <- function(port = get_port()) {
           cat("Creating repo ...\n")
           create_repo(
             input$create_user_name, input$create_token, repo, directory, create_group_lc,
-            pre = create_pre_lc, server = input$create_server
+            pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE), server = input$create_server
           )
           if (!is_empty(input$create_user_file)) {
             cat("Assigning work ...\n")

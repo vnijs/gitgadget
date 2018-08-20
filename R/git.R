@@ -402,12 +402,13 @@ maker <- function(repo_name, token, server, namespace = "") {
 #' @param base_dir Base directory for the repo. file.path(directory, assignment) should exist
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param pre Pre-amble for the repo (assignment) name
+#' @param ssh Use SSH for authentication
 #' @param server The gitlab API server
 #'
 #' @export
 create_repo <- function(
   username = Sys.getenv("git.user"), token = Sys.getenv("git.token"), repo = basename(getwd()),
-  base_dir = dirname(getwd()), groupname = "", pre = "", server = "https://gitlab.com/api/v4/"
+  base_dir = dirname(getwd()), groupname = "", pre = "", ssh = FALSE, server = "https://gitlab.com/api/v4/"
 ) {
 
   resp <- connect(token, server);
@@ -448,7 +449,11 @@ create_repo <- function(
   }
 
   if (gn == "") gn <- username
-  murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, repo), ".git")
+  if (isTRUE(ssh)) {
+    murl <- paste0("git@gitlab.com:", gn, "/", paste0(pre, repo), ".git")
+  } else {
+    murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, repo), ".git")
+  }
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
