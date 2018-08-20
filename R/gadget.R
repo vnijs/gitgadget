@@ -161,7 +161,7 @@ gitgadget <- function(port = get_port()) {
       miniTabPanel("Clone", value = "clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
-          textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https link to repo", value = ""),
+          textInput("clone_from","Repo to clone from remote git server:", placeholder = "Provide https or ssh link to repo", value = ""),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_clone_into"),
             # actionButton("clone_into_open", "Open", title = "Browse and select a local directory", style = "margin-top: 25px;")
@@ -170,7 +170,7 @@ gitgadget <- function(port = get_port()) {
 
           textInput("clone_to","Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
           radioButtons("clone_proj", "Open project in:", c("current session" = "curr", "new session" = "new"), "new", inline = TRUE),
-          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
+          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
           hr(),
           verbatimTextOutput("clone_output")
         )
@@ -1211,7 +1211,8 @@ gitgadget <- function(port = get_port()) {
 
     output$ui_sync_from <- renderUI({
       init <- upstream_info()
-      textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
+      # textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
+      textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https or ssh link to original remote repo")
     })
 
     output$sync_output <- renderPrint({
