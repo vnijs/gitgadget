@@ -100,7 +100,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
     if (length(mess) > 0 && grepl("already exists", mess, ignore.case = TRUE)) {
       return(list(status = "OKAY", message = mess))
     } else {
-      message("There was an error adding user to the group:", mess, "\n")
+      message("There was an error adding user", user_id, "to group", group_id, ":", mess, "\n")
       return(list(status = "SERVER_ERROR", message = mess))
     }
   }
@@ -180,7 +180,11 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
   mainproj <- fromJSON(rawToChar(resp$content))
 
   if (everything == FALSE && length(mainproj) > 0) {
-    mainproj <- select_at(mainproj, c("id", "name", "path_with_namespace", "forked_from_project"))
+    if (is.null(mainproj$forked_from_project)) {
+      mainproj <- select_at(mainproj, c("id", "name", "path_with_namespace"))
+    } else {
+      mainproj <- select_at(mainproj, c("id", "name", "path_with_namespace", "forked_from_project"))
+    }
   }
 
   list(status = "OKAY", repos = mainproj)
@@ -241,8 +245,8 @@ setupteam <- function(token, leader, others, git_leader, git_others, project_id,
   resp <- get_allprojects(token, server, everything = TRUE)
 
   if (!"forked_from_project" %in% names(resp$repos) ||
-    is_empty(resp$repos$forked_from_project) ||
-    !project_id %in% resp$repos$forked_from_project$id) {
+      is_empty(resp$repos$forked_from_project) ||
+      !project_id %in% resp$repos$forked_from_project$id) {
 
     message("Creating fork for ", leader)
 
@@ -268,7 +272,7 @@ setupteam <- function(token, leader, others, git_leader, git_others, project_id,
     upstream_name <- resp$repos$forked_from_project$name[id]
   }
 
-  #add others as users
+  ## add others as users
   if (length(others) > 0) {
     message("Adding ", paste0(others, collapse = ", "), " to ", leader, "'s repo")
     add_team(leader_project_id, token, data.frame(others, git_others), server)
@@ -326,7 +330,6 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  # student_data <- read.csv(userfile, stringsAsFactor = FALSE)
   student_data <- read_ufile(userfile)
   student_data$git_id <- userIDs(student_data$userid, token, server)
 
@@ -675,9 +678,14 @@ check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gi
     }
 
     if (id$status == "OKAY") {
-      print(paste0("OKAY: ", students[i, "userid"], " ", token))
+      id_check <- userID(students[i, "userid"], token, server)
+      if (isTRUE(id_check$status == "OKAY")) {
+        print(paste0("OKAY: ", students[i, "userid"], " ", token))
+      } else {
+        print(paste0("NOT OKAY (ID): ", students[i, "userid"], " ", token, " ", students[i, "email"]))
+      }
     } else {
-      print(paste0("NOT OKAY: ", students[i, "userid"], " ", token))
+      print(paste0("NOT OKAY (TOKEN): ", students[i, "userid"], " ", token, " ", students[i, "email"]))
     }
   }
 }
