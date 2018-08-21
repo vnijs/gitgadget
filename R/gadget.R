@@ -469,15 +469,16 @@ gitgadget <- function(port = get_port()) {
         }
 
         keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
+        ssh_dir <- file.path(homedir, ".ssh")
         if (is_empty(.ssh_exists())) {
-          if (!dir.exists("~/.ssh")) dir.create("~/.ssh")
-          # keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
-          paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ~/.ssh/", keyname," -N '", input$intro_passphrase, "'") %>%
+          if (!dir.exists(ssh_dir)) dir.create(ssh_dir)
+          paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ", ssh_dir, "/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
-          key <- readLines(paste0("~/.ssh/",keyname,".pub"))
+          key <- readLines(paste0(ssh_dir, "/", keyname, ".pub"))
 
-          if (os_type == "Darwin") {
+          if (os_type == "Darwin") {ls
+
             out <- pipe("pbcopy")
             cat(key, file = out)
             close(out)
@@ -499,8 +500,11 @@ gitgadget <- function(port = get_port()) {
           }
         }
 
+        ## set environment variable
+        Sys.setenv(GIT_SSH_COMMAND=paste0("'ssh -i '", ssh_dir, "/", keyname))
+
         if (keyname != "id_rsa") {
-          cat("\nYou will also need to add the lines below to ~/.ssh/config")
+          cat("\nYou will also need to add the lines below to ~/.ssh/config\n")
           cat("\nHost gitlab.com\n")
           cat(paste0("    IdentityFile ~/.ssh/", keyname))
           rstudioapi::navigateToFile("~/.ssh/config", line = 1000L)
@@ -561,7 +565,7 @@ gitgadget <- function(port = get_port()) {
         paste(c(ret, crh), collapse = "\n") %>%
           paste0("Show settings: git config --global --list\n\n", ., "\n") %>%
           paste0("git.home=", Sys.getenv("git.home", "<restart Rstudio to view updates>"),"\n") %>%
-          cat
+          cat()
       }
 
       if (pressed(input$intro_ssh)) {
