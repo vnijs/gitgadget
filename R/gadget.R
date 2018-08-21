@@ -511,6 +511,7 @@ gitgadget <- function(port = get_port()) {
         }
 
         browseURL("https://gitlab.com/profile/keys")
+        # browseURL("https://github.com/settings/keys")
 
       # } else if (os_type == "Windows") {
       } else {

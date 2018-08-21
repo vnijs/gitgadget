@@ -7,7 +7,7 @@
 create_repo(username = Sys.getenv("git.user"),
   token = Sys.getenv("git.token"), repo = basename(getwd()),
   base_dir = dirname(getwd()), groupname = "", pre = "",
-  server = "https://gitlab.com/api/v4/")
+  ssh = FALSE, server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{username}{Username}
@@ -21,6 +21,8 @@ create_repo(username = Sys.getenv("git.user"),
 \item{groupname}{Group to create on gitlab (defaults to user's namespace)}
 
 \item{pre}{Pre-amble for the repo (assignment) name}
+
+\item{ssh}{Use SSH for authentication}
 
 \item{server}{The gitlab API server}
 }
