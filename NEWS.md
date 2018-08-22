@@ -1,4 +1,4 @@
-# gitgadget 0.3.1.0
+# gitgadget 0.3.2.0
 
 * Use ssh keys with GitLab
 

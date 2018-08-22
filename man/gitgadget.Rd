@@ -4,6 +4,7 @@
 \name{gitgadget}
 \alias{gitgadget}
 \alias{gitgadget-package}
+\alias{gitgadget}
 \title{gitgadget}
 \usage{
 gitgadget(port = get_port())
