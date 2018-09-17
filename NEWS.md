@@ -1,3 +1,7 @@
+# gitgadget 0.3.3.0
+
+* Collect and Fetch assignments using either HTTPS or SSH
+
 # gitgadget 0.3.2.0
 
 * Use ssh keys with GitLab

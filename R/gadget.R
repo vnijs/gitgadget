@@ -1091,16 +1091,19 @@ gitgadget <- function(port = get_port()) {
       )
     }
 
-    assignment_name <- function(server = "https://gitlab.com") {
-      server = "https://gitlab.com"
-      assignment <- capture.output(remote_info())[-1:-2] %>%
-        gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", .) %>%
-        unique()
-      if (any(grepl("https://github.com", assignment))) {
+    assignment_name <- function() {
+      assignment <- capture.output(remote_info())[-1:-2]
+      if (any(grepl("(https://github.com)|(git@github.com)", assignment))) {
         message("GitGadget does not (yet) support assignment management on GitHub.com")
-        return("")
+        ""
       } else{
-        return(assignment)
+        if (any(grepl("https://gitlab.com", assignment))) {
+          server <- "https://gitlab.com"
+          gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", assignment) %>% unique()
+        } else {
+          server <- "git@gitlab.com"
+          gsub(paste0("^.*", server, ":(.*).git.*"), "\\1", assignment) %>% unique()
+        }
       }
     }
 
