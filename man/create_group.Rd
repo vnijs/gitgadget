@@ -8,7 +8,7 @@ create_group(token, groupname = "", userfile = "", permission = 20,
   server = "https://gitlab.com/api/v4/")
 }
 \arguments{
-\item{token}{Gitlab token}
+\item{token}{GitLab token}
 
 \item{groupname}{Group to create on gitlab (defaults to user's namespace)}
 

@@ -42,7 +42,7 @@
 - Added help button to gadget header
 - Specify user type in Introduction tab
 - Hide inputs in Collect tab from students
-- Option to remove multiple (student) brances in Branch tab
+- Option to remove multiple (student) branches in Branch tab
 - Remove option to use SSH
 - Local branches will now be updated if student MR was updated
 
@@ -57,7 +57,7 @@
 - Specify specifically that merge requests should be Fetched
 - Improved regex for Rproj file creation on clone
 - Update branch list on collect and fetch
-- Get full remote orgin list from .git/config
+- Get full remote origin list from .git/config
 
 ## Features 
 

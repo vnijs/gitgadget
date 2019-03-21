@@ -55,7 +55,7 @@ Collect assignments from students/teams using Merge Requests (MR) on GitLab. Inp
 First, provide `User name`, `Token`, and the GitLab `Group name`. Then click the `List` button to show available assignments. Select the desired assignment name from the dropdown and the load the user file with student GitLab tokens and press the `Collect` button to generate Merge Requests
  for all students (or team leads). Once this step is completed you can review and comment on the MRs using the GitLab UI.
  
-To view, run, and edit the MRs locally press the `Fetch` button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in R-studio or the _Synch_ tab in `gitgadget` to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.
+To view, run, and edit the MRs locally press the `Fetch` button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in R-studio or the _Sync_ tab in `gitgadget` to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.
 
 If students update their assignment repo and you want to `Fetch` the updates for local review you should first delete the existing branches for one or more students. This can be done through the _Branch_ tab by selecting all branches you want to delete and clicking the `Delete local` button.
 

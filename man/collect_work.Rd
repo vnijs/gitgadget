@@ -8,7 +8,7 @@ collect_work(token, assignment, userfile, type = "individual",
   server = "https://gitlab.com/api/v4/")
 }
 \arguments{
-\item{token}{Gitlab token}
+\item{token}{GitLab token}
 
 \item{assignment}{Name of the assigment (e.g., "class345/class345-assignment1")}
 

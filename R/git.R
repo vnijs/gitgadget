@@ -113,7 +113,7 @@ add_user <- function(user_id, group_id, token, permission, server) {
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token Gitlab token
+#' @param token GitLab token
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param permission Permission setting for the group (default is 20, i.e., reporter)
@@ -164,7 +164,7 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
       return(get_allprojects(token, server, everything = FALSE, turn = turn + 1))
     } else {
       message("****************************************************************************")
-      message("Tried 5 times and failed to get list of projects. Gitlab message shown below")
+      message("Tried 5 times and failed to get list of projects. GitLab message shown below")
       message("****************************************************************************")
       message(rawToChar(resp$content))
     }
@@ -302,7 +302,7 @@ add_team <- function(proj_id, token, team_mates, server) {
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token Gitlab token
+#' @param token GitLab token
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param assignment Name of the assigment to assign
 #' @param userfile A csv file with student information (i.e., username and token)
@@ -525,7 +525,7 @@ merger <- function(token, to, server,
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token Gitlab token
+#' @param token GitLab token
 #' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param type Individual or Team work
@@ -566,7 +566,7 @@ collect_work <- function(token, assignment, userfile,
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token Gitlab token
+#' @param token GitLab token
 #' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
 #' @param server The gitlab API server
 #'
