@@ -1,6 +1,6 @@
 # Git Gadget
 
-<!-- [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget) -->
+[![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget)
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome.
 
@@ -24,8 +24,6 @@ To create and fork repos and collect merge requests you will need to provide a G
 
 Unless you plan to use `gitgadget` to manage student assignments, use `student` as the `User type`. Finally, enter the main directory where you plan to clone code repos (e.g., "C:/Users/me/GitLab")
 
-> Please use HTTPS to clone, push, pull, etc. from and to GitLab
-
 ## Create (GitLab only)
 
 Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. You can also click the `Open` button and navigate to an existing directory. If a `Group name` is provided it will be used to place the repo on GitLab. This is recommended if you are using `gitgadget` for assignment management. If left blank, the GitLab user name will be used as the group. A `Prefix` can be added and will default to the value of `git.prefix` in .Renviron (see _Initial settings_ below). The prefix can be used to avoid conflicting assignment names across classes (e.g., multiple classes using "assignment1").
@@ -34,9 +32,9 @@ If you selected `faculty` as the `User type` in the _Introduce_ tab you will hav
 
 ## Clone
 
-Clone a repo from GitLab (or GitHub) (e.g., https://github.com/vnijs/gitgadget-test-repo). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the repo, one will be created.
+Clone a repo from GitLab (or GitHub) (e.g., `git@gitlab.com:username/test-repo.git`). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the repo, one will be created.
 
-> To activate an HTTPS credential helper the very first time you clone a repo from GitHub or GitLab you should use a terminal and run git from the command line (e.g., "git clone https://repo-to-clone.git")
+> To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal
 
 ## Branch
 
@@ -95,18 +93,16 @@ Fetch Merge Requests for all students or teams from the GitLab server. After fet
 
 ## Initial settings
 
-Gitgadget supports the following input from an .Renviron file in your home directory (e.g., "C:/Users/me/.Renviron")
+Gitgadget supports the following input from an .Renviron file in your home directory (e.g., "C:/Users/username/.Renviron"). The easiest way to edit `.Renviron` is to use `usethis::edit_r_environ()` in Rstudio.
 
 ```bash
 git.user = "your-gitlab-id"
 git.email = "yourgitlabemail@gmail.com"
 git.token = "abc123"
-git.home = "/Users/you/Desktop/git"
-git.server = "https://gitlab.com/api/v3/"
+git.home = "~/git"
+git.server = "https://gitlab.com/api/v4/"
 git.group = "school-courseid-2017"
 git.prefix = "school-courseid-2017-"
 git.userfile = "path-to-user-file.csv"
 git.user.type = "faculty"
 ```
-
-Use a text editor (e.g., notepad on Windows) to create or edit .Renviron in your home directory (e.g., "C:/Users/me/.Renviron")

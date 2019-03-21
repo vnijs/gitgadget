@@ -7,7 +7,7 @@ This is a resubmission. In this version I have added some new features and fixed
 * local OS X install, R 3.5.2
 * local Windows install, R 3.5.2
 * local Ubuntu 18.04, R 3.5.2
-* win-builder (devel)
+* win-builder (release)
 
 ## R CMD check results
 
