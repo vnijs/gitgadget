@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
-Version: 0.3.3
-Date: 2018-9-17
+Version: 0.4.0
+Date: 2019-3-20
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -27,10 +27,10 @@ Imports:
 Suggests:
     knitr,
     rmarkdown
-URL: URL: https://github.com/radiant-rstats/radiant
+URL: URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Encoding: UTF-8
 VignetteBuilder: knitr

@@ -21,9 +21,11 @@
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
+<!-- sticky kit -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
 
 
@@ -32,6 +34,7 @@
 
 <meta property="og:description" content="Create merge requests for each student/team" />
 <meta name="twitter:card" content="summary" />
+
 
 
 <!-- mathjax -->
@@ -58,7 +61,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gitgadget</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.2.8.5</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.4.0</span>
       </span>
     </div>
 
@@ -106,8 +109,8 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>collect_work</span>(<span class='no'>token</span>, <span class='no'>groupname</span>, <span class='no'>assignment</span>, <span class='no'>userfile</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"individual"</span>,
-  <span class='kw'>pre</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>server</span> <span class='kw'>=</span> <span class='st'>"https://gitlab.com/api/v4/"</span>)</pre>
+    <pre class="usage"><span class='fu'>collect_work</span>(<span class='no'>token</span>, <span class='no'>assignment</span>, <span class='no'>userfile</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"individual"</span>,
+  <span class='kw'>server</span> <span class='kw'>=</span> <span class='st'>"https://gitlab.com/api/v4/"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -117,12 +120,8 @@
       <td><p>Gitlab token</p></td>
     </tr>
     <tr>
-      <th>groupname</th>
-      <td><p>Group containing the assignment</p></td>
-    </tr>
-    <tr>
       <th>assignment</th>
-      <td><p>Name of the assigment. file.path(directory, assignment) should exist</p></td>
+      <td><p>Name of the assigment (e.g., "class345/class345-assignment1")</p></td>
     </tr>
     <tr>
       <th>userfile</th>
@@ -131,10 +130,6 @@
     <tr>
       <th>type</th>
       <td><p>Individual or Team work</p></td>
-    </tr>
-    <tr>
-      <th>pre</th>
-      <td><p>Pre-amble for the assignment name, usually groupname + "-"</p></td>
     </tr>
     <tr>
       <th>server</th>

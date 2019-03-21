@@ -99,11 +99,11 @@ gitgadget <- function(port = get_port()) {
           textInput("intro_user_email","User email:", value = Sys.getenv("git.email"), placeholder = "Provide GitLab/GitHub user email"),
           fillRow(height = "70px", width = "475px",
             passwordInput("intro_token_gl","GitLab token:", value = Sys.getenv("git.token")),
-            actionButton("intro_token_gl_get", "Get", title = "Browse to GitLab to get a PAT", style = "margin-top: 25px;")
+            actionButton("intro_token_gl_get", "Create", title = "Browse to GitLab to get a PAT", style = "margin-top: 25px;")
           ),
           # fillRow(height = "70px", width = "475px",
           #   passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
-          #   actionButton("intro_token_gh_get", "Get", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
+          #   actionButton("intro_token_gh_get", "Create", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
           # ),
           radioButtons("intro_user_type", "User type:", c("student","faculty"), Sys.getenv("git.user.type", "student"), inline = TRUE),
           fillRow(height = "70px", width = "475px",
@@ -425,7 +425,9 @@ gitgadget <- function(port = get_port()) {
       input$intro_keyname
 
       keyname <- ifelse(is_empty(input$intro_keyname), "id_rsa", input$intro_keyname)
-      .ssh_path <- file.path(homedir, ".ssh", paste0(keyname, ".pub"))
+
+     .ssh_path <- file.path(homedir, ".ssh", paste0(keyname, ".pub"))
+
       if (file.exists(.ssh_path)) .ssh_path else ""
     })
 
@@ -452,9 +454,11 @@ gitgadget <- function(port = get_port()) {
           textInput("intro_passphrase","Pass-phrase:", value = "")
         ),
         actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
-        actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard")
+        actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard"),
+        actionButton("intro_restart", "Restart", title = "Restart GitGadget")
       )
-      # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
+
+     # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
     })
 
     intro_ssh <- eventReactive(input$intro_ssh, {
@@ -475,7 +479,7 @@ gitgadget <- function(port = get_port()) {
           paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ", ssh_dir, "/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
-          key <- readLines(paste0(ssh_dir, "/", keyname, ".pub"))
+          key <- suppressWarnings(readLines(paste0(ssh_dir, "/", keyname, ".pub")))
 
           if (os_type == "Darwin") {ls
 
@@ -488,7 +492,7 @@ gitgadget <- function(port = get_port()) {
             cat("\n\nCopy the new public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
           }
         } else {
-          key <- readLines(.ssh_exists())
+          key <- suppressWarnings(readLines(.ssh_exists()))
           if (os_type == "Darwin") {
             out <- pipe("pbcopy")
             cat(key, file = out)
@@ -503,6 +507,18 @@ gitgadget <- function(port = get_port()) {
         ## set environment variable
         Sys.setenv(GIT_SSH_COMMAND=paste0("'ssh -i '", ssh_dir, "/", keyname))
 
+        if (file.exists(file.path(ssh_dir, "known_hosts"))) {
+          if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+            system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
+          }
+          if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+            system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+          }
+        } else {
+          system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
+          system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+        }
+
         if (keyname != "id_rsa") {
           cat("\nYou will also need to add the lines below to ~/.ssh/config\n")
           cat("\nHost gitlab.com\n")
@@ -516,13 +532,33 @@ gitgadget <- function(port = get_port()) {
       # } else if (os_type == "Windows") {
       } else {
         if (!is_empty(.ssh_exists())) {
-          key <- readLines(.ssh_exists())
+          ssh_dir <- file.path(homedir, ".ssh")
+          if (file.exists(file.path(ssh_dir, "known_hosts"))) {
+            if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+              system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
+            }
+            if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+              system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+            }
+          } else {
+            system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
+            system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+          }
+          key <- suppressWarnings(readLines(.ssh_exists()))
           cat(key, file = "clipboard")
           cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
-        } else {
-          cat("\nSSH keys cannot be generated from GIT gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+       } else {
+          cat("\nSSH keys cannot be generated from Git Gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
         }
       }
+    })
+
+    observeEvent(input$intro_restart, {
+      ## https://github.com/rstudio/rstudioapi/issues/111
+      stopApp(cat("\nUse Session > Restart R to update your settings in memory.\nThen start Git Gadget again to clone, create, etc.\n\n"))
+      # cmd <- "gitgadget:::gitgadget()"
+      # ret <- .rs.restartR(cmd)
+      # rstudioapi::restartSession(cmd)
     })
 
     output$introduce_output <- renderPrint({
@@ -865,8 +901,7 @@ gitgadget <- function(port = get_port()) {
 
         withProgress(message = "Cloning repo", value = 0, style = "old", {
           ret <- suppressWarnings(system(paste(cmd, "2>&1"), intern = TRUE))
-          if (any(grepl("rpostback-askpass", ret))) {
-
+          if (any(grepl("rpostback-askpass", ret)) || any(grepl("could not read Username", ret))) {
             rstudioapi::terminalActivate()
             Sys.sleep(1)
             tid <- rstudioapi::terminalVisible()
@@ -874,7 +909,7 @@ gitgadget <- function(port = get_port()) {
             showModal(
               modalDialog(
                 title = "Provide user name and password",
-                span("Click on the 'Terminal' tab in Rstudio to provide user name and password to access GitLab (GitHub)")
+                span("Provide user name and password in Rstudio > Terminal to clone from GitLab (GitHub)")
               )
             )
           } else if (any(grepl("fatal:", ret))) {

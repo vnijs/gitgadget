@@ -8,8 +8,8 @@
 <title>Rstudio Addin for Version Control and Assignment Management using Git • gitgadget</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><meta property="og:title" content="Rstudio Addin for Version Control and Assignment Management using Git">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="pkgdown.js"></script><meta property="og:title" content="Rstudio Addin for Version Control and Assignment Management using Git">
 <meta property="og:description" content="An Rstudio addin for version control that allows users to clone
     repositories, create and delete branches, and sync forks on GitHub, GitLab, etc.
     Furthermore, the addin uses the GitLab API to allow instructors to create
@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">gitgadget</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.2.8.5</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.4.0</span>
       </span>
     </div>
 
@@ -69,34 +69,34 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#git-gadget" class="anchor"></a>Git Gadget</h1></div>
 <!-- [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget) -->
-<p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for GitHub, bitbucket, etc. are welcome.</p>
-<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. It’s goal is to provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="http://happygitwithr.com/">happy git with R</a> by Jenny Bryan.</p>
+<p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for use with GitHub are welcome.</p>
+<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. <code>gitgadget</code> provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="http://happygitwithr.com/">happy git with R</a> by Jenny Bryan.</p>
 <p><code>gitgadget</code> requires Rstudio version 1.1 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">"gitgadget"</span>, <span class="dt">repos =</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span>)</a></code></pre></div>
+<p>To start <code>gitgadget</code> click on the Addins menu in Rstudio and then on <code>gitgadget</code>.</p>
 <blockquote>
 <p>Note: Hover over any button in the application for additional information about what clicking the button will accomplish</p>
 </blockquote>
 <div id="introduce" class="section level2">
 <h2 class="hasAnchor">
 <a href="#introduce" class="anchor"></a>Introduce</h2>
-<p>To start using git and <code>gitgadget</code> <a href="http://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on credential helpers for your platform. See <a href="http://happygitwithr.com/credential-ching.html">http://happygitwithr.com/credential-caching.html</a> for additional information.</p>
-<p>To create and fork repos and collect merge requests you will also need to provide a GitLab personal access token. First create the token on GitLab (<a href="https://gitlab.com/profile/personal_access_tokens" class="uri">https://gitlab.com/profile/personal_access_tokens</a>) and then copy-and-paste it in the <code>Token</code> input.</p>
-<!-- If available, `gitgadget` will put `~/.ssh/id_rsa.pub` into the clipboard when you click the `SSH key` button. Provide the key to github or gitlab for authentication. -->
-<p>Unless you plan to use <code>gitgadget</code> to manage student assignments use <code>student</code> as the <code>User type</code>.</p>
+<p>To start using git and <code>gitgadget</code> first <a href="http://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on credential helpers for your platform. See <a href="http://happygitwithr.com/credential-ching.html">http://happygitwithr.com/credential-caching.html</a> for additional information.</p>
+<p>To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the token on GitLab (<a href="https://gitlab.com/profile/personal_access_tokens" class="uri">https://gitlab.com/profile/personal_access_tokens</a>) and then copy-and-paste it in the <code>Token</code> input.</p>
+<p>Unless you plan to use <code>gitgadget</code> to manage student assignments, use <code>student</code> as the <code>User type</code>. Finally, enter the main directory where you plan to clone code repos (e.g., “C:/Users/me/GitLab”)</p>
 <blockquote>
-<p>To avoid possible authentication issues with SSH on GitLab we recommend you clone, push, pull, etc. using HTTPS</p>
+<p>Please use HTTPS to clone, push, pull, etc. from and to GitLab</p>
 </blockquote>
 </div>
 <div id="create-gitlab-only" class="section level2">
 <h2 class="hasAnchor">
 <a href="#create-gitlab-only" class="anchor"></a>Create (GitLab only)</h2>
-<p>Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. For existing directories you can click the <code>Open</code> button and navigate to the desired directory. If a <code>Group name</code> is provided it will be used to place the repo on Gitlab. This is recommended if you are using <code>gitgadget</code> for assignment management. If left blank, the GitLab user name will be used as the group. A <code>Prefix</code> can be added and will default to the value of <code>git.prefix</code> in .Rprofile in your home directory (see <em>Initial settings</em> below). If a default value is not available, a “-” will be added to the provided <code>Group name</code>. The prefix is used for assignment management to avoid conflicting assignment names across classes.</p>
-<p>If you selected <code>faculty</code> as the <code>User type</code> in the <em>Introduce</em> tab you will have the option to upload a CSV file with student tokens (see below). If a user file is provided a radio button will be shown that can be used to indicate if the work should be completed individually or in teams.</p>
+<p>Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. You can also click the <code>Open</code> button and navigate to an existing directory. If a <code>Group name</code> is provided it will be used to place the repo on GitLab. This is recommended if you are using <code>gitgadget</code> for assignment management. If left blank, the GitLab user name will be used as the group. A <code>Prefix</code> can be added and will default to the value of <code>git.prefix</code> in .Renviron (see <em>Initial settings</em> below). The prefix can be used to avoid conflicting assignment names across classes (e.g., multiple classes using “assignment1”).</p>
+<p>If you selected <code>faculty</code> as the <code>User type</code> in the <em>Introduce</em> tab you will have the option to upload a CSV file with student tokens (see below). If a user file is provided, a radio button will be shown that can be used to indicate if the work should be completed individually or in teams.</p>
 </div>
 <div id="clone" class="section level2">
 <h2 class="hasAnchor">
 <a href="#clone" class="anchor"></a>Clone</h2>
-<p>Clone a repo from GitLab (or GitHub) (e.g., <a href="https://github.com/vnijs/gitgadget-test-repo" class="uri">https://github.com/vnijs/gitgadget-test-repo</a>). The name for the directory placed inside <code>Base directory to clone repo into</code> will be taken from the repo name unless a <code>Custom directory to clone repo into</code> is provided. If there is no R-studio project file (<code>.Rproj</code>) in the repo one will be created.</p>
+<p>Clone a repo from GitLab (or GitHub) (e.g., <a href="https://github.com/vnijs/gitgadget-test-repo" class="uri">https://github.com/vnijs/gitgadget-test-repo</a>). The name for the directory placed inside <code>Base directory to clone repo into</code> will be taken from the repo name unless a <code>Custom directory to clone repo into</code> is provided. If there is no R-studio project file (<code>.Rproj</code>) in the repo, one will be created.</p>
 <blockquote>
 <p>To activate an HTTPS credential helper the very first time you clone a repo from GitHub or GitLab you should use a terminal and run git from the command line (i.e., git clone <a href="https://repo-to-clone" class="uri">https://repo-to-clone</a>)</p>
 </blockquote>
@@ -140,19 +140,19 @@
 <tr class="odd">
 <td>id1</td>
 <td>team1</td>
-<td><a href="mailto:student1@gmail.com">student1@gmail.com</a></td>
+<td><a href="mailto:student1@gmail.com" class="email">student1@gmail.com</a></td>
 <td>px…….</td>
 </tr>
 <tr class="even">
 <td>id2</td>
 <td>team1</td>
-<td><a href="mailto:student2@gmail.com">student2@gmail.com</a></td>
+<td><a href="mailto:student2@gmail.com" class="email">student2@gmail.com</a></td>
 <td>n9…….</td>
 </tr>
 <tr class="odd">
 <td>id3</td>
 <td>team2</td>
-<td><a href="mailto:student3@gmail.com">student3@gmail.com</a></td>
+<td><a href="mailto:student3@gmail.com" class="email">student3@gmail.com</a></td>
 <td>VR…….</td>
 </tr>
 </tbody>
@@ -170,17 +170,17 @@
 <div id="initial-settings" class="section level2">
 <h2 class="hasAnchor">
 <a href="#initial-settings" class="anchor"></a>Initial settings</h2>
-<p>Gitgadget supports the following input from an .Rprofile file in your home directory:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">options</span>(git.user = <span class="st">"yourgitlabid"</span>)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="ex">options</span>(git.email = <span class="st">"yourgitlabemail@gmail.com"</span>)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="ex">options</span>(git.token = <span class="st">""</span>)</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="ex">options</span>(git.home = <span class="st">"/Users/you/Desktop/git"</span>)</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="ex">options</span>(git.server = <span class="st">"https://gitlab.com/api/v3/"</span>)</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="ex">options</span>(git.group = <span class="st">"school-courseid-2017"</span>)</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="ex">options</span>(git.prefix = <span class="st">"school-courseid-2017-"</span>)</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="ex">options</span>(git.userfile = <span class="st">"path-to-user-file.csv"</span>)</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="ex">options</span>(git.user.type = <span class="st">"faculty"</span>)</a></code></pre></div>
-<p>Use a text editor (e.g., notepad on Windows) to create or edit .Rprofile in your home directory.</p>
+<p>Gitgadget supports the following input from an .Renviron file in your home directory (e.g., “C:/Users/me/.Renviron”)</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="ex">git.email</span> = <span class="st">"yourgitlabemail@gmail.com"</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="ex">git.token</span> = <span class="st">"abc123"</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="ex">git.home</span> = <span class="st">"/Users/you/Desktop/git"</span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="ex">git.server</span> = <span class="st">"https://gitlab.com/api/v3/"</span></a>
+<a class="sourceLine" id="cb2-6" data-line-number="6"><span class="ex">git.group</span> = <span class="st">"school-courseid-2017"</span></a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="ex">git.prefix</span> = <span class="st">"school-courseid-2017-"</span></a>
+<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="ex">git.userfile</span> = <span class="st">"path-to-user-file.csv"</span></a>
+<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="ex">git.user.type</span> = <span class="st">"faculty"</span></a></code></pre></div>
+<p>Use a text editor (e.g., notepad on Windows) to create or edit .Renviron in your home directory (e.g., “C:/Users/me/.Renviron”)</p>
 </div>
 </div>
   </div>

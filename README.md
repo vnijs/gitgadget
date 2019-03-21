@@ -18,7 +18,7 @@ To start `gitgadget` click on the Addins menu in Rstudio and then on `gitgadget`
 
 ## Introduce
 
-To start using git and `gitgadget` first [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-ching.html) for additional information. 
+To start using git and `gitgadget` first [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-caching.html) for additional information. 
 
 To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the token on GitLab (https://gitlab.com/profile/personal_access_tokens) and then copy-and-paste it in the `Token` input.
 
@@ -36,7 +36,7 @@ If you selected `faculty` as the `User type` in the _Introduce_ tab you will hav
 
 Clone a repo from GitLab (or GitHub) (e.g., https://github.com/vnijs/gitgadget-test-repo). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the repo, one will be created.
 
-> To activate an HTTPS credential helper the very first time you clone a repo from GitHub or GitLab you should use a terminal and run git from the command line (i.e., git clone https://repo-to-clone)
+> To activate an HTTPS credential helper the very first time you clone a repo from GitHub or GitLab you should use a terminal and run git from the command line (e.g., "git clone https://repo-to-clone.git")
 
 ## Branch
 

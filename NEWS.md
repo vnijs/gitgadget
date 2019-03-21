@@ -1,3 +1,7 @@
+# gitgadget 0.4.0.0
+
+* Enhancement for initial setup with SSH
+
 # gitgadget 0.3.3.0
 
 * Collect and Fetch assignments using either HTTPS or SSH
