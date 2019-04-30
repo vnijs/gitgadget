@@ -325,16 +325,18 @@ gitgadget <- function(port = get_port()) {
         resp <- system(cmd, intern = TRUE)
         cat("Used:", cmd, "\n")
 
+        ## based on https://twitter.com/joshua_ulrich/status/1115578106105028610
+        ## avoid "a ton of confusing merge commits on master"
+        system("git config --global branch.autosetuprebase always")
+
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
           readLines(renvir) %>%
-            .[!grepl("git.user\\s*=",.)] %>%
+            .[!grepl("git.user\\s*=", .)] %>%
             paste0(collapse = "\n") %>%
-            # paste0(., "\noptions(git.user = \"", input$intro_user_name, "\")\n") %>%
             paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n") %>%
             cat(file = renvir)
         } else {
-          # paste0("options(git.user = \"", input$intro_user_name, "\")\n") %>% cat(file = renvir)
           paste0("git.user = \"", input$intro_user_name, "\"\n") %>% cat(file = renvir)
         }
       }
