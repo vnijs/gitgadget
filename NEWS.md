@@ -1,4 +1,4 @@
-# gitgadget 0.4.0.0
+# gitgadget 0.4.1.0
 
 * Enhancement for initial setup with SSH
 

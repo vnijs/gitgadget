@@ -327,7 +327,7 @@ gitgadget <- function(port = get_port()) {
 
         ## based on https://twitter.com/joshua_ulrich/status/1115578106105028610
         ## avoid "a ton of confusing merge commits on master"
-        system("git config --global branch.autosetuprebase always")
+        # system("git config --global branch.autosetuprebase always")
 
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
