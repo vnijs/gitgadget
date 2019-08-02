@@ -448,7 +448,7 @@ create_repo <- function(
 
   ## avoid CI unless already setup by user
   if (!file.exists(".gitlab-ci.yml"))
-    cat("job:\n\tscript:\n\t\t- echo \"\"", file = ".gitlab-ci.yml")
+    cat("job:\n  script:\n    - echo \"\"", file = ".gitlab-ci.yml")
 
   ## make project file if needed
   rproj <- list.files(path = adir, pattern = "*.Rproj")
