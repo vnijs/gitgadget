@@ -483,8 +483,7 @@ gitgadget <- function(port = get_port()) {
 
           key <- suppressWarnings(readLines(paste0(ssh_dir, "/", keyname, ".pub")))
 
-          if (os_type == "Darwin") {ls
-
+          if (os_type == "Darwin") {
             out <- pipe("pbcopy")
             cat(key, file = out)
             close(out)

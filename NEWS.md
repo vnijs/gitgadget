@@ -1,6 +1,7 @@
-# gitgadget 0.4.1.0
+# gitgadget 0.4.2.0
 
 * Enhancement for initial setup with SSH
+* Add .gitlab-ci.yml to avoid students getting warning email because CI piplines were not setup
 
 # gitgadget 0.3.3.0
 

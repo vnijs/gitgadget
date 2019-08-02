@@ -446,6 +446,10 @@ create_repo <- function(
   if (!file.exists(".gitignore"))
     cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n", file = ".gitignore")
 
+  ## avoid CI unless already setup by user
+  if (!file.exists(".gitlab-ci.yml"))
+    cat("job:\n\tscript:\n\t\t- echo \"\"", file = ".gitlab-ci.yml")
+
   ## make project file if needed
   rproj <- list.files(path = adir, pattern = "*.Rproj")
   if (length(rproj) == 0) {
