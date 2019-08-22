@@ -524,6 +524,7 @@ gitgadget <- function(port = get_port()) {
           cat("\nYou will also need to add the lines below to ~/.ssh/config\n")
           cat("\nHost gitlab.com\n")
           cat(paste0("    IdentityFile ~/.ssh/", keyname))
+          cat("", file = "~/.ssh/config", append = TRUE)
           rstudioapi::navigateToFile("~/.ssh/config", line = 1000L)
         }
 
