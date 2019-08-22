@@ -1,3 +1,7 @@
+# gitgadget 0.4.3.0
+
+* Fix for generating ssh key with alternative name when .ssh/config does not yet exist 
+
 # gitgadget 0.4.2.0
 
 * Enhancement for initial setup with SSH

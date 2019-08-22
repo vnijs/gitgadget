@@ -558,8 +558,9 @@ gitgadget <- function(port = get_port()) {
     observeEvent(input$intro_restart, {
       ## https://github.com/rstudio/rstudioapi/issues/111
       stopApp(cat("\nUse Session > Restart R to update your settings in memory.\nThen start Git Gadget again to clone, create, etc.\n\n"))
+      ## Below is still not the same as using Session > Restart R
+      # stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
       # cmd <- "gitgadget:::gitgadget()"
-      # ret <- .rs.restartR(cmd)
       # rstudioapi::restartSession(cmd)
     })
 
