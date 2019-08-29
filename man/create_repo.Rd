@@ -14,7 +14,7 @@ create_repo(username = Sys.getenv("git.user"),
 
 \item{token}{Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))}
 
-\item{repo}{Name of the repo (assigment)}
+\item{repo}{Name of the repo (assignment)}
 
 \item{base_dir}{Base directory for the repo. file.path(directory, assignment) should exist}
 

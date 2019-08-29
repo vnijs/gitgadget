@@ -304,7 +304,7 @@ add_team <- function(proj_id, token, team_mates, server) {
 #'
 #' @param token GitLab token
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
-#' @param assignment Name of the assigment to assign
+#' @param assignment Name of the assignment to assign
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param type Individual or Team work
 #' @param pre Pre-amble for the assignment name, usually groupname + "-"
@@ -403,7 +403,7 @@ maker <- function(repo_name, token, server, namespace = "") {
 #'
 #' @param username Username
 #' @param token Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))
-#' @param repo Name of the repo (assigment)
+#' @param repo Name of the repo (assignment)
 #' @param base_dir Base directory for the repo. file.path(directory, assignment) should exist
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param pre Pre-amble for the repo (assignment) name
@@ -530,7 +530,7 @@ merger <- function(token, to, server,
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token GitLab token
-#' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
+#' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
 #' @param userfile A csv file with student information (i.e., username and token)
 #' @param type Individual or Team work
 #' @param server The gitlab API server
@@ -571,7 +571,7 @@ collect_work <- function(token, assignment, userfile,
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token GitLab token
-#' @param assignment Name of the assigment (e.g., "class345/class345-assignment1")
+#' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
 #' @param server The gitlab API server
 #'
 #' @export

@@ -10,7 +10,7 @@ collect_work(token, assignment, userfile, type = "individual",
 \arguments{
 \item{token}{GitLab token}
 
-\item{assignment}{Name of the assigment (e.g., "class345/class345-assignment1")}
+\item{assignment}{Name of the assignment (e.g., "class345/class345-assignment1")}
 
 \item{userfile}{A csv file with student information (i.e., username and token)}
 

@@ -6,7 +6,7 @@
 # gitgadget 0.4.2.0
 
 * Enhancement for initial setup with SSH
-* Add .gitlab-ci.yml to avoid warning emails about CI piplines
+* Add .gitlab-ci.yml to avoid warning emails about CI pipelines
 
 # gitgadget 0.3.3.0
 
