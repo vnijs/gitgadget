@@ -959,9 +959,9 @@ gitgadget <- function(port = get_port()) {
               cat(file = file.path(dir, paste0(basename(dir),".Rproj")))
           }
 
-          gitignore <- list.files(path = dir, pattern = ".gitignore")
+          gitignore <- list.files(path = dir, all.files = TRUE, pattern = ".gitignore")
           if (length(gitignore) == 0)
-            cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n", file = file.path(dir, ".gitignore"))
+            cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n", file = file.path(dir, ".gitignore"))
 
           cat("Repo was sucessfully cloned into", dir)
 

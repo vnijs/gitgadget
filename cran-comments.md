@@ -4,6 +4,22 @@ This is a resubmission. In this version I have added some new features and fixed
 
 ## Test environments
 
+* local OS X install, R 3.6.1
+* local Windows install, R 3.1.1
+* win-builder (devel)
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs.
+
+## Previous cran-comments
+
+## Resubmission
+
+This is a resubmission. In this version I have added some new features and fixed a few bugs. See the NEWS.md file for details
+
+## Test environments
+
 * local OS X install, R 3.5.2
 * local Windows install, R 3.5.2
 * local Ubuntu 18.04, R 3.5.2

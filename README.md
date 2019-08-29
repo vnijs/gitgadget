@@ -2,11 +2,11 @@
 
 [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget)
 
-`gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome.
+`gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome. For alternative that uses GitHub see https://github.com/rundel/ghclass although this does not (currently) have a shiny user interface.
 
 `gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. `gitgadget` provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
 
-`gitgadget` requires Rstudio version 1.1 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
+`gitgadget` requires Rstudio version 1.2 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
 
 ```r
 install.packages("gitgadget", repos = "https://radiant-rstats.github.io/minicran/")
@@ -24,6 +24,12 @@ To create and fork repos and collect merge requests you will need to provide a G
 
 Unless you plan to use `gitgadget` to manage student assignments, use `student` as the `User type`. Finally, enter the main directory where you plan to clone code repos (e.g., "C:/Users/me/GitLab")
 
+If you want to use an SSH key, make sure to click on the `Introduce` button first, restart Rstudio, and then click on the `SSH key` button. Copy the key shown in GitGadget to the gitlab.com page that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use `git clone git@some-private-repo` from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the video below for a demonstration.
+
+<iframe width="806" height="504" src="https://www.youtube.com/embed/FQx_3EDQaXc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+> Note: In the video we use a docker container (see https://github.com/radiant-rstats/docker/tree/master/install) but this is not required
+
 ## Create (GitLab only)
 
 Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. You can also click the `Open` button and navigate to an existing directory. If a `Group name` is provided it will be used to place the repo on GitLab. This is recommended if you are using `gitgadget` for assignment management. If left blank, the GitLab user name will be used as the group. A `Prefix` can be added and will default to the value of `git.prefix` in .Renviron (see _Initial settings_ below). The prefix can be used to avoid conflicting assignment names across classes (e.g., multiple classes using "assignment1").
@@ -35,6 +41,8 @@ If you selected `faculty` as the `User type` in the _Introduce_ tab you will hav
 Clone a repo from GitLab (or GitHub) (e.g., `git@gitlab.com:username/test-repo.git`). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the repo, one will be created.
 
 > To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal
+
+> To use an SSH key with GitGadget you should clone from a terminal the first time. See the video linked above for a demo
 
 ## Branch
 
@@ -93,7 +101,7 @@ Fetch Merge Requests for all students or teams from the GitLab server. After fet
 
 ## Initial settings
 
-Gitgadget supports the following input from an .Renviron file in your home directory (e.g., "C:/Users/username/.Renviron"). The easiest way to edit `.Renviron` is to use `usethis::edit_r_environ()` in Rstudio.
+GitGadget supports the following input from an .Renviron file in your home directory (e.g., "C:/Users/username/.Renviron"). The easiest way to edit `.Renviron` is to use `usethis::edit_r_environ()` in Rstudio.
 
 ```bash
 git.user = "your-gitlab-id"
