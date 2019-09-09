@@ -457,7 +457,8 @@ gitgadget <- function(port = get_port()) {
         ),
         actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"),
         actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard"),
-        actionButton("intro_restart", "Restart", title = "Restart GitGadget")
+        actionButton("intro_restart", "Restart", title = "Restart GitGadget"),
+        actionButton("intro_check", "Check", title = "Check settings")
       )
 
      # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
@@ -562,6 +563,11 @@ gitgadget <- function(port = get_port()) {
       # stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
       # cmd <- "gitgadget:::gitgadget()"
       # rstudioapi::restartSession(cmd)
+    })
+
+    observeEvent(input$intro_check, {
+      usethis::edit_r_environ()
+      usethis::edit_r_profile()
     })
 
     output$introduce_output <- renderPrint({

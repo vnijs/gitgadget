@@ -1,3 +1,7 @@
+# gitgadget 0.4.5.0
+
+* Added a `Check` button to the Introduce tab so you can easily check and edit the .Renviron and .Rprofile settings using `usethis` functions
+
 # gitgadget 0.4.4.0
 
 * `.gitignore` file was not picked up if it already existed. Fixed in this release
