@@ -1,6 +1,7 @@
-# gitgadget 0.4.5.0
+# gitgadget 0.4.6.0
 
 * Added a `Check` button to the Introduce tab so you can easily check and edit the .Renviron and .Rprofile settings using `usethis` functions
+* Allow both the "Owner" and the "Maintainer" of a repo to create merge requests with Collect & Fetch
 
 # gitgadget 0.4.4.0
 

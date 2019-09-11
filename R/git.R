@@ -148,20 +148,28 @@ create_group <- function(token, groupname = "", userfile = "",
   }
 }
 
-get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
+get_allprojects <- function(token, server, owned = TRUE, search = "", everything = FALSE, turn = 1) {
 
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  resp <- curl_fetch_memory(paste0(server, "projects?owned=true&per_page=100"), h)
-  rawToChar(resp$headers)
+
+  if (!is_empty(search)) {
+    search = paste0("&search=",search)
+  }
+
+  if (owned) {
+    resp <- curl_fetch_memory(paste0(server, "projects?owned=true", search, "&per_page=100"), h)
+  } else {
+    resp <- curl_fetch_memory(paste0(server, "projects?membership=true", search, "&per_page=100"), h)
+  }
 
   if (checkerr(resp$status_code) == FALSE) {
     if (turn < 6) {
       message("SERVER_ERROR: Problem getting projects")
       message("Sleeping for 5 seconds and then trying again")
       Sys.sleep(5)
-      return(get_allprojects(token, server, everything = FALSE, turn = turn + 1))
+      return(get_allprojects(token, server, owned = owned, everything = everything, turn = turn + 1))
     } else {
       message("****************************************************************************")
       message("Tried 5 times and failed to get list of projects. GitLab message shown below")
@@ -175,7 +183,7 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
     .[grepl("X-Total-Pages",.)] %>%
     sub("X-Total-Pages:\\s+","",.) %>%
     as.numeric
-  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of projects is > 100. Updates limits in 'get_allprojects")
+  if (is.numeric(nr_pages) && nr_pages > 1) stop("Nr. of projects is > 100. Update limits in 'get_allprojects")
 
   mainproj <- fromJSON(rawToChar(resp$content))
 
@@ -190,9 +198,10 @@ get_allprojects <- function(token, server, everything = FALSE, turn = 1) {
   list(status = "OKAY", repos = mainproj)
 }
 
-projID <- function(path_with_namespace, token, server) {
+projID <- function(path_with_namespace, token, server, owned = TRUE, search = "") {
 
-  resp <- get_allprojects(token, server)
+  resp <- get_allprojects(token, server, search = search, owned = owned)
+
   if (resp$status != "OKAY") return(resp)
   mainproj <- resp$repos
   if (is_empty(mainproj)) {
@@ -240,9 +249,9 @@ renameRepo <- function(project_id, token, newname, server) {
   }
 }
 
-setupteam <- function(token, leader, others, git_leader, git_others, project_id, server) {
+setupteam <- function(token, leader, others, git_leader, git_others, project_id, server, search = "") {
   ##fork if needed for team lead
-  resp <- get_allprojects(token, server, everything = TRUE)
+  resp <- get_allprojects(token, server, everything = TRUE, owned = TRUE, search = search)
 
   if (!"forked_from_project" %in% names(resp$repos) ||
       is_empty(resp$repos$forked_from_project) ||
@@ -340,7 +349,7 @@ assign_work <- function(token, groupname, assignment, userfile,
     dat$rownum <- seq_len(nrow(dat))
     leader <- 1
     teamname <- dat$team[leader]
-    setupteam(dat$token[leader], dat$userid[leader], dat$userid[-leader], dat$git_id[leader], dat$git_id[-leader], project_id, server)
+    setupteam(dat$token[leader], dat$userid[leader], dat$userid[-leader], dat$git_id[leader], dat$git_id[-leader], project_id, server, search = assignment)
     dat$teamname <- teamname
     dat$leader <- dat$userid[leader]
     dat
@@ -482,13 +491,18 @@ create_repo <- function(
   system2("git", c("push", "-u", "origin", "master"))
 }
 
-merger <- function(token, to, server,
+merger <- function(token, to, search = "", server,
                    title = "submission",
                    frombranch = "master",
                    tobranch = "master") {
 
-  resp <- get_allprojects(token[1], server)
-  forked <- resp$repo[resp$repo$forked_from_project$id == to,]
+  resp <- get_allprojects(token[1], server, search = search)
+
+  if (length(resp$repos) == 0) {
+    return()
+  } else {
+    forked <- resp$repos[resp$repos$forked_from_project$id == to,]
+  }
 
   if (length(forked) == 0) {
     message("Error trying to find fork")
@@ -545,10 +559,15 @@ collect_work <- function(token, assignment, userfile,
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  resp <- projID(assignment, token, server)
+  search <- strsplit(assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+  resp <- projID(assignment, token, server, owned = TRUE, search = search)
 
-  if (resp$status != "OKAY")
-    stop("Error getting assignment ", assignment)
+  if (resp$status != "OKAY") {
+    resp <- projID(assignment, token, server, owned = FALSE, search = search)
+    if (resp$status != "OKAY") {
+      stop("Error getting assignment ", assignment)
+    }
+  }
 
   project_id <- resp$project_id
   udat <- read_ufile(userfile)
@@ -562,7 +581,7 @@ collect_work <- function(token, assignment, userfile,
   }
 
   udat$user_id <- userIDs(udat$userid, token, server)
-  resp <- apply(udat[,c("token","userid")], 1, merger, project_id, server)
+  resp <- apply(udat[,c("token","userid")], 1, merger, project_id, search = search, server)
   message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
 
@@ -583,10 +602,16 @@ fetch_work <- function(token, assignment,
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  resp <- projID(assignment, token, server)
 
-  if (resp$status != "OKAY")
-    stop("Error getting assignment ", assignment)
+  search <- strsplit(assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+  resp <- projID(assignment, token, server, owned = TRUE, search = search)
+
+  if (resp$status != "OKAY") {
+    resp <- projID(assignment, token, server, owned = FALSE, search = search)
+    if (resp$status != "OKAY") {
+      stop("Error getting assignment ", assignment)
+    }
+  }
 
   project_id <- resp$project_id
 
@@ -650,7 +675,7 @@ remove_group <- function(token, groupname, server) {
 }
 
 remove_projects <- function(token, server) {
-  ids <- get_allprojects(token, server)
+  ids <- get_allprojects(token, server, owned = TRUE)
   sapply(ids$repos$id, function(id) {
     remove_project(token, id, server)
   })
@@ -675,8 +700,8 @@ check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gi
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {
     token <- students[i, "token"]
-    if (token != "") {
-      id <- get_allprojects(token, server)
+    if (!is_empty(token)) {
+      id <- get_allprojects(token, server, owned = TRUE)
     } else {
       id$status <- "EMPTY"
     }
