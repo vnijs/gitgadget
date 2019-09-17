@@ -4,7 +4,7 @@
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome. For alternative that uses GitHub see https://github.com/rundel/ghclass although this does not (currently) have a shiny user interface.
 
-`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. `gitgadget` provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
+`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. `gitgadget` provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan. See also, [git for humans](https://speakerdeck.com/alicebartlett/git-for-humans)
 
 `gitgadget` requires Rstudio version 1.2 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
 
@@ -26,9 +26,25 @@ Unless you plan to use `gitgadget` to manage student assignments, use `student` 
 
 If you want to use an SSH key, make sure to click on the `Introduce` button first, restart Rstudio, and then click on the `SSH key` button. Copy the key shown in GitGadget to the gitlab.com page that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use `git clone git@some-private-repo` from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the video below for a demonstration.
 
+#### Setup for git and gitlab
+
 <iframe width="806" height="504" src="https://www.youtube.com/embed/FQx_3EDQaXc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-> Note: In the video we use a docker container (see https://github.com/radiant-rstats/docker/tree/master/install) but this is not required
+#### Individual assignment practice
+
+<iframe width="806" height="504" src="https://www.youtube.com/embed/CANV6-mfZ9I" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+#### Merge conflicts
+
+<iframe width="806" height="504" src="https://www.youtube.com/embed/elq5UUG0RbE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+#### Group assignment practice
+
+<iframe width="806" height="504" src="https://www.youtube.com/embed/uwqUHl3z37o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+> Note: In these videos we use a docker container (see https://github.com/radiant-rstats/docker/tree/master/install) but this is not required
 
 ## Create (GitLab only)
 
