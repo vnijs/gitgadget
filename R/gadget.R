@@ -915,15 +915,25 @@ gitgadget <- function(port = get_port()) {
           }
           if (any(grepl("rpostback-askpass", ret)) || any(grepl("could not read Username", ret))) {
             rstudioapi::terminalActivate()
-            Sys.sleep(1)
-            tid <- rstudioapi::terminalVisible()
-            rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
-            showModal(
-              modalDialog(
-                title = "Provide user name and password",
-                span("Provide user name and password in Rstudio > Terminal to clone from GitLab (GitHub)")
+            tid <- c()
+            slp <- 1
+            while (length(tid) == 0) {
+              Sys.sleep(1)
+              tid <- rstudioapi::terminalVisible()
+              if  (slp > 10) break
+              slp <- slp + 1
+            }
+            if (slp > 10) {
+              cat("\nUnable to send commands to terminal. Please try again\n")
+            } else {
+              rstudioapi::terminalSend(tid, paste("git clone", clone_from, clone_to, "\n"))
+              showModal(
+                modalDialog(
+                  title = "Provide user name and password",
+                  span("Provide user name and password in Rstudio > Terminal to clone from GitLab (GitHub)")
+                )
               )
-            )
+            }
           } else if (any(grepl("fatal:", ret))) {
             cat(ret, sep = "\n")
           } else {
