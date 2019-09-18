@@ -24,25 +24,23 @@ To create and fork repos and collect merge requests you will need to provide a G
 
 Unless you plan to use `gitgadget` to manage student assignments, use `student` as the `User type`. Finally, enter the main directory where you plan to clone code repos (e.g., "C:/Users/me/GitLab")
 
-If you want to use an SSH key, make sure to click on the `Introduce` button first, restart Rstudio, and then click on the `SSH key` button. Copy the key shown in GitGadget to the gitlab.com page that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use `git clone git@some-private-repo` from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the video below for a demonstration.
+If you want to use an SSH key, make sure to click on the `Introduce` button first, restart Rstudio, and then click on the `SSH key` button. Copy the key shown in GitGadget to the gitlab.com page that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use `git clone git@some-private-repo` from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the videos below for a demonstration.
 
 #### Setup for git and gitlab
 
-<iframe width="806" height="504" src="https://www.youtube.com/embed/FQx_3EDQaXc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+https://youtu.be/FQx_3EDQaXc
 
 #### Individual assignment practice
 
-<iframe width="806" height="504" src="https://www.youtube.com/embed/CANV6-mfZ9I" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+https://www.youtube.com/CANV6-mfZ9I
 
 #### Merge conflicts
 
-<iframe width="806" height="504" src="https://www.youtube.com/embed/elq5UUG0RbE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+https://www.youtube.com/elq5UUG0RbE
 
 #### Group assignment practice
 
-<iframe width="806" height="504" src="https://www.youtube.com/embed/uwqUHl3z37o" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+https://www.youtube.com/uwqUHl3z37o
 
 > Note: In these videos we use a docker container (see https://github.com/radiant-rstats/docker/tree/master/install) but this is not required
 
