@@ -529,10 +529,7 @@ gitgadget <- function(port = get_port()) {
           rstudioapi::navigateToFile("~/.ssh/config", line = 1000L)
         }
 
-        browseURL("https://gitlab.com/profile/keys")
-        # browseURL("https://github.com/settings/keys")
 
-      # } else if (os_type == "Windows") {
       } else {
         if (!is_empty(.ssh_exists())) {
           ssh_dir <- file.path(homedir, ".ssh")
@@ -554,6 +551,8 @@ gitgadget <- function(port = get_port()) {
           cat("\nSSH keys cannot be generated from Git Gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
         }
       }
+      browseURL("https://gitlab.com/profile/keys")
+      # browseURL("https://github.com/settings/keys")
     })
 
     observeEvent(input$intro_restart, {
@@ -572,7 +571,7 @@ gitgadget <- function(port = get_port()) {
 
     output$introduce_output <- renderPrint({
       input$intro_git
-      if (file.exists(file.path(find_home(), ".gitconfig"))) {
+      if (file.exists(file.path(find_home(), ".gitconfig")) || file.exists(file.path(find_home(), "Documents/.gitconfig"))) {
         ret <- system("git config --global --list", intern = TRUE) %>%
           .[grepl("^user",.)]
       } else {

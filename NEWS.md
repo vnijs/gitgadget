@@ -1,5 +1,6 @@
-# gitgadget 0.4.6.0
+# gitgadget 0.4.7.0
 
+* Fix to address that on Windows the global .gitconfig file may be put in the Documents folder
 * Added a `Check` button to the Introduce tab so you can easily check and edit the .Renviron and .Rprofile settings using `usethis` functions
 * Allow both the "Owner" and the "Maintainer" of a repo to create merge requests with Collect & Fetch
 
