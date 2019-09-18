@@ -14,6 +14,16 @@ install.packages("gitgadget", repos = "https://radiant-rstats.github.io/minicran
 
 To start `gitgadget` click on the Addins menu in Rstudio and then on `gitgadget`.
 
+On macOS, you will you will need to run the command below from a terminal to get access to git commands:
+
+```bash
+xcode-select --install;
+```
+
+On Windows you will need to install git bash from https://git-scm.com/download/win. Alternatively, you can use the following installer that will ensure git is setup correctly for use with gitgadget:
+
+https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe
+
 > Note: Hover over any button in the application for additional information about what clicking the button will accomplish
 
 ## Introduce
@@ -32,15 +42,15 @@ https://youtu.be/FQx_3EDQaXc
 
 #### Individual assignment practice
 
-https://www.youtube.com/CANV6-mfZ9I
+https://youtu.be/CANV6-mfZ9I
 
 #### Merge conflicts
 
-https://www.youtube.com/elq5UUG0RbE
+https://youtu.be/elq5UUG0RbE
 
 #### Group assignment practice
 
-https://www.youtube.com/uwqUHl3z37o
+https://youtu.be/uwqUHl3z37o
 
 > Note: In these videos we use a docker container (see https://github.com/radiant-rstats/docker/tree/master/install) but this is not required
 
