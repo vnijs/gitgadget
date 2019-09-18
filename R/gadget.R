@@ -908,7 +908,11 @@ gitgadget <- function(port = get_port()) {
         cat("Used:", cmdclean, "\n\n")
 
         withProgress(message = "Cloning repo", value = 0, style = "old", {
-          ret <- suppressWarnings(system(paste(cmd, "2>&1"), intern = TRUE))
+          if (os_type == "Windows") {
+            ret <- suppressWarnings(system(cmd, intern = TRUE))
+          } else {
+            ret <- suppressWarnings(system(paste(cmd, "2>&1"), intern = TRUE))
+          }
           if (any(grepl("rpostback-askpass", ret)) || any(grepl("could not read Username", ret))) {
             rstudioapi::terminalActivate()
             Sys.sleep(1)
