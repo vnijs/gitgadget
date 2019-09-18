@@ -344,7 +344,6 @@ gitgadget <- function(port = get_port()) {
       if (!is_empty(input$intro_user_email)) {
         cmd <- paste("git config --global --replace-all user.email", input$intro_user_email)
         resp <- system(cmd, intern = TRUE)
-        print(resp)
         cat("Used:", cmd, "\n")
 
         renvir <- file.path(renvirdir, ".Renviron")
