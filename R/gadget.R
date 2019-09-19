@@ -144,7 +144,7 @@ gitgadget <- function(port = get_port()) {
                 uiOutput("ui_create_user_file"),
                 shinyFiles::shinyFilesButton("create_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
             ),
-            conditionalPanel("input.create_user_file != ''",
+            conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
               actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
               radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
             )
@@ -153,9 +153,7 @@ gitgadget <- function(port = get_port()) {
           actionButton("remove_remote_show", "Remove remote", title = "Remove remote repo if present", class = "btn-danger"),
           actionButton("remove_git_show", "Remove .git", title = "Remove local .git directory if present", class = "btn-danger"),
           HTML("<h4>Create local .git and remote repo</h4>"),
-          actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
-          actionButton("create_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
-          actionButton("create_show_repo", "Show", title = "Show class repo to students", class = "btn-success"),
+          uiOutput("ui_create_buttons"),
           hr(),
           verbatimTextOutput("create_output")
         )
@@ -468,6 +466,18 @@ gitgadget <- function(port = get_port()) {
      # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
     })
 
+    output$ui_create_buttons <- renderUI({
+      if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
+        tagList(
+          actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
+          actionButton("create_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
+          actionButton("create_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
+        )
+      } else {
+        actionButton("create", "Create", title = "Create a new repo using the gitlab API")
+      }
+    })
+
     intro_ssh <- eventReactive(input$intro_ssh, {
       if (os_type != "Windows") {
         email <- system("git config --global --list", intern = TRUE) %>%
@@ -721,7 +731,7 @@ gitgadget <- function(port = get_port()) {
               with(tags, table(
                 align = "right",
                 td(modalButton("Cancel")),
-                td(conditionalPanel("input.create_user_file != ''",
+                td(conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
                   actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
                 )),
                 td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
