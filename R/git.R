@@ -839,7 +839,7 @@ if (main_git__) {
   userfile <- "~/git/msba-test-gitlab.csv"
   students <- read_ufile(userfile)
   students
-  remove_student_projects(userfile, server)
+  remove_student_projects(userfile, Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
 
   ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
