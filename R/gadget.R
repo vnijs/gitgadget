@@ -237,9 +237,9 @@ gitgadget <- function(port = get_port()) {
               ),
               textInput("collect_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
               radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
-              actionButton("collect_show_repo", "Show", title = "Show class repo to students", class = "btn-success"),
               actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
               actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"),
+              actionButton("collect_show_repo", "Show", title = "Show class repo to students", class = "btn-success"),
               actionButton("collect_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning")
             ),
             hr(),
@@ -466,18 +466,6 @@ gitgadget <- function(port = get_port()) {
      # actionButton("intro_git", "Introduce", title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>")
     })
 
-    output$ui_create_buttons <- renderUI({
-      if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
-        tagList(
-          actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
-          actionButton("create_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
-          actionButton("create_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
-        )
-      } else {
-        actionButton("create", "Create", title = "Create a new repo using the gitlab API")
-      }
-    })
-
     intro_ssh <- eventReactive(input$intro_ssh, {
       if (os_type != "Windows") {
         email <- system("git config --global --list", intern = TRUE) %>%
@@ -681,6 +669,18 @@ gitgadget <- function(port = get_port()) {
         }
       }
       textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+    })
+
+    output$ui_create_buttons <- renderUI({
+      if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
+        tagList(
+          actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
+          actionButton("create_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
+          actionButton("create_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
+        )
+      } else {
+        actionButton("create", "Create", title = "Create a new repo using the gitlab API")
+      }
     })
 
     observeEvent(input$create_check_tokens, {

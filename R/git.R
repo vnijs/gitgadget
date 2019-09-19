@@ -413,7 +413,7 @@ assign_work <- function(token, groupname, assignment, userfile,
 
   resp <- student_data %>%
     group_by_at(.vars = "git_id") %>%
-    do(setup(.))
+    do(add_users(.))
 
   if (type == "individual")
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
@@ -653,7 +653,18 @@ collect_work <- function(token, assignment, userfile,
       slice(1)
   }
 
-  udat$user_id <- userIDs(udat$userid, token, server)
+  udat$git_id <- userIDs(udat$userid, token, server)
+
+  ## ensuring that users have the required access to create a merge request
+  add_users <- function(dat) {
+    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+    dat
+  }
+
+  resp <- udat %>%
+    group_by_at(.vars = "git_id") %>%
+    do(add_users(.))
+
   resp <- apply(udat[,c("token","userid")], 1, merger, project_id, search = search, server)
   message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
