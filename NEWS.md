@@ -1,5 +1,7 @@
-# gitgadget 0.4.7.0
+# gitgadget 0.4.8.0
 
+* Permissions are now set at the repo/projects level, rather than at the group level
+* Both Create and Collect now have the option to _Show_ (i.e., add permissions) or _Hide_ (i.e., remove permissions) from a repo
 * Fix to address that on Windows the global .gitconfig file may be put in the Documents folder
 * Added a `Check` button to the Introduce tab so you can easily check and edit the .Renviron and .Rprofile settings using `usethis` functions
 * Allow both the "Owner" and the "Maintainer" of a repo to create merge requests with Collect & Fetch

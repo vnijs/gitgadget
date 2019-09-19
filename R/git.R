@@ -82,31 +82,94 @@ groupr <- function(groupname, path, token, server) {
   list(status = "OKAY", group_id = group_id)
 }
 
-add_users <- function(user_ids, group_id, token, permission, server) {
-  resp <- lapply(user_ids, function(user_id) {
-    add_user(user_id, group_id, token, permission, server)$status
-  })
-  if (resp[[1]] != "OKAY") stop("\nThere was an error adding users\n")
+
+add_users_repo <- function(token, repo, userfile, permission = 20, server = "https://gitlab.com/api/v4/") {
+
+  resp <- connect(token, server)
+  if (resp$status != 'OKAY')
+    stop("Error connecting to server: check token/server")
+
+  resp <- projID(repo, token, server)
+
+  if (resp$status != "OKAY") {
+    message("Error finding repo: ", repo)
+    return(invisible())
+  }
+
+  project_id <- resp$project_id
+  student_data <- read_ufile(userfile)
+  student_data$git_id <- userIDs(student_data$userid, token, server)
+
+  setup <- function(dat) {
+    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+    dat
+  }
+
+  resp <- student_data %>%
+    group_by_at(.vars = "git_id") %>%
+    do(setup(.))
 }
 
-add_user <- function(user_id, group_id, token, permission, server) {
+add_user_repo <- function(user_id, repo_id, token, permission, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl <- paste0(server, "groups/", group_id, "/members?user_id=", user_id, "&access_level=", permission)
+  murl <- paste0(server, "projects/", repo_id, "/members?user_id=", user_id, "&access_level=", permission)
   resp <- curl_fetch_memory(murl,h)
   if (checkerr(resp$status_code) == FALSE) {
     mess <- fromJSON(rawToChar(resp$content))$message
     if (length(mess) > 0 && grepl("already exists", mess, ignore.case = TRUE)) {
       return(list(status = "OKAY", message = mess))
     } else {
-      message("There was an error adding user", user_id, "to group", group_id, ":", mess, "\n")
+      message("There was an error adding user", user_id, "to repo", repo_id, ":", mess, "\n")
       return(list(status = "SERVER_ERROR", message = mess))
     }
   }
 
   resp$content <- fromJSON(rawToChar(resp$content))
   list(status = "OKAY")
+}
+
+
+remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.com/api/v4/") {
+
+  resp <- connect(token, server)
+  if (resp$status != 'OKAY')
+    stop("Error connecting to server: check token/server")
+
+  resp <- projID(repo, token, server)
+
+  if (resp$status != "OKAY") {
+    message("Error finding repo: ", repo)
+    return(invisible())
+  }
+
+  project_id <- resp$project_id
+  student_data <- read_ufile(userfile)
+  student_data$git_id <- userIDs(student_data$userid, token, server)
+
+  setup <- function(dat) {
+    remove_user_repo(dat$git_id, project_id, token, server = server)
+    dat
+  }
+
+  resp <- student_data %>%
+    group_by_at(.vars = "git_id") %>%
+    do(setup(.))
+}
+
+remove_user_repo <- function(user_id, repo_id, token, server) {
+  h <- new_handle()
+  handle_setopt(h, customrequest = "DELETE")
+  handle_setheaders(h, "PRIVATE-TOKEN" = token)
+  murl <- paste0(server, "projects/", repo_id, "/members/", user_id)
+  resp <- curl_fetch_memory(murl,h)
+  if (checkerr(resp$status_code) == FALSE) {
+    message("User ", user_id, " was not a member of repo ", repo_id, "\n")
+    list(status = "SERVER_ERROR")
+  } else {
+    list(status = "OKAY")
+  }
 }
 
 #' Create a group on gitlab using the API
@@ -140,12 +203,13 @@ create_group <- function(token, groupname = "", userfile = "",
   }
 
   ## must give users permission in order to fork repo for them
-  if (!is_empty(userfile)) {
-    course_id <- resp$group_id
-    udat <- read_ufile(userfile)
-    uids <- userIDs(udat$userid, token, server)
-    add_users(uids, course_id, token, permission, server)
-  }
+  ## not currently used
+  # if (!is_empty(userfile)) {
+  #   course_id <- resp$group_id
+  #   udat <- read_ufile(userfile)
+  #   uids <- userIDs(udat$userid, token, server)
+  #   add_users_group(uids, course_id, token, permission, server)
+  # }
 }
 
 get_allprojects <- function(token, server, owned = TRUE, search = "", everything = FALSE, turn = 1) {
@@ -342,12 +406,21 @@ assign_work <- function(token, groupname, assignment, userfile,
   student_data <- read_ufile(userfile)
   student_data$git_id <- userIDs(student_data$userid, token, server)
 
+  add_users <- function(dat) {
+    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+    dat
+  }
+
+  resp <- student_data %>%
+    group_by_at(.vars = "git_id") %>%
+    do(setup(.))
+
   if (type == "individual")
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
 
+  leader <- 1
   setup <- function(dat) {
     dat$rownum <- seq_len(nrow(dat))
-    leader <- 1
     teamname <- dat$team[leader]
     setupteam(dat$token[leader], dat$userid[leader], dat$userid[-leader], dat$git_id[leader], dat$git_id[-leader], project_id, server, search = assignment)
     dat$teamname <- teamname
