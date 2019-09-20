@@ -1,4 +1,4 @@
-# gitgadget 0.4.8.0
+# gitgadget 0.5.0.0
 
 * Permissions are now set at the repo/projects level, rather than at the group level
 * Both Create and Collect now have the option to _Show_ (i.e., add permissions) or _Hide_ (i.e., remove permissions) from a repo

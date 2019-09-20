@@ -202,14 +202,16 @@ create_group <- function(token, groupname = "", userfile = "",
     return(invisible())
   }
 
-  ## must give users permission in order to fork repo for them
-  ## not currently used
-  # if (!is_empty(userfile)) {
-  #   course_id <- resp$group_id
-  #   udat <- read_ufile(userfile)
-  #   uids <- userIDs(udat$userid, token, server)
-  #   add_users_group(uids, course_id, token, permission, server)
-  # }
+  # https://docs.gitlab.com/ee/api/access_requests.html
+  permissions <- c(10, 20, 30, 40, 50)
+
+  ## provide group permissions
+  if (!is_empty(userfile) && permission %in% permissions) {
+    course_id <- resp$group_id
+    udat <- read_ufile(userfile)
+    uids <- userIDs(udat$userid, token, server)
+    add_users_group(uids, course_id, token, permission, server)
+  }
 }
 
 get_allprojects <- function(token, server, owned = TRUE, search = "", everything = FALSE, turn = 1) {

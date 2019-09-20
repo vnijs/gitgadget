@@ -239,8 +239,8 @@ gitgadget <- function(port = get_port()) {
               radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
               actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
               actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"),
-              actionButton("collect_show_repo", "Show", title = "Show class repo to students", class = "btn-success"),
-              actionButton("collect_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning")
+              actionButton("collect_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
+              actionButton("collect_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
             ),
             hr(),
             verbatimTextOutput("collect_output")
@@ -861,7 +861,7 @@ gitgadget <- function(port = get_port()) {
             cat("Creating group ...\n")
             create_group(
               input$create_token, create_group_lc, input$create_user_file,
-              permission = 20, server = input$create_server
+              permission = 0, server = input$create_server
             )
           }
 
@@ -1203,8 +1203,11 @@ gitgadget <- function(port = get_port()) {
     ## Show reset modal when button is clicked.
     observeEvent(input$sync_undo_commit_show, {
       ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
+      commit_mess <- system("git log -1 --pretty=%B", intern = TRUE)
       showModal(
         modalDialog(title = "Undo latest local commit",
+          span(suppressWarnings(paste0("\"", commit_mess[1], "\""))),
+          br(), br(),
           span("Are you sure you want to undo the latest local commit? This will
                leave the latest changes un-staged (see Rstudio Git tab) so you can
                edit them or revert the changes"),
@@ -1302,27 +1305,6 @@ gitgadget <- function(port = get_port()) {
 
     output$sync_output <- renderPrint({
       remote_info()
-    })
-
-    get_assignments <- eventReactive(input$collect_list, {
-
-      token <- input$collect_token
-      group <- input$collect_group
-      server <- input$collect_server
-      if (is_empty(token) || is_empty(server)) {
-        message("Please specify all required inputs to retrieve available assignments")
-        return(invisible())
-      }
-
-      proj <- get_allprojects(token, server = "https://gitlab.com/api/v4/", everything = TRUE)$repos
-      proj <- proj[proj$namespace$name == group,]
-
-      if (length(proj) == 0) {
-        message("No assignments found for specified groupname")
-        return(invisible())
-      } else {
-        proj[["name"]]
-      }
     })
 
     output$ui_collect_assignment <- renderUI({
