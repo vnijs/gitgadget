@@ -1435,7 +1435,7 @@ gitgadget <- function(port = get_port()) {
 
     output$collect_output <- renderPrint({
       if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
-       cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the\nRstudio project used to create and for the assignment repo (i.e., check is the\nAssignment name shown is correct). Then press the Collect button to generate Merge\nRequests. Click the Fetch button to review the Merge Requests locally") } else {
+       cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the\nRstudio project used to create the assignment repo or in a clone of that repo (i.e.,\ncheck if the Assignment name shown is correct). Then press the Collect button to generate\nMerge Requests. Click the Fetch button to review the Merge Requests locally as branches") } else {
         if (pressed(input$collect))
           ret <- collect()
         if (pressed(input$collect_fetch)) {
