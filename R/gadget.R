@@ -144,6 +144,10 @@ gitgadget <- function(port = get_port()) {
                 uiOutput("ui_create_user_file"),
                 shinyFiles::shinyFilesButton("create_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
             ),
+            fillRow(height = "70px", width = "475px",
+                uiOutput("ui_create_ta_file"),
+                shinyFiles::shinyFilesButton("create_tafile_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors", style = "margin-top: 25px;")
+            ),
             conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
               actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
               radioButtons("create_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE)
@@ -234,6 +238,15 @@ gitgadget <- function(port = get_port()) {
               fillRow(height = "70px", width = "475px",
                 uiOutput("ui_collect_user_file"),
                 shinyFiles::shinyFilesButton("collect_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+              ),
+              fillRow(height = "70px", width = "475px",
+                uiOutput("ui_collect_ta_file"),
+                shinyFiles::shinyFilesButton("collect_tafile_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors", style = "margin-top: 25px;")
+              ),
+
+              conditionalPanel("input.intro_user_type == 'faculty' && input.collect_ta_file != ''",
+                actionButton("collect_hide_from_ta", "Hide", title = "Hide student forks from TA", class = "btn-warning"),
+                actionButton("collect_show_to_ta", "Show", title = "Show student forks to TA", class = "btn-success")
               ),
               textInput("collect_server","API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
               radioButtons("collect_type", "Assignment type:", c("individual","team"), "individual", inline = TRUE),
@@ -671,6 +684,25 @@ gitgadget <- function(port = get_port()) {
       textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
     })
 
+    create_ta_uploadfile <- shinyFiles::shinyFileChoose(
+      input = input,
+      id = "create_tafile_find",
+      roots = gg_volumes,
+      session = session,
+      filetype = "csv"
+    )
+
+    output$ui_create_ta_file <- renderUI({
+      init <- Sys.getenv("git.tafile")
+      if (!is.integer(input$create_tafile_find)) {
+        chosen <- shinyFiles::parseFilePaths(gg_volumes, input$create_tafile_find)
+        if (nrow(chosen) > 0) {
+          init <- chosen$datapath
+        }
+      }
+      textInput("create_ta_file","Upload file with TA tokens:", value = init, placeholder = "Open TA CSV file")
+    })
+
     output$ui_create_buttons <- renderUI({
       if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
         tagList(
@@ -878,7 +910,9 @@ gitgadget <- function(port = get_port()) {
               cat("Assigning work ...\n")
               assign_work(
                 input$create_token, create_group_lc, repo,
-                input$create_user_file, type = input$create_type, pre = create_pre_lc,
+                input$create_user_file,
+                tafile = input$create_ta_file,
+                type = input$create_type, pre = create_pre_lc,
                 server = input$create_server
               )
             }
@@ -1340,6 +1374,28 @@ gitgadget <- function(port = get_port()) {
       textInput("collect_user_file", "Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
     })
 
+    collect_tafile_find <- shinyFiles::shinyFileChoose(
+      input = input,
+      id = "collect_tafile_find",
+      roots = gg_volumes,
+      session = session,
+      filetype = "csv"
+    )
+
+    ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
+    ## setup a branch switcher so you can easily do "git checkout origin/merge-requests/1" for each PR
+    ## can you push back tot the PR as well?
+    output$ui_collect_ta_file <- renderUI({
+      init <- Sys.getenv("git.tafile")
+      if (!is.integer(input$collect_tafile_find)) {
+        chosen <- shinyFiles::parseFilePaths(gg_volumes, input$collect_tafile_find)
+        if (nrow(chosen) > 0) {
+          init <- chosen$datapath
+        }
+      }
+      textInput("collect_ta_file", "Upload file with TA tokens:", value = init, placeholder = "Open TA CSV file")
+    })
+
     collect <- eventReactive(input$collect, {
       req(input$collect_token, input$collect_server, input$collect_user_file)
 
@@ -1430,6 +1486,40 @@ gitgadget <- function(port = get_port()) {
       withProgress(message = "Showing class repo", value = 0, style = "old", {
         add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server)
         cat("User permissions added ...\n\n")
+      })
+    })
+
+    observeEvent(input$collect_hide_from_ta, {
+      req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
+      withProgress(message = "Hiding student forks from TA", value = 0, style = "old", {
+        repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+        students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+        if (input$collect_type == "team") {
+          students <- distinct(students, team, .keep_all = TRUE)
+        }
+        for (i in seq_len(nrow(students))) {
+          fork <- paste0(students[i, "userid"], "/", repo)
+          remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server)
+          message(paste0("Project fork ", fork, " hidden from TAs"))
+        }
+        cat("\nStudent forks hidden from TA ...\n")
+      })
+    })
+
+    observeEvent(input$collect_show_to_ta, {
+      req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
+      withProgress(message = "Showing student forks to TA", value = 0, style = "old", {
+        repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+        students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+        if (input$collect_type == "team") {
+          students <- distinct(students, team, .keep_all = TRUE)
+        }
+        for (i in seq_len(nrow(students))) {
+          fork <- paste0(students[i, "userid"], "/", repo)
+          add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server)
+          message(paste0("Project fork ", fork, " shown to TAs"))
+        }
+        cat("Student forks shown to TA ...\n\n")
       })
     })
 

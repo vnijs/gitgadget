@@ -101,7 +101,7 @@ add_users_repo <- function(token, repo, userfile, permission = 20, server = "htt
   student_data$git_id <- userIDs(student_data$userid, token, server)
 
   setup <- function(dat) {
-    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+    add_user_repo(dat$git_id, project_id, token, permission, server = server)
     dat
   }
 
@@ -381,13 +381,14 @@ add_team <- function(proj_id, token, team_mates, server) {
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param assignment Name of the assignment to assign
 #' @param userfile A csv file with student information (i.e., username and token)
+#' @param tafile A optional csv file with TA information (i.e., username and token)
 #' @param type Individual or Team work
 #' @param pre Pre-amble for the assignment name, usually groupname + "-"
 #' @param server The gitlab API server
 #'
 #' @export
 assign_work <- function(token, groupname, assignment, userfile,
-                        type = "individual", pre = "",
+                        tafile = "", type = "individual", pre = "",
                         server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(token, server)
@@ -405,34 +406,54 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  student_data <- read_ufile(userfile)
-  student_data$git_id <- userIDs(student_data$userid, token, server)
 
-  add_users <- function(dat) {
-    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+  add_users <- function(dat, permission) {
+    add_user_repo(dat$git_id, project_id, token, permission, server = server)
     dat
   }
 
+  student_data <- read_ufile(userfile)
+  student_data$git_id <- userIDs(student_data$userid, token, server)
+
   resp <- student_data %>%
     group_by_at(.vars = "git_id") %>%
-    do(add_users(.))
+    do(add_users(., 20))
 
   if (type == "individual")
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
 
-  leader <- 1
-  setup <- function(dat) {
-    dat$rownum <- seq_len(nrow(dat))
-    teamname <- dat$team[leader]
-    setupteam(dat$token[leader], dat$userid[leader], dat$userid[-leader], dat$git_id[leader], dat$git_id[-leader], project_id, server, search = assignment)
-    dat$teamname <- teamname
-    dat$leader <- dat$userid[leader]
-    dat
+  if (!is_empty(tafile)) {
+    ta_data <- read_ufile(tafile)
+    ta_data$git_id <- userIDs(ta_data$userid, token, server)
+    ta_data$team <- "team0"
+
+    resp <- ta_data %>%
+      group_by_at(.vars = "git_id") %>%
+      do(add_users(., 40))
+  } else {
+    ta_data <- head(student_data, 0)
   }
 
-  resp <- student_data %>%
-    group_by_at(.vars = "team") %>%
-    do(setup(.))
+  leader <- 1
+  teams <- unique(student_data$team)
+  setup <- function(dat) {
+    setup_dat <- bind_rows(dat, ta_data)
+    setupteam(
+      setup_dat$token[leader],
+      setup_dat$userid[leader],
+      setup_dat$userid[-leader],
+      setup_dat$git_id[leader],
+      setup_dat$git_id[-leader],
+      project_id,
+      server,
+      search = assignment
+    )
+  }
+
+  for (i in teams) {
+    filter(student_data, team == i) %>%
+      setup()
+  }
 }
 
 maker <- function(repo_name, token, server, namespace = "") {
