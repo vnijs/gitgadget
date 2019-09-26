@@ -14,13 +14,12 @@ connect <- function(token = Sys.getenv("git.token"), server = "https://gitlab.co
   }
 }
 
-read_ufile <- function(userfile) {
+read_ufile <- function(userfile, cols = c("userid", "team", "token")) {
   users <- read.csv(userfile, stringsAsFactors = FALSE)
-  cols <- c("userid", "team", "token")
-  if (sum(cols %in% colnames(users)) < 3) {
-    stop("Userfile must include the columns ", paste0(cols, collapse = ", "))
-  } else {
+  if (all(cols %in% colnames(users))) {
     users
+  } else {
+    stop("Userfile must include the columns ", paste0(cols, collapse = ", "))
   }
 }
 
@@ -97,15 +96,15 @@ add_users_repo <- function(token, repo, userfile, permission = 20, server = "htt
   }
 
   project_id <- resp$project_id
-  student_data <- read_ufile(userfile)
-  student_data$git_id <- userIDs(student_data$userid, token, server)
+  user_data <- read_ufile(userfile, cols = c("userid", "token"))
+  user_data$git_id <- userIDs(user_data$userid, token, server)
 
   setup <- function(dat) {
     add_user_repo(dat$git_id, project_id, token, permission, server = server)
     dat
   }
 
-  resp <- student_data %>%
+  resp <- user_data %>%
     group_by_at(.vars = "git_id") %>%
     do(setup(.))
 }
@@ -145,15 +144,15 @@ remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.co
   }
 
   project_id <- resp$project_id
-  student_data <- read_ufile(userfile)
-  student_data$git_id <- userIDs(student_data$userid, token, server)
+  user_data <- read_ufile(userfile, cols = c("userid", "token"))
+  user_data$git_id <- userIDs(user_data$userid, token, server)
 
   setup <- function(dat) {
     remove_user_repo(dat$git_id, project_id, token, server = server)
     dat
   }
 
-  resp <- student_data %>%
+  resp <- user_data %>%
     group_by_at(.vars = "git_id") %>%
     do(setup(.))
 }
@@ -422,7 +421,7 @@ assign_work <- function(token, groupname, assignment, userfile,
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
 
   if (!is_empty(tafile)) {
-    ta_data <- read_ufile(tafile)
+    ta_data <- read_ufile(tafile, cols = c("userid", "token"))
     ta_data$git_id <- userIDs(ta_data$userid, token, server)
     ta_data$team <- "team0"
 
@@ -801,7 +800,7 @@ remove_student_projects <- function(userfile, server) {
 
 check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")) {
 
-  students <- read_ufile(userfile)
+  students <- read_ufile(userfile, cols = c("userid", "token", "email"))
 
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {

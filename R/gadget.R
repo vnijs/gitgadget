@@ -716,9 +716,16 @@ gitgadget <- function(port = get_port()) {
     })
 
     observeEvent(input$create_check_tokens, {
-      withProgress(message = "Checking student tokens on GitLab", value = 0, style = "old", {
-        check_tokens(input$create_user_file)
-      })
+      if (!is_empty(input$create_user_file)) {
+        withProgress(message = "Checking student tokens on GitLab", value = 0, style = "old", {
+          check_tokens(input$create_user_file)
+        })
+      }
+      if (!is_empty(input$create_ta_file)) {
+        withProgress(message = "Checking TA tokens on GitLab", value = 0, style = "old", {
+          check_tokens(input$create_ta_file)
+        })
+      }
       message("\nToken check completed. Check the console for messages\n")
     })
 
