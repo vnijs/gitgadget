@@ -406,7 +406,6 @@ assign_work <- function(token, groupname, assignment, userfile,
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-
   add_users <- function(dat, permission) {
     add_user_repo(dat$git_id, project_id, token, permission, server = server)
     dat
