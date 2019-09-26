@@ -349,7 +349,7 @@ setupteam <- function(token, leader, others, git_leader, git_others, project_id,
   ## add others as users
   if (length(others) > 0) {
     message("Adding ", paste0(others, collapse = ", "), " to ", leader, "'s repo")
-    add_team(leader_project_id, token, data.frame(others, git_others), server)
+    resp <- add_team(leader_project_id, token, data.frame(others, git_others), server)
   }
   invisible()
 }
@@ -360,11 +360,15 @@ add_team <- function(proj_id, token, team_mates, server) {
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
   apply(team_mates, 1, function(others) {
-    murl <- paste0(server, "projects/", proj_id, "/members?user_id=", others[2], "&access_level=40")
+    murl <- paste0(server, "projects/", proj_id, "/members?user_id=", gsub(" ", "", others[2]), "&access_level=40")
     resp <- curl_fetch_memory(murl, h)
+    mess <- rawToChar(resp$content)
     if (checkerr(resp$status_code) == TRUE) {
       content <- fromJSON(rawToChar(resp$content))
       list(status = "OKAY", content = content)
+    } else  if (length(mess) > 0 && grepl("already exists", mess, ignore.case = TRUE)) {
+      message(paste0("User ", others[1], " is already a member"))
+      list(status = "OKAY", message = mess)
     } else {
       message("Error adding user ", others[1], " to team: server code ", resp$status_code)
       list(status = "SERVER_ERROR", content = rawToChar(resp$content))
@@ -434,8 +438,9 @@ assign_work <- function(token, groupname, assignment, userfile,
 
   leader <- 1
   teams <- unique(student_data$team)
+  vars <- c("token", "userid", "git_id")
   setup <- function(dat) {
-    setup_dat <- bind_rows(dat, ta_data)
+    setup_dat <- bind_rows(dat[ ,vars], ta_data[ ,vars])
     setupteam(
       setup_dat$token[leader],
       setup_dat$userid[leader],
