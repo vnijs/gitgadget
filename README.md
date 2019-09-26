@@ -62,6 +62,8 @@ Enter the path to a local directory to create a repo on GitLab. If the local dir
 
 If you selected `faculty` as the `User type` in the _Introduce_ tab you will have the option to upload a CSV file with student tokens (see below). If a user file is provided, a radio button will be shown that can be used to indicate if the work should be completed individually or in teams. Furthermore, you can choose if you want to _hide_ or _show_ the master class repo to students. _Hiding_ the master repo can avoid confusion where a student might accidentally clone the wrong repo (i.e., the class repo rather than their own fork) and not be able to push there changes back to gitlab. _Showing_ the master repo, on the other hand, will make it possible to _sync_ any changes to the class repo after it was forked for each student.
 
+If a CSV file with TA information is specified they will be added as "Maintainer" to the class repo. The will also be added as "Maintainer" to all created student (or team) forks. TA information should include `userid`, `token`, and `email`. 
+
 ## Clone
 
 Clone a repo from GitLab (or GitHub) (e.g., `git@gitlab.com:username/test-repo.git`). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the remote repo, one will be created.
@@ -87,6 +89,8 @@ If the repo you are working on is a fork you probably want to make sure it is up
 ## Collect (GitLab only)
 
 Collect assignments from students/teams using Merge Requests (MR) on GitLab. Inputs will only be shown if the user type in the _Introduce_ tab is set to `faculty`. 
+
+If a CSV file with TA information is specified they removed from (_Hide_) or added to (_Show_) to all created student (or team) forks as a "Maintainer". TA information should include `userid`, `token`, and `email`. 
 
 To collect and fetch assignments linked to class repo you must first open a clone of that repo in Rstudio and provide your `Token`. The `Assignment name` input should now show the assignment repo name on gitlab.com. Next, indicate of the assignment was `individual` or `team` and click the `Collect` button to generate Merge Requests for all students (or team leads). Once this step is completed you can review and comment on the MRs using the GitLab UI. Collecting assignments requires that MRs be generated, which in turn requires that the class repo be visible to students. The `Hide` button can be used to ensure students will not have access to the MRs. However, since this is likely to be after the assignment due data, visibility of the class repo and MRs may not be or much concern. The `Show` button will provide students access to the class repo and MRs.
  
