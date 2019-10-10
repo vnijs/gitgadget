@@ -346,7 +346,7 @@ gitgadget <- function(port = get_port()) {
 
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             .[!grepl("git.user\\s*=", .)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n") %>%
@@ -363,7 +363,7 @@ gitgadget <- function(port = get_port()) {
 
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             .[!grepl("git.email\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\ngit.email = \"", input$intro_user_email, "\"\n") %>%
@@ -376,7 +376,7 @@ gitgadget <- function(port = get_port()) {
       if (!is_empty(input$intro_token_gl)) {
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             .[!grepl("git.token\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n") %>%
@@ -387,7 +387,7 @@ gitgadget <- function(port = get_port()) {
       if (!is_empty(input$intro_token_gh)) {
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             .[!grepl("GITHUB_PAT\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\nGITHUB_PAT = \"", input$intro_token_gh, "\"\n") %>%
@@ -401,7 +401,7 @@ gitgadget <- function(port = get_port()) {
         if (!dir.exists(git_home)) dir.create(git_home, recursive = TRUE)
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             .[!grepl("git.home\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
             paste0(., "\ngit.home = \"", git_home, "\"\n") %>%
@@ -418,7 +418,7 @@ gitgadget <- function(port = get_port()) {
         # renvir <- file.path(renvirdir, ".Rprofile")
         renvir <- file.path(renvirdir, ".Renviron")
         if (file.exists(renvir)) {
-          readLines(renvir) %>%
+          readLines(renvir, warn = FALSE) %>%
             # .[!grepl("options\\(git.user.type\\s*=",.)] %>%
             .[!grepl("git.user.type\\s*=",.)] %>%
             paste0(collapse = "\n") %>%
@@ -497,7 +497,7 @@ gitgadget <- function(port = get_port()) {
           paste0("ssh-keygen -t rsa -b 4096 -C \"", email, "\" -f ", ssh_dir, "/", keyname," -N '", input$intro_passphrase, "'") %>%
            system(.)
 
-          key <- suppressWarnings(readLines(paste0(ssh_dir, "/", keyname, ".pub")))
+          key <- readLines(paste0(ssh_dir, "/", keyname, ".pub"), warn = FALSE)
 
           if (os_type == "Darwin") {
             out <- pipe("pbcopy")
@@ -509,7 +509,7 @@ gitgadget <- function(port = get_port()) {
             cat("\n\nCopy the new public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
           }
         } else {
-          key <- suppressWarnings(readLines(.ssh_exists()))
+          key <- readLines(.ssh_exists(), warn = FALSE)
           if (os_type == "Darwin") {
             out <- pipe("pbcopy")
             cat(key, file = out)
@@ -525,10 +525,10 @@ gitgadget <- function(port = get_port()) {
         Sys.setenv(GIT_SSH_COMMAND=paste0("'ssh -i '", ssh_dir, "/", keyname))
 
         if (file.exists(file.path(ssh_dir, "known_hosts"))) {
-          if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+          if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
             system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
           }
-          if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+          if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
             system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
           }
         } else {
@@ -549,17 +549,17 @@ gitgadget <- function(port = get_port()) {
         if (!is_empty(.ssh_exists())) {
           ssh_dir <- file.path(homedir, ".ssh")
           if (file.exists(file.path(ssh_dir, "known_hosts"))) {
-            if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+            if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
               system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
             }
-            if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"))))) {
+            if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
               system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
             }
           } else {
             system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
             system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
           }
-          key <- suppressWarnings(readLines(.ssh_exists()))
+          key <- readLines(.ssh_exists(), warn = FALSE)
           cat(key, file = "clipboard")
           cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
        } else {
