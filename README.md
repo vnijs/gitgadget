@@ -143,5 +143,6 @@ git.server = "https://gitlab.com/api/v4/"
 git.group = "school-courseid-2019"
 git.prefix = "school-courseid-2019-"
 git.userfile = "path-to-user-file.csv"
+git.tafile = "path-to-ta-file.csv"
 git.user.type = "faculty"
 ```
