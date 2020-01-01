@@ -1,3 +1,9 @@
+# gitgadget 0.5.3.0
+
+* Warning if user tries to `create` a repo from the base git directory
+* Code base restructured
+* Added inst/app/app.R for use with shiny server
+
 # gitgadget 0.5.2.0
 
 * Set `warn = FALSE` for `readLines`

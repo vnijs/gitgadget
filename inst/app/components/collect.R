@@ -3,7 +3,7 @@ output$ui_collect_assignment <- renderUI({
   if (length(resp) == 0) {
     HTML("<label>No assignments available for specified input values</label>")
   } else {
-    selectInput("collect_assignment","Assignment name:", choices = resp)
+    selectInput("collect_assignment", "Assignment name:", choices = resp)
   }
 
 })
@@ -27,7 +27,10 @@ output$ui_collect_user_file <- renderUI({
       init <- chosen$datapath
     }
   }
-  textInput("collect_user_file", "Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+  textInput(
+    "collect_user_file", "Upload file with student tokens:", 
+    value = init, placeholder = "Open student CSV file"
+  )
 })
 
 collect_tafile_find <- shinyFiles::shinyFileChoose(
@@ -108,11 +111,10 @@ repo <- paste0(create_group_lc, "/", repo)
 
 observeEvent(input$create_hide_repo, {
   req(input$create_token, input$create_server, input$create_user_file)
-
   withProgress(message = "Hiding class repo", value = 0, style = "old", {
-repo <- create_repo_name()
-remove_users_repo(input$create_token, repo, input$create_user_file, server = input$create_server)
-cat("\nUser permissions removed ...\n\n")
+    repo <- create_repo_name()
+    remove_users_repo(input$create_token, repo, input$create_user_file, server = input$create_server)
+    cat("\nUser permissions removed ...\n\n")
   })
 })
 
@@ -120,72 +122,72 @@ cat("\nUser permissions removed ...\n\n")
 observeEvent(input$create_show_repo, {
   req(input$create_token, input$create_server, input$create_user_file)
   withProgress(message = "Showing class repo", value = 0, style = "old", {
-repo <- create_repo_name()
-add_users_repo(input$create_token, repo, input$create_user_file, permission = 20, server = input$create_server)
-cat("User permissions added ...\n")
+    repo <- create_repo_name()
+    add_users_repo(input$create_token, repo, input$create_user_file, permission = 20, server = input$create_server)
+    cat("User permissions added ...\n")
   })
 })
 
 observeEvent(input$collect_hide_repo, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_assignment)
   withProgress(message = "Hiding class repo", value = 0, style = "old", {
-remove_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, server = input$collect_server)
-cat("\nUser permissions removed ...\n")
+    remove_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, server = input$collect_server)
+    cat("\nUser permissions removed ...\n")
   })
 })
 
 observeEvent(input$collect_show_repo, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_assignment)
   withProgress(message = "Showing class repo", value = 0, style = "old", {
-add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server)
-cat("User permissions added ...\n\n")
+    add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server)
+    cat("User permissions added ...\n\n")
   })
 })
 
 observeEvent(input$collect_hide_from_ta, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
   withProgress(message = "Hiding student forks from TA", value = 0, style = "old", {
-repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
-students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
-if (input$collect_type == "team") {
-  students <- distinct(students, team, .keep_all = TRUE)
-}
-for (i in seq_len(nrow(students))) {
-  fork <- paste0(students[i, "userid"], "/", repo)
-  remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server)
-  message(paste0("Project fork ", fork, " hidden from TAs"))
-}
-cat("\nStudent forks hidden from TA ...\n")
+    repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+    students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    if (input$collect_type == "team") {
+      students <- distinct(students, team, .keep_all = TRUE)
+    }
+    for (i in seq_len(nrow(students))) {
+      fork <- paste0(students[i, "userid"], "/", repo)
+      remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server)
+      message(paste0("Project fork ", fork, " hidden from TAs"))
+    }
+    cat("\nStudent forks hidden from TA ...\n")
   })
 })
 
 observeEvent(input$collect_show_to_ta, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
   withProgress(message = "Showing student forks to TA", value = 0, style = "old", {
-repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
-students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
-if (input$collect_type == "team") {
-  students <- distinct(students, team, .keep_all = TRUE)
-}
-for (i in seq_len(nrow(students))) {
-  fork <- paste0(students[i, "userid"], "/", repo)
-  add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server)
-  message(paste0("Project fork ", fork, " shown to TAs"))
-}
-cat("Student forks shown to TA ...\n\n")
+    repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+    students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    if (input$collect_type == "team") {
+      students <- distinct(students, team, .keep_all = TRUE)
+    }
+    for (i in seq_len(nrow(students))) {
+      fork <- paste0(students[i, "userid"], "/", repo)
+      add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server)
+      message(paste0("Project fork ", fork, " shown to TAs"))
+    }
+    cat("Student forks shown to TA ...\n\n")
   })
 })
 
 output$collect_output <- renderPrint({
   if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {
    cat("Provide GitLab token and load the user file with GitLab tokens. You should be in the\nRstudio project used to create the assignment repo or in a clone of that repo (i.e.,\ncheck if the Assignment name shown is correct). Then press the Collect button to generate\nMerge Requests. Click the Fetch button to review the Merge Requests locally as branches") } else {
-if (pressed(input$collect))
-  ret <- collect()
-if (pressed(input$collect_fetch)) {
-  cat("Fetching merge requests ...\n")
-  ret <- collect_fetch()
-}
-if (not_pressed(input$collect) && not_pressed(input$collect_fetch))
-  cat("Specify GitLab token and the user file with GitLab tokens. Then press the Collect button")
+   if (pressed(input$collect))
+     ret <- collect()
+   if (pressed(input$collect_fetch)) {
+     cat("Fetching merge requests ...\n")
+     ret <- collect_fetch()
+   }
+   if (not_pressed(input$collect) && not_pressed(input$collect_fetch))
+     cat("Specify GitLab token and the user file with GitLab tokens. Then press the Collect button")
   }
 })

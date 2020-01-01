@@ -2,12 +2,9 @@
 remote_info <- function() {
   input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
   cat("Overview of remotes:\n\n")
-  # dir <- getOption("gitgadget.launch_dir", ".")
-  # paste0(system(paste0("git -C ", dir, " remote -v"), intern = TRUE), collapse = "\n") %>%
-  cat(
-    paste0(system(paste0("git remote -v"), intern = TRUE), collapse = "\n") %>%
-      gsub("(\t)|(  ) ", " ", .)
-  )
+  paste0(system(paste0("git remote -v"), intern = TRUE), collapse = "\n") %>%
+    gsub("(\t)|(  ) ", " ", .) %>%
+    cat()
 }
 
 assignment_name <- function() {
@@ -29,9 +26,9 @@ assignment_name <- function() {
 upstream_info <- function() {
   input$sync; input$sync_unlink
   system("git remote -v", intern = TRUE) %>%
-    .[grepl("^upstream",.)] %>%
-    gsub("^upstream\\s+","", .) %>%
-    gsub(" \\(fetch\\)$","", .)
+    .[grepl("^upstream", .)] %>%
+    gsub("^upstream\\s+", "", .) %>%
+    gsub(" \\(fetch\\)$", "", .)
 }
 
 observeEvent(input$sync_commit, {
@@ -61,7 +58,10 @@ observeEvent(input$sync_undo_commit_show, {
            edit them or revert the changes"),
       footer = tagList(
         modalButton("Cancel"),
-        actionButton("sync_undo_commit", "Undo", class = "btn-danger", title = "Undo the latest local commit\n\nGit command:\ngit reset HEAD~")
+        actionButton(
+          "sync_undo_commit", "Undo", class = "btn-danger", 
+          title = "Undo the latest local commit\n\nGit command:\ngit reset HEAD~"
+        )
       )
     )
   )
@@ -104,7 +104,10 @@ observeEvent(input$sync_reset_show, {
            and make a copy of the remote repo!"),
       footer = tagList(
         modalButton("Cancel"),
-        actionButton("sync_reset", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master")
+        actionButton(
+          "sync_reset", "Reset", class = "btn-danger", 
+          title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master"
+        )
       )
     )
   )
@@ -147,8 +150,11 @@ observeEvent(input$sync_unlink, {
 
 output$ui_sync_from <- renderUI({
   init <- upstream_info()
-  # textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https link to original remote repo")
-  textInput("sync_from","Sync repo with remote it was forked from:", value = ifelse(length(init) == 0, "", init[1]), placeholder = "Provide https or ssh link to original remote repo")
+  textInput(
+    "sync_from", "Sync repo with remote it was forked from:", 
+    value = ifelse(length(init) == 0, "", init[1]), 
+    placeholder = "Provide https or ssh link to original remote repo"
+  )
 })
 
 output$sync_output <- renderPrint({

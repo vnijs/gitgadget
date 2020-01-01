@@ -2,7 +2,6 @@ branches <- reactive({
   input$branch_delete
   input$branch_create
   input$branch_checkout
-
   # dir <- getOption("gitgadget.launch_dir", ".")
   # br <- system(paste0("git -C ", dir, " branch -a"), intern = TRUE)
   br <- system(paste0("git branch -a"), intern = TRUE)
@@ -12,7 +11,7 @@ branches <- reactive({
     c()
   } else {
     br %>% gsub("[\\* ]+", "", .) %>%
-    {.[!grepl("(^master$)|(^remotes/origin/master$)|(^remotes/origin/HEAD)",.)]}
+    {.[!grepl("(^master$)|(^remotes/origin/master$)|(^remotes/origin/HEAD)", .)]}
   }
 })
 
@@ -30,8 +29,6 @@ observeEvent(input$branch_create_from_mr, {
   if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
     system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
   }
-  # system("git fetch origin +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
-  # branches <- system("git branch ", intern = TRUE) %>% gsub("[\\* ]+", "", .)
 })
 
 observeEvent(input$branch_merge, {
@@ -103,9 +100,9 @@ rbranches <- reactive({
   if (length(br) == 0 || (!is.null(brs) && brs == 128)) {
     c()
   } else {
-    br %>% {unique(c(.[grepl("\\* ",.)],.))} %>%
+    br %>% {unique(c(.[grepl("\\* ", .)], .))} %>%
     gsub("[\\* ]+", "", .) %>%
-    {.[!grepl("(^remotes/origin/master$)|(^remotes/origin/HEAD)",.)]}
+    {.[!grepl("(^remotes/origin/master$)|(^remotes/origin/HEAD)", .)]}
   }
 })
 
@@ -123,7 +120,7 @@ observeEvent(input$branch_checkout, {
   if (!is.null(input$branch_checkout_name)) {
     ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
     withProgress(message = "Checkout branch", value = 0, style = "old", {
-      system(paste0("git checkout ", sub("remotes/origin/","",input$branch_checkout_name)))
+      system(paste0("git checkout ", sub("remotes/origin/", "", input$branch_checkout_name)))
     })
   }
 })

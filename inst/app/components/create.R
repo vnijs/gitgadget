@@ -41,7 +41,10 @@ output$ui_create_user_file <- renderUI({
       init <- chosen$datapath
     }
   }
-  textInput("create_user_file","Upload file with student tokens:", value = init, placeholder = "Open student CSV file")
+  textInput(
+    "create_user_file", "Upload file with student tokens:", 
+    value = init, placeholder = "Open student CSV file"
+  )
 })
 
 create_ta_uploadfile <- shinyFiles::shinyFileChoose(
@@ -60,15 +63,27 @@ output$ui_create_ta_file <- renderUI({
       init <- chosen$datapath
     }
   }
-  textInput("create_ta_file","Upload file with TA tokens:", value = init, placeholder = "Open TA CSV file")
+  textInput(
+    "create_ta_file", "Upload file with TA tokens:", 
+    value = init, placeholder = "Open TA CSV file"
+  )
 })
 
 output$ui_create_buttons <- renderUI({
   if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
     tagList(
-      actionButton("create", "Create", title = "Create a new repo using the gitlab API"),
-      actionButton("create_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
-      actionButton("create_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
+      actionButton(
+        "create", "Create", 
+        title = "Create a new repo using the gitlab API"
+      ),
+      actionButton(
+        "create_hide_repo", "Hide", 
+        title = "Hide class repo from students", class = "btn-warning"
+      ),
+      actionButton(
+        "create_show_repo", "Show", 
+        title = "Show class repo to students", class = "btn-success"
+      )
     )
   } else {
     actionButton("create", "Create", title = "Create a new repo using the gitlab API")
@@ -154,17 +169,6 @@ observeEvent(input$remove_remote_show, {
     showModal(
       modalDialog(title = "Remove remote GitHub repo",
         span("This feature has not yet been implemented for GitHub repos")
-        # span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
-        # footer = tagList(
-        #   with(tags, table(
-        #     align = "right",
-        #     td(modalButton("Cancel")),
-        #     td(conditionalPanel("input.create_user_file != ''",
-        #       actionButton("remove_forks", "Remove forks", title = "Remove forks from current repo created for students", class = "btn-danger")
-        #     )),
-        #     td(actionButton("remove_gitlab", "Remove remote", title = "Remove previous remote repo if present", class = "btn-danger"))
-        #   ))
-        # )
       )
     )
   }
@@ -196,7 +200,10 @@ remove_gitlab <- observeEvent(input$remove_gitlab, {
 
     cat("Removing remote repo ...\n")
 
-    id <- projID(paste0(create_group_lc, "/", create_pre_lc, repo), input$create_token, input$create_server)
+    id <- projID(
+      paste0(create_group_lc, "/", create_pre_lc, repo), 
+      input$create_token, input$create_server
+    )
     if (id$status == "OKAY") {
       resp <- remove_project(input$create_token, id$project_id, input$create_server)
       if (checkerr(resp$status_code))
@@ -230,7 +237,10 @@ remove_forks <- observeEvent(input$remove_forks, {
 
     students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
     for (i in seq_len(nrow(students))) {
-      id <- projID(paste0(students[i, "userid"], "/", create_pre_lc, repo), students[i, "token"], "https://gitlab.com/api/v4/")
+      id <- projID(
+        paste0(students[i, "userid"], "/", create_pre_lc, repo), 
+        students[i, "token"], "https://gitlab.com/api/v4/"
+      )
       if (id$status == "OKAY") {
         remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v4/")
         message(paste0("Project fork ", id$project_id, " removed for ", students[i, "userid"], " in ", students[i, "team"]))

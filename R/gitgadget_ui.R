@@ -5,7 +5,7 @@ gitgadget_ui <- function() {
     miniTitleBar(
       paste0("GITGADGET (", packageVersion("gitgadget"), ")"),
       right = actionButton(
-        "done", "Done", class = "btn-sm btn-primary", 
+        "done", "Done", class = "btn-sm btn-primary",
         onclick = "setTimeout(function(){window.close();}, 100);"
       ),
       left = miniTitleBarButton("help", "Help", primary = FALSE)
@@ -35,7 +35,10 @@ gitgadget_ui <- function() {
           ),
           # fillRow(height = "70px", width = "475px",
           #   passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
-          #   actionButton("intro_token_gh_get", "Create", title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;")
+          #   actionButton(
+          #     "intro_token_gh_get", "Create", 
+          #     title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;"
+          #   )
           # ),
           radioButtons(
             "intro_user_type", "User type:", c("student", "faculty"),
@@ -66,7 +69,6 @@ gitgadget_ui <- function() {
           radioButtons("create_ssh", "Authentication type:", c("ssh", "https"), "ssh", inline = TRUE),
           fillRow(height = "70px", width = "300px",
             textInput("create_user_name", "User name:", value = Sys.getenv("git.user")),
-            # passwordInput("create_token", "Token:", value = Sys.getenv("git.token"))
             uiOutput("ui_create_token")
           ),
           conditionalPanel("input.create_remote == 'GitLab'",
@@ -105,8 +107,14 @@ gitgadget_ui <- function() {
             )
           ),
           HTML("<h4>Remove existing remote repo local .git directory</h4>"),
-          actionButton("remove_remote_show", "Remove remote", title = "Remove remote repo if present", class = "btn-danger"),
-          actionButton("remove_git_show", "Remove .git", title = "Remove local .git directory if present", class = "btn-danger"),
+          actionButton(
+            "remove_remote_show", "Remove remote", 
+            title = "Remove remote repo if present", class = "btn-danger"
+          ),
+          actionButton(
+            "remove_git_show", "Remove .git", 
+            title = "Remove local .git directory if present", class = "btn-danger"
+          ),
           HTML("<h4>Create local .git and remote repo</h4>"),
           uiOutput("ui_create_buttons"),
           hr(),
@@ -117,22 +125,32 @@ gitgadget_ui <- function() {
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
           textInput(
-            "clone_from", "Repo to clone from remote git server:", 
+            "clone_from", "Repo to clone from remote git server:",
             placeholder = "Provide https or ssh link to repo", value = ""
           ),
           fillRow(height = "70px", width = "475px",
             uiOutput("ui_clone_into"),
             shinyFiles::shinyDirButton(
-              "clone_into_open", "Open", 
-              title = "Browse and select a local directory", 
+              "clone_into_open", "Open",
+              title = "Browse and select a local directory",
               style = "margin-top: 25px;"
             )
           ),
-          textInput("clone_to", "Custom directory to clone repo into:", placeholder = "Use for custom directory only", value = ""),
+          textInput(
+            "clone_to", "Custom directory to clone repo into:", 
+            placeholder = "Use for custom directory only", value = ""
+          ),
           {if (rstudioapi::isAvailable()) {
-            radioButtons("clone_proj", "Open project in:", c("current session" = "curr", "new session" = "new"), "new", inline = TRUE)
+            radioButtons(
+              "clone_proj", "Open project in:", 
+              c("current session" = "curr", "new session" = "new"), 
+              "new", inline = TRUE
+            )
           }},
-          actionButton("clone", "Clone", title = "Clone a repo from, e.g., github or gitlab over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"),
+          actionButton(
+            "clone", "Clone", 
+            title = "Clone a repo from, e.g., github or gitlab over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"
+          ),
           hr(),
           verbatimTextOutput("clone_output")
         )
@@ -142,9 +160,18 @@ gitgadget_ui <- function() {
           br(),
           HTML("<h4>Create a new branch</h4>"),
           textInput("branch_create_name", NULL, value = "", placeholder = "Provide a name for the new branch"),
-          actionButton("branch_create", "Create local", title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"),
-          actionButton("branch_link", "Link remote", title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"),
-          actionButton("branch_create_from_mr", "Create from MR", title = "Create a local branch from a Merge/Pull request\n"),
+          actionButton(
+            "branch_create", "Create local", 
+            title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"
+          ),
+          actionButton(
+            "branch_link", "Link remote", 
+            title = "Link the local branch to a (new) remote branch\n\nGit command:\ngit push --set-upstream origin <branch>"
+          ),
+          actionButton(
+            "branch_create_from_mr", "Create from MR", 
+            title = "Create a local branch from a Merge/Pull request\n"
+          ),
           HTML("<h4>Check out a branch</h4>"),
           fillRow(height = "40px", width = "420px",
             uiOutput("ui_branch_checkout_name"),
@@ -152,31 +179,70 @@ gitgadget_ui <- function() {
           ),
           HTML("<h4>Merge branches</h4>"),
           uiOutput("ui_branch_merge_branches"),
-          actionButton("branch_merge", "Merge branches", title = "Merge the 'from' branch into the 'into' branch\n\nGit commands:\ngit checkout <from branch>\ngit merge <into branch>"),
-          actionButton("branch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
+          actionButton(
+            "branch_merge", "Merge branches", 
+            title = "Merge the 'from' branch into the 'into' branch\n\nGit commands:\ngit checkout <from branch>\ngit merge <into branch>"
+          ),
+          actionButton(
+            "branch_abort", "Abort merge", 
+            title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"
+          ),
           HTML("<h4>Delete existing branch(es)</h4>"),
           uiOutput("ui_branch_delete_name"),
-          actionButton("branch_unlink", "Unlink remote", title = "Unlink the local and the remote branch(es). The remote branch(es) will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"),
-          actionButton("branch_delete", "Delete local", title = "Remove the local branch(es)\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"),
+          actionButton(
+            "branch_unlink", "Unlink remote", 
+            title = "Unlink the local and the remote branch(es). The remote branch(es) will not be deleted\n\nGit command:\ngit branch -d -r origin/<branch>"
+          ),
+          actionButton(
+            "branch_delete", "Delete local", 
+            title = "Remove the local branch(es)\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"
+          ),
           br(), br()
         )
       ),
       miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
-          textAreaInput("sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", placeholder = "Provide a commit message that describes the changes you made to the repo"),
-          actionButton("sync_commit", "Commit", title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""),
-          actionButton("sync_undo_commit_show", "Undo", class = "btn-danger", title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"),
+          textAreaInput(
+            "sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", 
+            placeholder = "Provide a commit message that describes the changes you made to the repo"
+          ),
+          actionButton(
+            "sync_commit", "Commit", 
+            title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""
+          ),
+          actionButton(
+            "sync_undo_commit_show", "Undo", class = "btn-danger", 
+            title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"
+          ),
           HTML("<h2>Sync with remote</h2>"),
           actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
-          actionButton("sync_push", "Push", title = "Push all commited updates to the remote repo\n\nGit command: git push"),
-          actionButton("sync_reset_show", "Reset", class = "btn-danger", title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"),
+          actionButton(
+            "sync_push", "Push", 
+            title = "Push all commited updates to the remote repo\n\nGit command: git push"
+          ),
+          actionButton(
+            "sync_reset_show", "Reset", class = "btn-danger", 
+            title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"
+          ),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
-          actionButton("sync", "Sync", title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"),
-          actionButton("sync_merge", "Merge", title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"),
-          actionButton("synch_abort", "Abort merge", title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"),
-          actionButton("sync_unlink", "Unlink", title = "Remove a link between a local repo and the original from which it was forked\n\nGit command:\ngit remote remove upstream"),
+          actionButton(
+            "sync", "Sync", 
+            title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"
+          ),
+          actionButton(
+            "sync_merge", "Merge", 
+            title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"
+          ),
+          actionButton(
+            "synch_abort", "Abort merge", 
+            title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"
+          ),
+          actionButton(
+            "sync_unlink", "Unlink", 
+            title = "Remove a link between a local repo and the original from which it was forked\n\nGit command:\ngit remote remove upstream"
+          ),
           hr(),
           verbatimTextOutput("sync_output")
         )
@@ -186,30 +252,45 @@ gitgadget_ui <- function() {
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
             passwordInput("collect_token", "Token:", value = Sys.getenv("git.token")),
-            # fillRow(height = "70px", width = "500px",
-            #   textInput("collect_group","Group name:", value = Sys.getenv("git.group", ""), placeholder = "Enter group name on GitLab"),
-            #   actionButton("collect_list", "List", title = "Collect the list of assignments associated with the specified group. Used for assignment management by instructors")
-            # ),
             uiOutput("ui_collect_assignment"),
             conditionalPanel("input.collect_assignment != undefined && input.collect_assignment != null &&
                 input.collect_assignment.length > 0",
               fillRow(height = "70px", width = "475px",
                 uiOutput("ui_collect_user_file"),
-                shinyFiles::shinyFilesButton("collect_file_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors")
+                shinyFiles::shinyFilesButton(
+                  "collect_file_find", "Open", multiple = FALSE, 
+                  title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors"
+                )
               ),
               fillRow(height = "70px", width = "475px",
                 uiOutput("ui_collect_ta_file"),
-                shinyFiles::shinyFilesButton("collect_tafile_find", "Open", multiple = FALSE, title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors", style = "margin-top: 25px;")
+                shinyFiles::shinyFilesButton(
+                  "collect_tafile_find", "Open", multiple = FALSE, 
+                  title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors", 
+                  style = "margin-top: 25px;"
+                )
               ),
-
               conditionalPanel("input.intro_user_type == 'faculty' && input.collect_ta_file != ''",
-                actionButton("collect_hide_from_ta", "Hide", title = "Hide student forks from TA", class = "btn-warning"),
+                actionButton(
+                  "collect_hide_from_ta", "Hide", 
+                  title = "Hide student forks from TA", 
+                  class = "btn-warning"
+                ),
                 actionButton("collect_show_to_ta", "Show", title = "Show student forks to TA", class = "btn-success")
               ),
-              textInput("collect_server", "API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
+              textInput(
+                "collect_server", "API server:", 
+                value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+              ),
               radioButtons("collect_type", "Assignment type:", c("individual", "team"), "individual", inline = TRUE),
-              actionButton("collect", "Collect", title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"),
-              actionButton("collect_fetch", "Fetch", title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"),
+              actionButton(
+                "collect", "Collect", 
+                title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"
+              ),
+              actionButton(
+                "collect_fetch", "Fetch", 
+                title = "Create local branches from all merge requests and link them to (new) remote branches. Used for assignment management by instructors"
+              ),
               actionButton("collect_hide_repo", "Hide", title = "Hide class repo from students", class = "btn-warning"),
               actionButton("collect_show_repo", "Show", title = "Show class repo to students", class = "btn-success")
             ),

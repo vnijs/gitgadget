@@ -89,7 +89,7 @@ output$clone_output <- renderPrint({
       rproj <- list.files(path = dir, pattern = "*.Rproj")
       if (length(rproj) == 0) {
         "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTex\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n" %>%
-          cat(file = file.path(dir, paste0(basename(dir),".Rproj")))
+          cat(file = file.path(dir, paste0(basename(dir), ".Rproj")))
       }
 
       vscode <- list.files(path = dir, pattern = "*.code-workspace")

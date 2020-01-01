@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 .DS_Store
+.vscode
 gitgadget.code-workspace
 cran-comments.md
