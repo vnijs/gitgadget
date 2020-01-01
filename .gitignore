@@ -3,5 +3,5 @@
 .RData
 .Ruserdata
 .DS_Store
-gitgadget.sublime-project
+gitgadget.code-workspace
 cran-comments.md

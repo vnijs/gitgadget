@@ -4,4 +4,6 @@
 ^.*\.sublime-project$
 ^\.travis\.yml$
 ^docs$
+^build$
+gitgadget.code-workspace
 cran-comments.md

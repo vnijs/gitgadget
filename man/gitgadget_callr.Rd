@@ -13,6 +13,4 @@ Launch gitgadget in a separate process
 Using the \code{callr} package to launch gitgadget in a separate process so
   the console is not blocked. Rstudio viewer is used if available. See
   \url{https://github.com/vnijs/gitgadget} for documentation
-
- @importFrom callr r_bg
 }
