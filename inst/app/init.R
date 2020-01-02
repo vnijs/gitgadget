@@ -46,7 +46,7 @@ if (rstudioapi::isAvailable()) {
   if (rstudioapi::getVersion() < "1.1") stop("GitGadget requires Rstudio version 1.1 or later")
 } else {
   wd <- getwd()
-  if (grepl("^/srv/", wd)) wd <- git_home 
+  if (grepl("^/srv/", wd) || wd == homedir) wd <- git_home 
   if (wd == "") {
     projdir <- basedir <- file.path(homedir, "git")
   } else {
