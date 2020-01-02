@@ -577,7 +577,7 @@ create_repo <- function(
 
   ## make sure .gitignore is added before create
   if (!file.exists(".gitignore"))
-    cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n.vscode\n", file = ".gitignore")
+    cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n.mypy_cache\n.vscode\n", file = ".gitignore")
 
   ## avoid CI unless already setup by user
   if (!file.exists(".gitlab-ci.yml"))

@@ -111,7 +111,7 @@ output$clone_output <- renderPrint({
 
       gitignore <- list.files(path = dir, all.files = TRUE, pattern = ".gitignore")
       if (length(gitignore) == 0) {
-        cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n", file = file.path(dir, ".gitignore"))
+        cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n.mypy_cache\n.vscode\n", file = ".gitignore")
       }
 
       cat("Repo was sucessfully cloned into", dir)
