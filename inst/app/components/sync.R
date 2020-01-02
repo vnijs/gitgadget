@@ -215,7 +215,6 @@ observeEvent(input$sync_unlink, {
       span(HTML(paste0(mess, collapse = "</br>")))
     )
   )
-
 })
 
 output$ui_sync_commit_message <- renderUI({

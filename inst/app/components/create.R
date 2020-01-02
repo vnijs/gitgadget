@@ -327,6 +327,54 @@ create <- eventReactive(input$create, {
   message("\nCreate process complete. Check the console for messages\n")
 })
 
+create_repo_name <- reactive({
+  repo <- basename(input$create_directory)
+  create_pre_lc <- tolower(input$create_pre)
+  if (!is_empty(create_pre_lc)) {
+    repo <- paste0(create_pre_lc, repo)
+  }
+
+  create_group_lc <- tolower(input$create_group)
+  if (!is_empty(create_group_lc) && create_group_lc != Sys.getenv("git.user")) {
+    repo <- paste0(create_group_lc, "/", repo)
+  }
+  repo
+})
+
+observeEvent(input$create_hide_repo, {
+  req(input$create_token, input$create_server, input$create_user_file)
+  withProgress(message = "Hiding class repo", value = 0, style = "old", {
+    repo <- create_repo_name()
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
+    mess <- capture.output(remove_users_repo(input$create_token, repo, input$create_user_file, server = input$create_server))
+    cat("\nUser permissions removed ...\n\n")
+  })
+  showModal(
+    modalDialog(
+      title = "Hide repo messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
+})
+
+observeEvent(input$create_show_repo, {
+  req(input$create_token, input$create_server, input$create_user_file)
+  withProgress(message = "Showing class repo", value = 0, style = "old", {
+    repo <- create_repo_name()
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
+    mess <- capture.output(add_users_repo(input$create_token, repo, input$create_user_file, permission = 20, server = input$create_server))
+    cat("User permissions added ...\n")
+  })
+  showModal(
+    modalDialog(
+      title = "Show repo messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
+})
+
 output$create_output <- renderPrint({
   input$create  ## creating a dependency
   ret <- create()

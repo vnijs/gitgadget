@@ -65,13 +65,19 @@ collect <- eventReactive(input$collect, {
   ## assignment name is retrieved from gitlab
   # input$collect_token, input$collect_group,
   withProgress(message = "Generating merge requests", value = 0, style = "old", {
-    collect_work(
+    mess <- capture.output(collect_work(
       input$collect_token, input$collect_assignment,
       input$collect_user_file,
       type = input$collect_type, server = input$collect_server
-    )
+    ))
   })
-
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Fetching merge request messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
   message("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
 })
 
@@ -86,58 +92,34 @@ collect_fetch <- eventReactive(input$collect_fetch, {
   withProgress(message = "Fetching merge requests", value = 0, style = "old", {
     owd <- setwd(input$repo_directory)
     on.exit(setwd(owd))
-    fetch_work(
+    mess <- capture.output(fetch_work(
       input$collect_token, input$collect_assignment,
       server = input$collect_server
+    ))
+  })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Fetching merge request messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
     )
-  })
-
+  )
   message("\nUse the Git tab in R-studio (click refresh first) to switch between different student assignment submissions\n")
-})
-
-create_repo_name <- reactive({
-  repo <- basename(input$create_directory)
-  create_pre_lc <- tolower(input$create_pre)
-  if (!is_empty(create_pre_lc)) {
-repo <- paste0(create_pre_lc, repo)
-  }
-
-  create_group_lc <- tolower(input$create_group)
-  if (!is_empty(create_group_lc) && create_group_lc != Sys.getenv("git.user")) {
-repo <- paste0(create_group_lc, "/", repo)
-  }
-  repo
-})
-
-observeEvent(input$create_hide_repo, {
-  req(input$create_token, input$create_server, input$create_user_file)
-  withProgress(message = "Hiding class repo", value = 0, style = "old", {
-    repo <- create_repo_name()
-    owd <- setwd(input$repo_directory)
-    on.exit(setwd(owd))
-    remove_users_repo(input$create_token, repo, input$create_user_file, server = input$create_server)
-    cat("\nUser permissions removed ...\n\n")
-  })
-})
-
-
-observeEvent(input$create_show_repo, {
-  req(input$create_token, input$create_server, input$create_user_file)
-  withProgress(message = "Showing class repo", value = 0, style = "old", {
-    repo <- create_repo_name()
-    owd <- setwd(input$repo_directory)
-    on.exit(setwd(owd))
-    add_users_repo(input$create_token, repo, input$create_user_file, permission = 20, server = input$create_server)
-    cat("User permissions added ...\n")
-  })
 })
 
 observeEvent(input$collect_hide_repo, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_assignment)
   withProgress(message = "Hiding class repo", value = 0, style = "old", {
-    remove_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, server = input$collect_server)
+    mess <- capture.output(remove_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, server = input$collect_server))
     cat("\nUser permissions removed ...\n")
   })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Hide repo messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
 })
 
 observeEvent(input$collect_show_repo, {
@@ -145,9 +127,16 @@ observeEvent(input$collect_show_repo, {
   withProgress(message = "Showing class repo", value = 0, style = "old", {
     owd <- setwd(input$repo_directory)
     on.exit(setwd(owd))
-    add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server)
+    mess <- capture.output(add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server))
     cat("User permissions added ...\n\n")
   })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Show repo messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
 })
 
 observeEvent(input$collect_hide_from_ta, {
@@ -162,11 +151,18 @@ observeEvent(input$collect_hide_from_ta, {
       fork <- paste0(students[i, "userid"], "/", repo)
       owd <- setwd(input$repo_directory)
       on.exit(setwd(owd))
-      remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server)
+      mess <- capture.output(remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server))
       message(paste0("Project fork ", fork, " hidden from TAs"))
     }
     cat("\nStudent forks hidden from TA ...\n")
   })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Hide repos from TA messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
 })
 
 observeEvent(input$collect_show_to_ta, {
@@ -181,11 +177,18 @@ observeEvent(input$collect_show_to_ta, {
     on.exit(setwd(owd))
     for (i in seq_len(nrow(students))) {
       fork <- paste0(students[i, "userid"], "/", repo)
-      add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server)
+      mess <- capture.output(add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server))
       message(paste0("Project fork ", fork, " shown to TAs"))
     }
     cat("Student forks shown to TA ...\n\n")
   })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Show repos to TA messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
 })
 
 output$collect_output <- renderPrint({

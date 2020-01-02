@@ -18,8 +18,15 @@ observeEvent(input$branch_create, {
   req(input$repo_directory)
   if (input$branch_create_name != "") {
     withProgress(message = "Creating branch", value = 0, style = "old", {
-      suppressWarnings(system(paste("git -C", input$repo_directory, "checkout -b", input$branch_create_name)))
+      mess <- suppressWarnings(system(paste("git -C", input$repo_directory, "checkout -b", input$branch_create_name), intern = TRUE))
     })
+    if (is_empty(mess)) mess <- "No messages"
+    showModal(
+      modalDialog(
+        title = "Branch create messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
@@ -27,7 +34,14 @@ observeEvent(input$branch_create_from_mr, {
   req(input$repo_directory)
   remote_fetch <- suppressWarnings(system(paste("git -C", input$repo_directory, "config --get-all remote.origin.fetch"), intern = TRUE))
   if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
-    system(paste("git -C", dir, "config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*"))
+    mess <- system(paste("git -C", dir, "config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*"), intern = TRUE)
+    if (is_empty(mess)) mess <- "No messages"
+    showModal(
+      modalDialog(
+        title = "Branch create from MR messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
@@ -37,23 +51,43 @@ observeEvent(input$branch_merge, {
   req(input$repo_directory)
   if (!is.null(from) || !is.null(into)) {
     withProgress(message = "Merging branch", value = 0, style = "old", {
-      suppressWarnings(system(paste("git -C", input$repo_directory, "checkout", into)))
-      suppressWarnings(system(paste("git -C", input$repo_directory, "merge", from)))
+      mess1 <- suppressWarnings(system(paste("git -C", input$repo_directory, "checkout", into), intern = TRUE))
+      mess2 <- suppressWarnings(system(paste("git -C", input$repo_directory, "merge", from), inter = TRUE))
     })
+    showModal(
+      modalDialog(
+        title = "Branch merge messages",
+        span(HTML(paste0(c(mess1, mess2), collapse = "</br>")))
+      )
+    )
   }
 })
 
 observeEvent(input$branch_abort, {
   req(input$repo_directory)
-  system(paste("git -C", input$repo_directory, "merge --abort"))
+  mess <- suppressWarnings(system(paste("git -C", input$repo_directory, "merge --abort"), intern = TRUE))
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Branch merge abort messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
 })
 
 observeEvent(input$branch_link, {
   req(input$repo_directory)
   if (input$branch_create_name != "") {
     ## would prefer to do this without 'push' -- however then I can't unlink for some reason
-    paste("git -C", input$repo_directory, "push --set-upstream origin", input$branch_create_name) %>%
-      system(.)
+    mess <- suppressWarnings(paste("git -C", input$repo_directory, "push --set-upstream origin", input$branch_create_name) %>%
+      system(intern = TRUE))
+    if (is_empty(mess)) mess <- "No messages"
+    showModal(
+      modalDialog(
+        title = "Branch link messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
@@ -62,9 +96,16 @@ observeEvent(input$branch_unlink, {
   branch <- input$branch_delete_name
   if (is_empty(branch)) input$branch_create_name
   if (!is_empty(branch)) {
+    mess <- c()
     for (ib in branch) {
-      system(paste0("git -C ", input$repo_directory, " branch -d -r origin/", ib))
+      mess <- c(mess, system(paste0("git -C ", input$repo_directory, " branch -d -r origin/", ib), intern = TRUE))
     }
+    showModal(
+      modalDialog(
+        title = "Branch create messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
@@ -72,11 +113,17 @@ observeEvent(input$branch_delete, {
   req(input$repo_directory)
   if (!is.null(input$branch_delete_name)) {
     withProgress(message = "Deleting branch", value = 0, style = "old", {
-      system(paste("git -C", input$repo_directory, "checkout master"))
+      mess <- system(paste("git -C", input$repo_directory, "checkout master"), intern = TRUE)
       for (ib in input$branch_delete_name) {
-        system(paste("git -C", input$repo_directory, "branch -D", ib))
+        mess <- c(mess, system(paste("git -C", input$repo_directory, "branch -D", ib), intern = TRUE))
       }
     })
+    showModal(
+      modalDialog(
+        title = "Branch create messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
@@ -138,8 +185,14 @@ observeEvent(input$branch_checkout, {
   if (!is.null(input$branch_checkout_name)) {
     ## based on solution #1 http://stackoverflow.com/a/29828320/1974918
     withProgress(message = "Checkout branch", value = 0, style = "old", {
-      suppressWarnings(system(paste0("git -C ", input$repo_directory, " checkout ", sub("remotes/origin/", "", input$branch_checkout_name))))
+      mess <- suppressWarnings(system(paste0("git -C ", input$repo_directory, " checkout ", sub("remotes/origin/", "", input$branch_checkout_name)), intern = TRUE))
     })
+    showModal(
+      modalDialog(
+        title = "Branch checkout messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   }
 })
 
