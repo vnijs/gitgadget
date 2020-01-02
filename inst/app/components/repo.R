@@ -3,7 +3,11 @@ shinyFiles::shinyDirChoose(input, "repo_directory_find", roots = gg_volumes)
 output$ui_repo_directory <- renderUI({
   input$create
   input$remove_git
-  init <- projdir
+  if (grepl(homedir, projdir)) {
+    init <- projdir
+  } else {
+    init <- homedir
+  }
   if (!is.integer(input$repo_directory_find)) {
     init <- shinyFiles::parseDirPath(gg_volumes, input$repo_directory_find)
   }

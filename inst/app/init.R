@@ -45,20 +45,14 @@ if (rstudioapi::isAvailable()) {
   projdir <- basedir <- rstudioapi::getActiveProject()
   if (rstudioapi::getVersion() < "1.1") stop("GitGadget requires Rstudio version 1.1 or later")
 } else {
-  if (exists("launch_dir"))  {
-    projdir <- basedir <- launch_dir
+  wd <- getwd()
+  if (grepl("^/srv/", wd)) wd <- git_home
+  if (wd == "") {
+    projdir <- basedir <- file.path(homedir, "git")
   } else {
-    projdir <- basedir <- getwd()
+    projdir <- basedir <- wd
   }
 }
 
 ## setting up volumes for shinyFiles
-if (length(projdir) == 0) {
-  if (git_home == "") {
-    projdir <- basedir <- file.path(homedir, "git")
-  } else {
-    projdir <- basedir <- git_home
-  }
-} else {
-  gg_volumes <- setNames(c(projdir, gg_volumes), c(basename(projdir), names(gg_volumes)))
-}
+gg_volumes <- setNames(c(projdir, gg_volumes), c(basename(projdir), names(gg_volumes)))
