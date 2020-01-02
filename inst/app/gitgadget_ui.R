@@ -1,5 +1,3 @@
-#' noRd
-#' export
 gitgadget_ui <- function() {
   miniPage(
     miniTitleBar(

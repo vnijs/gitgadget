@@ -28,6 +28,7 @@ get_port <- function() {
 gitgadget <- function(port = get_port()) {
   gitgadget_dir <- system.file(package = "gitgadget")
   source(file.path(gitgadget_dir, "app/init.R"), local = TRUE)
+  source(file.path(gitgadget_dir, "app/gitgadget_ui.R"), local = TRUE)
   ui <- gitgadget_ui()
   server <- function(input, output, session) {
     source(file.path(gitgadget_dir, "app/components/legacy.R"), local = TRUE)
