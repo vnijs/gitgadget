@@ -157,7 +157,14 @@ gitgadget_ui <- function() {
       ),
       miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
         miniContentPanel(
-          br(),
+          HTML("<h4>Change the repo directory</h4>"),
+          fillRow(height = "40px", width = "475px",
+            uiOutput("ui_branch_directory"),
+            shinyFiles::shinyDirButton(
+              "branch_directory_find", "Open",
+              title = "Browse and select a repo directory"
+            )
+          ),
           HTML("<h4>Create a new branch</h4>"),
           textInput("branch_create_name", NULL, value = "", placeholder = "Provide a name for the new branch"),
           actionButton(

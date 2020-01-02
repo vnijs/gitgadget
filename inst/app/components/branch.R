@@ -1,3 +1,16 @@
+shinyFiles::shinyDirChoose(input, "branch_directory_find", roots = gg_volumes)
+
+output$ui_branch_directory <- renderUI({
+  init <- projdir
+  if (!is.integer(input$branch_directory_find)) {
+    init <- shinyFiles::parseDirPath(gg_volumes, input$branch_directory_find)
+  }
+  textInput(
+    "branch_directory", NULL, value = init, 
+    placeholder = "Repo directory"
+  )
+})
+
 branches <- reactive({
   input$branch_delete
   input$branch_create
