@@ -19,6 +19,7 @@ server <- function(input, output, session) {
   source("components/intro.R", local = TRUE)
   source("components/create.R", local = TRUE)
   source("components/clone.R", local = TRUE)
+  source("components/repo.R", local = TRUE)
   source("components/branch.R", local = TRUE)
   source("components/sync.R", local = TRUE)
   source("components/collect.R", local = TRUE)

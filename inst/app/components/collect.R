@@ -1,6 +1,7 @@
 output$ui_collect_assignment <- renderUI({
   resp <- assignment_name()
-  if (length(resp) == 0) {
+  # if (length(resp) == 0) {
+  if (is_empty(resp)) {
     HTML("<label>No assignments available for specified input values</label>")
   } else {
     selectInput("collect_assignment", "Assignment name:", choices = resp)
@@ -75,16 +76,16 @@ collect <- eventReactive(input$collect, {
 })
 
 collect_fetch <- eventReactive(input$collect_fetch, {
-  remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
+  remote_fetch <- system(paste("git -C", input$repo_directory, "config --get-all remote.origin.fetch"), intern = TRUE)
   if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
-    system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
+    system(paste("git  -C", input$repo_directory, "config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*"))
   }
 
-
-  # input$collect_token, input$collect_group,
   ## pre not used when called from the gadget interface because the full
   ## assignment name is retrieved from gitlab
   withProgress(message = "Fetching merge requests", value = 0, style = "old", {
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
     fetch_work(
       input$collect_token, input$collect_assignment,
       server = input$collect_server
@@ -93,7 +94,6 @@ collect_fetch <- eventReactive(input$collect_fetch, {
 
   message("\nUse the Git tab in R-studio (click refresh first) to switch between different student assignment submissions\n")
 })
-
 
 create_repo_name <- reactive({
   repo <- basename(input$create_directory)
@@ -113,6 +113,8 @@ observeEvent(input$create_hide_repo, {
   req(input$create_token, input$create_server, input$create_user_file)
   withProgress(message = "Hiding class repo", value = 0, style = "old", {
     repo <- create_repo_name()
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
     remove_users_repo(input$create_token, repo, input$create_user_file, server = input$create_server)
     cat("\nUser permissions removed ...\n\n")
   })
@@ -123,6 +125,8 @@ observeEvent(input$create_show_repo, {
   req(input$create_token, input$create_server, input$create_user_file)
   withProgress(message = "Showing class repo", value = 0, style = "old", {
     repo <- create_repo_name()
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
     add_users_repo(input$create_token, repo, input$create_user_file, permission = 20, server = input$create_server)
     cat("User permissions added ...\n")
   })
@@ -139,6 +143,8 @@ observeEvent(input$collect_hide_repo, {
 observeEvent(input$collect_show_repo, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_assignment)
   withProgress(message = "Showing class repo", value = 0, style = "old", {
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
     add_users_repo(input$collect_token, input$collect_assignment, input$collect_user_file, permission = 20, server = input$create_server)
     cat("User permissions added ...\n\n")
   })
@@ -154,6 +160,8 @@ observeEvent(input$collect_hide_from_ta, {
     }
     for (i in seq_len(nrow(students))) {
       fork <- paste0(students[i, "userid"], "/", repo)
+      owd <- setwd(input$repo_directory)
+      on.exit(setwd(owd))
       remove_users_repo(students[i, "token"], fork, input$collect_ta_file, server = input$collect_server)
       message(paste0("Project fork ", fork, " hidden from TAs"))
     }
@@ -169,6 +177,8 @@ observeEvent(input$collect_show_to_ta, {
     if (input$collect_type == "team") {
       students <- distinct(students, team, .keep_all = TRUE)
     }
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
     for (i in seq_len(nrow(students))) {
       fork <- paste0(students[i, "userid"], "/", repo)
       add_users_repo(students[i, "token"], fork, input$collect_ta_file, permission = 40, server = input$collect_server)

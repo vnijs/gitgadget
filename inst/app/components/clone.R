@@ -13,10 +13,21 @@ clone <- eventReactive(input$clone, {
     if (!is_empty(clone_to)) {
       cmd <- paste(cmd, clone_to)
       cmdclean <- paste(cmdclean, clone_to)
-      cloneto <- file.path(getwd(), clone_to)
+      clone_to <- file.path(getwd(), clone_to)
     } else {
       clone_to <- file.path(getwd(), basename(clone_from) %>% tools::file_path_sans_ext())
     }
+
+    if (dir.exists(clone_to)) {
+      showModal(
+        modalDialog(
+          title = "Directory already exists",
+          span("The directory you are trying to clone to already exists")
+        )
+      )
+      return(invisible())
+    }
+
     cat("Used:", cmdclean, "\n\n")
 
     withProgress(message = "Cloning repo", value = 0, style = "old", {

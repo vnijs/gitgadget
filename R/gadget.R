@@ -37,6 +37,7 @@ gitgadget <- function(port = get_port()) {
     source(file.path(gitgadget_dir, "app/components/intro.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/create.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/clone.R"), local = TRUE)
+    source(file.path(gitgadget_dir, "app/components/repo.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/branch.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/sync.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/collect.R"), local = TRUE)

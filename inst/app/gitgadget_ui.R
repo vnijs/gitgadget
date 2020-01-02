@@ -153,18 +153,23 @@ gitgadget_ui <- function() {
           verbatimTextOutput("clone_output")
         )
       ),
-      miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
+      miniTabPanel("Directory", value = "directory", icon = icon("folder"),
         miniContentPanel(
           HTML("<h4>Change the repo directory</h4>"),
           fillRow(height = "40px", width = "475px",
-            uiOutput("ui_branch_directory"),
+            uiOutput("ui_repo_directory"),
             shinyFiles::shinyDirButton(
-              "branch_directory_find", "Open",
+              "repo_directory_find", "Open",
               title = "Browse and select a repo directory"
             )
           ),
+          verbatimTextOutput("repo_output")
+        )
+      ),
+      miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
+        miniContentPanel(
           HTML("<h4>Create a new branch</h4>"),
-          textInput("branch_create_name", NULL, value = "", placeholder = "Provide a name for the new branch"),
+          uiOutput("ui_branch_create_name"),
           actionButton(
             "branch_create", "Create local", 
             title = "Create a new local branch based on the currently active branch. Click the refresh button in Rstudio's Git tab to view the updated list of branches\n\nGit command:\ngit branch -b <branch>"
@@ -208,10 +213,7 @@ gitgadget_ui <- function() {
       miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
-          textAreaInput(
-            "sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", 
-            placeholder = "Provide a commit message that describes the changes you made to the repo"
-          ),
+          uiOutput("ui_sync_commit_message"),
           actionButton(
             "sync_commit", "Commit", 
             title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""
