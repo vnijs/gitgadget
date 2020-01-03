@@ -33,7 +33,6 @@ upstream_info <- function() {
 
 observeEvent(input$sync_stage, {
   req(input$repo_directory)
-  req(input$repo_directory)
   withProgress(message = "Staging all files", value = 0, style = "old", {
     system(paste("git -C", input$repo_directory, "add ."))
     mess <- suppressWarnings(system(paste0("git -C ", input$repo_directory, " diff --staged"), intern = TRUE))
@@ -265,7 +264,7 @@ output$sync_output <- renderPrint({
 
 color_diff_html <- function(mess) {
   # adapted from https://gist.github.com/stopyoukid/5888146
-  html <- "<html> <head> <meta charset=\"utf-8\"> <style> .modal-lg .file-diff>div { width: 100%; } .modal-lg pre { padding: 0; margin: 0; font-size: 12px; text-align: left; border: 0; border-radius: 0; background-color: rgb(255, 255, 255); } .modal-lg .file { margin-bottom: 1em; border: 1px; } .modal-lg .delete { background-color: #fdd; } .modal-lg .insert { background-color: #dfd; } .modal-lg .info { background-color: #888 } .modal-lg .context { color: #aaa; } </style> </head> <body> <div id=\"wrapper\">"
+  html <- "<html> <head> <meta charset=\"utf-8\"> <style> .modal-lg .file-diff>div { width: 100%; } .modal-lg pre { padding: 0; margin: 0; margin-left: 5px; font-size: 12px; text-align: left; border: 0; border-radius: 0; background-color: rgb(255, 255, 255); line-height: 1.75em; } .modal-lg .file { margin-bottom: 1em; border: 1px; } .modal-lg .delete { background-color: #fdd; } .modal-lg .insert { background-color: #dfd; } .modal-lg .info { background-color: #888 } .modal-lg .context { color: #aaa; } </style> </head> <body> <div id=\"wrapper\">"
   first <- 1
   diffseen <- lastonly <- 0
   currSection <- currFile <- ""
@@ -308,26 +307,23 @@ color_diff_html <- function(mess) {
       currSection <- ""
       lastonly <- 0
     } else if (t3 == '+++') {
-      next
-      cls <- 'insert'
       lastonly <- 0
+      next
     } else if (t3 == "---") {
-      next
-      cls <- "delete"
       lastonly <- 0
+      next
     } else if (t2 == "@@") {
       cls <- "info"
       lastonly <- 0
     } else if (t1 == "+") {
-      s <- substring(s, 2)
+      s <- paste0(" ", substring(s, 2))
       cls <- "insert"
       lastonly <- 0
     } else if (t1 == "-") {
-      s <- substring(s, 2)
+      s <- paste0(" ", substring(s, 2))
       cls <- "delete"
       lastonly <- 0
     } else {
-      # s <- substring(s, 2)
       cls <- "context"
       lastonly <- 0
     }
@@ -348,7 +344,7 @@ color_diff_html <- function(mess) {
   }
 
   if (currSection != "") {
-    addDiffToPage(currFile, currSection, html)
+    html <- addDiffToPage(currFile, currSection, html)
   }
 
   paste0(html, "\n</div></body></html>")
