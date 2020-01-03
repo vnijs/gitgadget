@@ -7,7 +7,6 @@ remote_info <- reactive({
 })
 
 assignment_name <- function() {
-  # assignment <- capture.output(remote_info())[-1:-2]
   assignment <- remote_info()
   if (any(grepl("(https://github.com)|(git@github.com)", assignment))) {
     message("GitGadget does not (yet) support assignment management on GitHub.com")
@@ -31,6 +30,27 @@ upstream_info <- function() {
     gsub("^upstream\\s+", "", .) %>%
     gsub(" \\(fetch\\)$", "", .)
 }
+
+observeEvent(input$sync_stage, {
+  req(input$repo_directory)
+  req(input$repo_directory)
+  withProgress(message = "Staging all files", value = 0, style = "old", {
+    system(paste("git -C", input$repo_directory, "add ."))
+    mess <- suppressWarnings(system(paste0("git -C ", input$repo_directory, " diff --staged"), intern = TRUE))
+  })
+
+  mess <- color_diff_html(mess)
+
+  showModal(
+    modalDialog(
+      title = "Staged file differences",
+      span(HTML(paste0(mess, collapse = "</br>"))),
+      size = "l",
+      easyClose = TRUE
+    )
+  )
+  updateTextInput(session = session, "sync_commit_message", value = "")
+})
 
 observeEvent(input$sync_commit, {
   req(input$repo_directory)
@@ -242,3 +262,94 @@ output$sync_output <- renderPrint({
   cat("Overview of remotes:\n\n")
   cat(remote_info())
 })
+
+color_diff_html <- function(mess) {
+  # adapted from https://gist.github.com/stopyoukid/5888146
+  html <- "<html> <head> <meta charset=\"utf-8\"> <style> .modal-lg .file-diff>div { width: 100%; } .modal-lg pre { padding: 0; margin: 0; font-size: 12px; text-align: left; border: 0; border-radius: 0; background-color: rgb(255, 255, 255); } .modal-lg .file { margin-bottom: 1em; border: 1px; } .modal-lg .delete { background-color: #fdd; } .modal-lg .insert { background-color: #dfd; } .modal-lg .info { background-color: #888 } .modal-lg .context { color: #aaa; } </style> </head> <body> <div id=\"wrapper\">"
+  first <- 1
+  diffseen <- lastonly <- 0
+  currSection <- currFile <- ""
+
+  addDiffToPage <- function(file, section, html) {
+    paste0(html, "\n<h2>", file, "</h2>\n") %>%
+      paste0("<div class=\"file-diff\">\n") %>%
+      paste0(section) %>%
+      paste0("\n</div>")
+  }
+
+  for (s in mess) {
+    # Get beginning of line to determine what type of diff line it is.
+    t1 <- substring(s, 0, 1)
+    t2 <- substring(s, 0, 2)
+    t3 <- substring(s, 0, 3)
+    t4 <- substring(s, 0, 4)
+    t7 <- substring(s, 0, 7)
+    cls <- ""
+
+    # Determine HTML class to use.
+    if (t7 == "Only in") {
+      cls <- "only"
+      if (diffseen == 0) {
+        diffseen <- 1
+      } else {
+        if (lastonly == 0) {
+          html <- addDiffToPage(currFile, currSection, html)
+        } 
+      }
+      if (lastonly == 0) currSection <- ""
+        lastonly <- 1
+    } else if (t4 == "diff") {
+      cls <- "file"
+      s <- sub("^.* b/", ">>> ", s)
+
+      if (diffseen == 1)
+        html <- addDiffToPage(currFile, currSection, html)
+      diffseen <- 1
+      currSection <- ""
+      lastonly <- 0
+    } else if (t3 == '+++') {
+      next
+      cls <- 'insert'
+      lastonly <- 0
+    } else if (t3 == "---") {
+      next
+      cls <- "delete"
+      lastonly <- 0
+    } else if (t2 == "@@") {
+      cls <- "info"
+      lastonly <- 0
+    } else if (t1 == "+") {
+      s <- substring(s, 2)
+      cls <- "insert"
+      lastonly <- 0
+    } else if (t1 == "-") {
+      s <- substring(s, 2)
+      cls <- "delete"
+      lastonly <- 0
+    } else {
+      # s <- substring(s, 2)
+      cls <- "context"
+      lastonly <- 0
+    }
+
+    # Convert &, <, > to HTML entities.
+    s <- gsub("\\&", "\\&amp;", s) %>% 
+      gsub("<", "\\&lt;", .) %>%
+      gsub(">", "\\&gt;", .)
+      
+    if (first == 1) first <- 0
+
+    # Output the line.
+    if (cls != "") {
+      currSection <- paste0(currSection, "\n<pre class=\"", cls, "\">", s, "</pre>")
+    } else {
+      currSection <- paste0(currSection, "\n<pre>", s, "</pre>")
+    }
+  }
+
+  if (currSection != "") {
+    addDiffToPage(currFile, currSection, html)
+  }
+
+  paste0(html, "\n</div></body></html>")
+}

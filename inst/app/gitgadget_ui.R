@@ -155,7 +155,11 @@ gitgadget_ui <- function() {
       ),
       miniTabPanel("Directory", value = "directory", icon = icon("folder"),
         miniContentPanel(
-          HTML("<h4>Change the repo directory</h4>"),
+          fillRow(height = "40px", width = "475px",
+            HTML("<h4>Change the repo directory</h4>"),
+            # actionButton("repo_refresh", "Refresh", icon = icon("refresh"))
+            tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("refresh"), ""))
+          ),
           fillRow(height = "40px", width = "475px",
             uiOutput("ui_repo_directory"),
             shinyFiles::shinyDirButton(
@@ -164,6 +168,54 @@ gitgadget_ui <- function() {
             )
           ),
           verbatimTextOutput("repo_output")
+        )
+      ),
+      miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
+        miniContentPanel(
+          HTML("<h2>Commit changes locally</h2>"),
+          uiOutput("ui_sync_commit_message"),
+          actionButton(
+            "sync_stage", "Stage", 
+            title = "Stage files and show changes\n\nGit commands:\ngit add .\ngit diff --staged "
+          ),
+          actionButton(
+            "sync_commit", "Commit", 
+            title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""
+          ),
+          actionButton(
+            "sync_undo_commit_show", "Undo", class = "btn-danger", 
+            title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"
+          ),
+          HTML("<h2>Sync with remote</h2>"),
+          actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
+          actionButton(
+            "sync_push", "Push", 
+            title = "Push all commited updates to the remote repo\n\nGit command: git push"
+          ),
+          actionButton(
+            "sync_reset_show", "Reset", class = "btn-danger", 
+            title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"
+          ),
+          HTML("<h2>Sync a fork</h2>"),
+          uiOutput("ui_sync_from"),
+          actionButton(
+            "sync", "Sync", 
+            title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"
+          ),
+          actionButton(
+            "sync_merge", "Merge", 
+            title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"
+          ),
+          actionButton(
+            "synch_abort", "Abort merge", 
+            title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"
+          ),
+          actionButton(
+            "sync_unlink", "Unlink", 
+            title = "Remove a link between a local repo and the original from which it was forked\n\nGit command:\ngit remote remove upstream"
+          ),
+          hr(),
+          verbatimTextOutput("sync_output")
         )
       ),
       miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
@@ -208,50 +260,6 @@ gitgadget_ui <- function() {
             title = "Remove the local branch(es)\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"
           ),
           br(), br()
-        )
-      ),
-      miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
-        miniContentPanel(
-          HTML("<h2>Commit changes locally</h2>"),
-          uiOutput("ui_sync_commit_message"),
-          actionButton(
-            "sync_commit", "Commit", 
-            title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""
-          ),
-          actionButton(
-            "sync_undo_commit_show", "Undo", class = "btn-danger", 
-            title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"
-          ),
-          HTML("<h2>Sync with remote</h2>"),
-          actionButton("sync_pull", "Pull", title = "Pull updates from remote repo\n\nGit command: git pull"),
-          actionButton(
-            "sync_push", "Push", 
-            title = "Push all commited updates to the remote repo\n\nGit command: git push"
-          ),
-          actionButton(
-            "sync_reset_show", "Reset", class = "btn-danger", 
-            title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"
-          ),
-          HTML("<h2>Sync a fork</h2>"),
-          uiOutput("ui_sync_from"),
-          actionButton(
-            "sync", "Sync", 
-            title = "Link the local repo with the original from which it was forked and pull an updated copy into an upstream/ branch\n\nGit commands:\ngit remote add upstream <remote url>\ngit fetch upstream"
-          ),
-          actionButton(
-            "sync_merge", "Merge", 
-            title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"
-          ),
-          actionButton(
-            "synch_abort", "Abort merge", 
-            title = "Abort the merge in progress\n\nGit command:\ngit merge --abort"
-          ),
-          actionButton(
-            "sync_unlink", "Unlink", 
-            title = "Remove a link between a local repo and the original from which it was forked\n\nGit command:\ngit remote remove upstream"
-          ),
-          hr(),
-          verbatimTextOutput("sync_output")
         )
       ),
       miniTabPanel("Collect", value = "collect", icon = icon("cloud-download"),
