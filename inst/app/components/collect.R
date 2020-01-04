@@ -1,3 +1,36 @@
+assignment_name <- function(github = FALSE, url = FALSE) {
+  assignment <- remote_info()
+  if (any(grepl("(https://github.com)|(git@github.com)", assignment))) {
+    if (github) {
+      if (any(grepl("https://github.com", assignment))) {
+        server <- "https://github.com"
+        assn <- gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", assignment) %>% unique()
+      } else {
+        server <- "git@github.com"
+        assn <- gsub(paste0("^.*", server, ":(.*).git.*"), "\\1", assignment) %>% unique()
+      }
+    } else {
+      message("GitGadget does not (yet) support assignment management on GitHub.com")
+      ""
+    }
+    if (url) {
+      assn <- paste0("https://github.com/", assn)
+    }
+  } else{
+    if (any(grepl("https://gitlab.com", assignment))) {
+      server <- "https://gitlab.com"
+      assn <- gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", assignment) %>% unique()
+    } else {
+      server <- "git@gitlab.com"
+      assn <- gsub(paste0("^.*", server, ":(.*).git.*"), "\\1", assignment) %>% unique()
+    }
+    if (url) {
+      assn <- paste0("https://gitlab.com/", assn)
+    }
+  }
+  assn
+}
+
 output$ui_collect_assignment <- renderUI({
   resp <- assignment_name()
   # if (length(resp) == 0) {
