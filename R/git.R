@@ -81,7 +81,8 @@ groupr <- function(groupname, path, token, server) {
   list(status = "OKAY", group_id = group_id)
 }
 
-
+#' @noRd
+#' @export
 add_users_repo <- function(token, repo, userfile, permission = 20, server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(token, server)
@@ -129,6 +130,8 @@ add_user_repo <- function(user_id, repo_id, token, permission, server) {
   list(status = "OKAY")
 }
 
+#' @noRd
+#' @export
 remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.com/api/v4/") {
 
   resp <- connect(token, server)
@@ -855,6 +858,14 @@ remove_student_projects <- function(userfile, server) {
   sapply(udat$token, remove_projects, server)
 }
 
+#' Check student tokens
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param server The gitlab API server
+#'
+#' @export
 check_tokens <- function(
   userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
 ) {

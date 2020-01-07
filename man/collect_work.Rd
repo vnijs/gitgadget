@@ -4,8 +4,13 @@
 \alias{collect_work}
 \title{Create merge requests for each student/team}
 \usage{
-collect_work(token, assignment, userfile, type = "individual",
-  server = "https://gitlab.com/api/v4/")
+collect_work(
+  token,
+  assignment,
+  userfile,
+  type = "individual",
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}

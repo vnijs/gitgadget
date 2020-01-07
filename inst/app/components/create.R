@@ -91,16 +91,23 @@ output$ui_create_buttons <- renderUI({
 })
 
 observeEvent(input$create_check_tokens, {
+  mess <- ""
   if (!is_empty(input$create_user_file)) {
     withProgress(message = "Checking student tokens on GitLab", value = 0, style = "old", {
-      check_tokens(input$create_user_file)
+      mess <- capture.output(check_tokens(input$create_user_file))
     })
   }
   if (!is_empty(input$create_ta_file)) {
     withProgress(message = "Checking TA tokens on GitLab", value = 0, style = "old", {
-      check_tokens(input$create_ta_file)
+      mess <- capture.output(check_tokens(input$create_ta_file)) %>%
+        paste0(mess, "\n\n", .)
     })
   }
+  showModal(
+    modalDialog(title = "Check token messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
   message("\nToken check completed. Check the console for messages\n")
 })
 
@@ -281,6 +288,8 @@ create <- eventReactive(input$create, {
     return(invisible())
   }
 
+  mess <- ""
+
   if (input$create_remote == "GitLab") {
     withProgress(message = "Creating and forking repo", value = 0, style = "old", {
 
@@ -289,33 +298,40 @@ create <- eventReactive(input$create, {
 
       if (create_group_lc != "" && create_group_lc != Sys.getenv("git.user")) {
         cat("Creating group ...\n")
-        create_group(
+        mess <- capture.output(create_group(
           input$create_token, create_group_lc, input$create_user_file,
           permission = 0, server = input$create_server
-        )
+        ))
       }
 
       cat("Creating repo ...\n")
-      create_repo(
+      mess <- capture.output(create_repo(
         input$create_user_name, input$create_token, repo, directory, create_group_lc,
-        pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE), server = input$create_server
-      )
+        pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE), 
+        server = input$create_server
+      )) %>% paste0(mess, "\n\n", .)
       if (!is_empty(input$create_user_file)) {
         if (is_empty(input$create_group)) {
           cat("A groupname is required when assigning work.\n")
           cat("Add a groupname and try again ...\n")
         } else {
           cat("Assigning work ...\n")
-          assign_work(
+          mess <- capture.output(assign_work(
             input$create_token, create_group_lc, repo,
             input$create_user_file,
             tafile = input$create_ta_file,
             type = input$create_type, pre = create_pre_lc,
             server = input$create_server
-          )
+          )) %>% paste0(mess, "\n\n", .)
         }
       }
     })
+    showModal(
+      modalDialog(
+        title = "Repo creation messages",
+        span(HTML(paste0(mess, collapse = "</br>")))
+      )
+    )
   } else {
     cat("Creating repo ...\n")
     curr <- setwd(input$create_directory)

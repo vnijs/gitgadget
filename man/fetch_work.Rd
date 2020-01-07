@@ -4,8 +4,7 @@
 \alias{fetch_work}
 \title{Fetch all merge requests as local branches and link to a remote}
 \usage{
-fetch_work(token, assignment, page = 1,
-  server = "https://gitlab.com/api/v4/")
+fetch_work(token, assignment, page = 1, server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{token}{GitLab token}

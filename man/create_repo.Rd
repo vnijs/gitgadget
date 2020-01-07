@@ -4,10 +4,16 @@
 \alias{create_repo}
 \title{Create the main repo from a local directory}
 \usage{
-create_repo(username = Sys.getenv("git.user"),
-  token = Sys.getenv("git.token"), repo = basename(getwd()),
-  base_dir = dirname(getwd()), groupname = "", pre = "",
-  ssh = FALSE, server = "https://gitlab.com/api/v4/")
+create_repo(
+  username = Sys.getenv("git.user"),
+  token = Sys.getenv("git.token"),
+  repo = basename(getwd()),
+  base_dir = dirname(getwd()),
+  groupname = "",
+  pre = "",
+  ssh = FALSE,
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{username}{Username}

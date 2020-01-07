@@ -4,9 +4,16 @@
 \alias{assign_work}
 \title{Assign work to each student/team by creating a fork of the main repo}
 \usage{
-assign_work(token, groupname, assignment, userfile, tafile = "",
-  type = "individual", pre = "",
-  server = "https://gitlab.com/api/v4/")
+assign_work(
+  token,
+  groupname,
+  assignment,
+  userfile,
+  tafile = "",
+  type = "individual",
+  pre = "",
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}

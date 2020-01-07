@@ -4,8 +4,13 @@
 \alias{create_group}
 \title{Create a group on gitlab using the API}
 \usage{
-create_group(token, groupname = "", userfile = "", permission = 20,
-  server = "https://gitlab.com/api/v4/")
+create_group(
+  token,
+  groupname = "",
+  userfile = "",
+  permission = 20,
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}
