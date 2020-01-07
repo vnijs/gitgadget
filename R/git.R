@@ -87,7 +87,7 @@ groupr <- function(groupname, path, token, server) {
 #'
 #' @param token GitLab token
 #' @param repo Repo to update
-#' @param userfile A csv file with student information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param permission Permission setting for the repo (default is 20, i.e., reporter)
 #' @param server The gitlab API server
 #'
@@ -148,7 +148,7 @@ add_user_repo <- function(user_id, repo_id, token, permission, server) {
 #'
 #' @param token GitLab token
 #' @param repo Repo the update
-#' @param userfile A csv file with student information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param server The gitlab API server
 #'
 #' @export
@@ -199,7 +199,7 @@ remove_user_repo <- function(user_id, repo_id, token, server) {
 #'
 #' @param token GitLab token
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
-#' @param userfile A csv file with student information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param permission Permission setting for the group (default is 20, i.e., reporter)
 #' @param server The gitlab API server
 #'
@@ -425,8 +425,8 @@ add_team <- function(proj_id, token, team_mates, server) {
 #' @param token GitLab token
 #' @param groupname Group to create on gitlab (defaults to user's namespace)
 #' @param assignment Name of the assignment to assign
-#' @param userfile A csv file with student information (i.e., username and token)
-#' @param tafile A optional csv file with TA information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
+#' @param tafile A optional csv file with TA information (i.e., username, token, and email)
 #' @param type Individual or Team work
 #' @param pre Pre-amble for the assignment name, usually groupname + "-"
 #' @param server The gitlab API server
@@ -702,7 +702,7 @@ merger <- function(
 #'
 #' @param token GitLab token
 #' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
-#' @param userfile A csv file with student information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param type Individual or Team work
 #' @param server The gitlab API server
 #'
@@ -882,7 +882,7 @@ remove_student_projects <- function(userfile, server) {
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param userfile A csv file with student information (i.e., username and token)
+#' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param server The gitlab API server
 #'
 #' @export
@@ -901,15 +901,18 @@ check_tokens <- function(
       id$status <- "EMPTY"
     }
 
+    userid <- students[i, "userid"]
+    email <- students[i, "email"]
     if (id$status == "OKAY") {
-      id_check <- userID(students[i, "userid"], token, server)
+      id_check <- userID(userid, token, server)
       if (isTRUE(id_check$status == "OKAY")) {
-        print(paste0("OKAY: ", students[i, "userid"], " ", token))
+        type <- "OKAY: "
       } else {
-        print(paste0("NOT OKAY (ID): ", students[i, "userid"], " ", token, " ", students[i, "email"]))
+        type <- "NOT OKAY (ID): "
       }
     } else {
-      print(paste0("NOT OKAY (TOKEN): ", students[i, "userid"], " ", token, " ", students[i, "email"]))
+      type <- "NOT OKAY (TOKEN): "
     }
+    cat(paste0(type, userid, " ", token, " <a href=\"mailto:", email, "\" target=\"_blank\">", email, "</a></br>"))
   }
 }

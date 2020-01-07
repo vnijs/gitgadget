@@ -4,15 +4,20 @@
 \alias{add_users_repo}
 \title{Add users to a repo}
 \usage{
-add_users_repo(token, repo, userfile, permission = 20,
-  server = "https://gitlab.com/api/v4/")
+add_users_repo(
+  token,
+  repo,
+  userfile,
+  permission = 20,
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}
 
 \item{repo}{Repo to update}
 
-\item{userfile}{A csv file with student information (i.e., username and token)}
+\item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{permission}{Permission setting for the repo (default is 20, i.e., reporter)}
 

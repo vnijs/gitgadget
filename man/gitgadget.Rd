@@ -3,7 +3,6 @@
 \docType{package}
 \name{gitgadget}
 \alias{gitgadget}
-\alias{gitgadget-package}
 \title{gitgadget}
 \usage{
 gitgadget(port = get_port(), launch.browser = TRUE)

@@ -4,15 +4,20 @@
 \alias{collect_work}
 \title{Create merge requests for each student/team}
 \usage{
-collect_work(token, assignment, userfile, type = "individual",
-  server = "https://gitlab.com/api/v4/")
+collect_work(
+  token,
+  assignment,
+  userfile,
+  type = "individual",
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}
 
 \item{assignment}{Name of the assignment (e.g., "class345/class345-assignment1")}
 
-\item{userfile}{A csv file with student information (i.e., username and token)}
+\item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{type}{Individual or Team work}
 

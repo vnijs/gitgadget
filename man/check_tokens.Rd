@@ -4,11 +4,13 @@
 \alias{check_tokens}
 \title{Check student tokens}
 \usage{
-check_tokens(userfile, server = Sys.getenv("git.server",
-  "https://gitlab.com/api/v4/"))
+check_tokens(
+  userfile,
+  server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+)
 }
 \arguments{
-\item{userfile}{A csv file with student information (i.e., username and token)}
+\item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{server}{The gitlab API server}
 }

@@ -4,15 +4,14 @@
 \alias{remove_users_repo}
 \title{Remove users from a repo}
 \usage{
-remove_users_repo(token, repo, userfile,
-  server = "https://gitlab.com/api/v4/")
+remove_users_repo(token, repo, userfile, server = "https://gitlab.com/api/v4/")
 }
 \arguments{
 \item{token}{GitLab token}
 
 \item{repo}{Repo the update}
 
-\item{userfile}{A csv file with student information (i.e., username and token)}
+\item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{server}{The gitlab API server}
 }

@@ -4,15 +4,20 @@
 \alias{create_group}
 \title{Create a group on gitlab using the API}
 \usage{
-create_group(token, groupname = "", userfile = "", permission = 20,
-  server = "https://gitlab.com/api/v4/")
+create_group(
+  token,
+  groupname = "",
+  userfile = "",
+  permission = 20,
+  server = "https://gitlab.com/api/v4/"
+)
 }
 \arguments{
 \item{token}{GitLab token}
 
 \item{groupname}{Group to create on gitlab (defaults to user's namespace)}
 
-\item{userfile}{A csv file with student information (i.e., username and token)}
+\item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{permission}{Permission setting for the group (default is 20, i.e., reporter)}
 
