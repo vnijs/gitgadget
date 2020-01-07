@@ -1,6 +1,6 @@
 # Git Gadget
 
-[![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget)
+<!-- [![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget) -->
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome.
 

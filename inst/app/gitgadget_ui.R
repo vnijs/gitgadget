@@ -28,14 +28,16 @@ gitgadget_ui <- function() {
             actionButton(
               "intro_token_gl_get", "Create",
               title = "Browse to GitLab to get a PAT",
-              style = "margin-top: 25px;"
+              style = "margin-top: 25px;",
+              onclick = "window.open('https://gitlab.com/profile/personal_access_tokens', '_blank')"
             )
           ),
           # fillRow(height = "70px", width = "475px",
           #   passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
           #   actionButton(
           #     "intro_token_gh_get", "Create", 
-          #     title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;"
+          #     title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;",
+          #     onclick = "window.open('https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT', '_blank')"
           #   )
           # ),
           radioButtons(
@@ -200,6 +202,7 @@ gitgadget_ui <- function() {
             "sync_reset_show", "Reset", class = "btn-danger", 
             title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"
           ),
+          uiOutput("ui_sync_check"),
           HTML("<h2>Sync a fork</h2>"),
           uiOutput("ui_sync_from"),
           actionButton(

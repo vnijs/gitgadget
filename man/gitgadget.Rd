@@ -3,12 +3,15 @@
 \docType{package}
 \name{gitgadget}
 \alias{gitgadget}
+\alias{gitgadget-package}
 \title{gitgadget}
 \usage{
-gitgadget(port = get_port())
+gitgadget(port = get_port(), launch.browser = TRUE)
 }
 \arguments{
 \item{port}{Port to use for the app}
+
+\item{launch.browser}{Launch app in viewer (browsers) or only show the URL}
 }
 \description{
 gitgadget

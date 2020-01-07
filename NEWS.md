@@ -1,3 +1,7 @@
+# gitgadget 0.5.4.0
+
+* Various updates to allow using gitgadget with shiny server
+
 # gitgadget 0.5.3.0
 
 * Warning if user tries to `create` a repo from the base git directory

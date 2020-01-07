@@ -128,14 +128,14 @@ observeEvent(input$sync_push, {
   )
 })
 
-observeEvent(input$sync_check, {
-  req(input$repo_directory)
+output$ui_sync_check <- renderUI({
+  req(input$sync_check > 0)
   assn <- assignment_name(github = TRUE, url = TRUE)
   hash <- suppressWarnings(system(paste("git -C", input$repo_directory, "rev-parse --short HEAD"), intern = TRUE))
   if (!is_empty(hash) && length(hash) == 1) {
     assn <- paste0(assn, "/commit/", hash)
   }
-  utils::browseURL(assn)
+  tags$script(paste0("window.open('", assn, "', '_blank')"))
 })
 
 ## Show reset modal when button is clicked.

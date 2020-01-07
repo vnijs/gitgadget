@@ -1,8 +1,3 @@
-observeEvent(input$help, {
-  viewer <- getOption("viewer", default = browseURL)
-  viewer("https://github.com/vnijs/gitgadget")
-})
-
 ## Show remove_git modal when button is clicked.
 observeEvent(input$help, {
   ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html

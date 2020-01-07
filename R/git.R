@@ -81,9 +81,21 @@ groupr <- function(groupname, path, token, server) {
   list(status = "OKAY", group_id = group_id)
 }
 
-#' @noRd
+#' Add users to a repo
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param token GitLab token
+#' @param repo Repo to update
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param permission Permission setting for the repo (default is 20, i.e., reporter)
+#' @param server The gitlab API server
+#'
 #' @export
-add_users_repo <- function(token, repo, userfile, permission = 20, server = "https://gitlab.com/api/v4/") {
+add_users_repo <- function(
+  token, repo, userfile, permission = 20, 
+  server = "https://gitlab.com/api/v4/"
+) {
 
   resp <- connect(token, server)
   if (resp$status != 'OKAY')
@@ -130,7 +142,15 @@ add_user_repo <- function(user_id, repo_id, token, permission, server) {
   list(status = "OKAY")
 }
 
-#' @noRd
+#' Remove users from a repo
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param token GitLab token
+#' @param repo Repo the update
+#' @param userfile A csv file with student information (i.e., username and token)
+#' @param server The gitlab API server
+#'
 #' @export
 remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.com/api/v4/") {
 

@@ -23,9 +23,10 @@ get_port <- function() {
 #' @details See \url{https://github.com/vnijs/gitgadget} for documentation
 #'
 #' @param port Port to use for the app
+#' @param launch.browser Launch app in viewer (browsers) or only show the URL
 #'
 #' @export
-gitgadget <- function(port = get_port()) {
+gitgadget <- function(port = get_port(), launch.browser = TRUE) {
   gitgadget_dir <- system.file(package = "gitgadget")
   source(file.path(gitgadget_dir, "app/init.R"), local = TRUE)
   source(file.path(gitgadget_dir, "app/gitgadget_ui.R"), local = TRUE)
@@ -46,11 +47,22 @@ gitgadget <- function(port = get_port()) {
     })
   }
 
-  if (rstudioapi::isAvailable()) {
+  if (rstudioapi::isAvailable() && launch.browser) {
     runGadget(shinyApp(ui, server), port = port, viewer = shiny::paneViewer(minHeight = 725))
   } else {
-    runApp(shinyApp(ui, server))
+    runApp(shinyApp(ui, server), port = port, launch.browser = launch.browser)
   }
+}
+
+
+#' Start gitgadget and show url to open the application in an external browser
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for documentation
+#'
+#' @export
+gitgadget_url <- function() {
+  message("Click on the link below to open gitgadget\nin your default browser")
+  gitgadget::gitgadget(launch.browser = FALSE)
 }
 
 #' Launch gitgadget in a separate process

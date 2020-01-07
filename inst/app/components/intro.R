@@ -1,11 +1,11 @@
-observeEvent(input$intro_token_gl_get, {
-  utils::browseURL("https://gitlab.com/profile/personal_access_tokens")
-})
+# observeEvent(input$intro_token_gl_get, {
+#   utils::browseURL("https://gitlab.com/profile/personal_access_tokens")
+# })
 
-observeEvent(input$intro_token_gh_get, {
-  ## based on usethis::browse_github_pat
-  utils::browseURL("https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT")
-})
+# observeEvent(input$intro_token_gh_get, {
+#   ## based on usethis::browse_github_pat
+#   utils::browseURL("https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT")
+# })
 
 observeEvent(input$intro_git, {
 
@@ -135,7 +135,11 @@ output$ui_intro_buttons <- renderUI({
       "intro_git", "Introduce", 
       title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"
     ),
-    actionButton("intro_ssh", "SSH key", title = "Create an SSH key and copy the public-key to the clipboard"),
+    actionButton(
+      "intro_ssh", "SSH key", 
+      title = "Create an SSH key and copy the public-key to the clipboard",
+      onclick = "window.open('https://gitlab.com/profile/keys', '_blank')"
+    ),
     actionButton("intro_restart", "Restart", title = "Restart GitGadget"),
     actionButton("intro_check", "Check", title = "Check settings")
   )
@@ -231,22 +235,44 @@ intro_ssh <- eventReactive(input$intro_ssh, {
       cat("\nSSH keys cannot be generated from Git Gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
     }
   }
-  browseURL("https://gitlab.com/profile/keys")
+  # browseURL("https://gitlab.com/profile/keys")
   # browseURL("https://github.com/settings/keys")
 })
 
 observeEvent(input$intro_restart, {
   ## https://github.com/rstudio/rstudioapi/issues/111
-  stopApp(cat("\nUse Session > Restart R to update your settings in memory.\nThen start Git Gadget again to clone, create, etc.\n\n"))
-  ## Below is still not the same as using Session > Restart R
-  # stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
-  # cmd <- "gitgadget:::gitgadget()"
-  # rstudioapi::restartSession(cmd)
+  if (Sys.getenv("SHINY_PORT") == "") {
+    stopApp(cat("\nUse Session > Restart R to update your settings in memory.\nThen start Git Gadget again to clone, create, etc.\n\n"))
+    ## Below is still not the same as using Session > Restart R
+    # stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
+    # cmd <- "gitgadget:::gitgadget()"
+    # rstudioapi::restartSession(cmd)
+  } else {
+    showModal(
+      modalDialog(
+        title = "Restart Git Gadget",
+        span("To restart the app with updated settings press the 'Done' button on the top-right. Then restart R (or refresh your browser if launching from Jupyter) and restart Git Gadget"),
+        easyClose = TRUE
+      )
+    )
+  }
 })
 
 observeEvent(input$intro_check, {
-  usethis::edit_r_environ()
-  usethis::edit_r_profile()
+  if (Sys.getenv("SHINY_PORT") == "") {
+    usethis::edit_r_environ()
+  } else {
+    path <- usethis:::scoped_path_r("user", ".Renviron", envvar = "R_ENVIRON_USER")
+    Renv <- readLines(path)
+    showModal(
+      modalDialog(
+        title = "Staged file differences",
+        span(HTML(paste0(Renv, collapse = "</br>"))),
+        size = "l",
+        easyClose = TRUE
+      )
+    )
+  }
 })
 
 output$introduce_output <- renderPrint({
