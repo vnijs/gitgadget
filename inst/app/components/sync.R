@@ -1,4 +1,3 @@
-
 remote_info <- reactive({
   input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
   req(input$repo_directory)
@@ -34,7 +33,6 @@ observeEvent(input$sync_stage, {
       easyClose = TRUE
     )
   )
-  updateTextInput(session = session, "sync_commit_message", value = "")
 })
 
 observeEvent(input$sync_commit, {
@@ -76,7 +74,7 @@ observeEvent(input$sync_undo_commit_show, {
       footer = tagList(
         modalButton("Cancel"),
         actionButton(
-          "sync_undo_commit", "Undo", class = "btn-danger", 
+          "sync_undo_commit", "Undo", class = "btn-danger",
           title = "Undo the latest local commit\n\nGit command:\ngit reset HEAD~"
         )
       )
@@ -149,7 +147,7 @@ observeEvent(input$sync_reset_show, {
       footer = tagList(
         modalButton("Cancel"),
         actionButton(
-          "sync_reset", "Reset", class = "btn-danger", 
+          "sync_reset", "Reset", class = "btn-danger",
           title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master"
         )
       )
@@ -238,7 +236,7 @@ output$ui_sync_commit_message <- renderUI({
     HTML(paste0("<label>", input$repo_directory, " is not a git repo</label></br>"))
   } else {
     textAreaInput(
-      "sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "", 
+      "sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "",
       placeholder = "Provide a commit message that describes the changes you made to the repo"
     )
   }
@@ -247,8 +245,8 @@ output$ui_sync_commit_message <- renderUI({
 output$ui_sync_from <- renderUI({
   init <- upstream_info()
   textInput(
-    "sync_from", "Sync repo with remote it was forked from:", 
-    value = ifelse(length(init) == 0, "", init[1]), 
+    "sync_from", "Sync repo with remote it was forked from:",
+    value = ifelse(length(init) == 0, "", init[1]),
     placeholder = "Provide https or ssh link to original remote repo"
   )
 })
@@ -290,7 +288,7 @@ color_diff_html <- function(mess) {
       } else {
         if (lastonly == 0) {
           html <- addDiffToPage(currFile, currSection, html)
-        } 
+        }
       }
       if (lastonly == 0) currSection <- ""
         lastonly <- 1
@@ -326,10 +324,10 @@ color_diff_html <- function(mess) {
     }
 
     # Convert &, <, > to HTML entities.
-    s <- gsub("\\&", "\\&amp;", s) %>% 
+    s <- gsub("\\&", "\\&amp;", s) %>%
       gsub("<", "\\&lt;", .) %>%
       gsub(">", "\\&gt;", .)
-      
+
     if (first == 1) first <- 0
 
     # Output the line.
