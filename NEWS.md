@@ -1,3 +1,7 @@
+# gitgadget 0.5.5.0
+
+* Fix for fork synch
+
 # gitgadget 0.5.4.0
 
 * Various updates to allow using gitgadget with shiny server

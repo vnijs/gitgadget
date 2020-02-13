@@ -196,7 +196,7 @@ observeEvent(input$sync_merge, {
   req(input$repo_directory)
   withProgress(message = "Merging synced repo", value = 0, style = "old", {
     mess1 <- system(paste("git -C", input$repo_directory, "checkout master"), intern = TRUE)
-    mess2 <- system(paste("git -C", input$repo_directory, "merge upstream/master"), inern = TRUE)
+    mess2 <- system(paste("git -C", input$repo_directory, "merge upstream/master"), intern = TRUE)
   })
   mess <- c(mess1, mess2)
   showModal(
