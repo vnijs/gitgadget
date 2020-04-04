@@ -43,6 +43,17 @@ observeEvent(input$intro_git, {
     }
   }
 
+  if (!is_empty(input$intro_server)) {
+    renvir <- file.path(renvirdir, ".Renviron")
+    if (file.exists(renvir)) {
+      readLines(renvir, warn = FALSE) %>%
+        .[!grepl("git.server\\s*=", .)] %>%
+        paste0(collapse = "\n") %>%
+        paste0(., "\ngit.server = \"", input$intro_server, "\"\n") %>%
+        cat(file = renvir)
+    }
+  }
+
   if (!is_empty(input$intro_token_gl)) {
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
@@ -112,6 +123,18 @@ observeEvent(input$intro_git, {
 
 shinyFiles::shinyDirChoose(input, "intro_git_home_open", roots = gg_volumes)
 
+output$ui_intro_get_token <- renderUI({
+  init <- input$intro_server
+  if (is_empty(init)) init <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  url <- sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
+  actionButton(
+    "intro_token_gl_get", "Create",
+    title = "Browse to git server to get a PAT",
+    style = "margin-top: 25px;",
+    onclick = paste0("window.open('", url, "/profile/personal_access_tokens', '_blank')")
+  )
+})
+
 output$ui_intro_git_home <- renderUI({
   init <- Sys.getenv("git.home", basedir)
   if (!is.integer(input$intro_git_home_open)) {
@@ -126,19 +149,22 @@ output$ui_intro_git_home <- renderUI({
 
 output$ui_intro_buttons <- renderUI({
   ## intend to remove SSH functionality below
+  init <- input$intro_server
+  if (is_empty(init)) init <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  url <- sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
   tagList(
     fillRow(height = "70px", width = "300px",
       textInput("intro_keyname", "Key name:", value = "id_rsa"),
       textInput("intro_passphrase", "Pass-phrase:", value = "")
     ),
     actionButton(
-      "intro_git", "Introduce", 
+      "intro_git", "Introduce",
       title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"
     ),
     actionButton(
-      "intro_ssh", "SSH key", 
+      "intro_ssh", "SSH key",
       title = "Create an SSH key and copy the public-key to the clipboard",
-      onclick = "window.open('https://gitlab.com/profile/keys', '_blank')"
+      onclick = paste0("window.open('", url, "/profile/keys', '_blank')")
     ),
     actionButton("intro_restart", "Restart", title = "Restart GitGadget"),
     actionButton("intro_check", "Check", title = "Check settings")
@@ -277,7 +303,7 @@ observeEvent(input$intro_check, {
 
 output$introduce_output <- renderPrint({
   input$intro_git
-  if (file.exists(file.path(find_home(), ".gitconfig")) || 
+  if (file.exists(file.path(find_home(), ".gitconfig")) ||
       file.exists(file.path(find_home(), "Documents/.gitconfig"))) {
     ret <- system("git config --global --list", intern = TRUE) %>%
       .[grepl("^user", .)]

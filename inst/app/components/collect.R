@@ -1,5 +1,6 @@
 assignment_name <- function(github = FALSE, url = FALSE) {
   assignment <- remote_info()
+  assn <- NULL
   if (any(grepl("(https://github.com)|(git@github.com)", assignment))) {
     if (github) {
       if (any(grepl("https://github.com", assignment))) {
@@ -33,7 +34,6 @@ assignment_name <- function(github = FALSE, url = FALSE) {
 
 output$ui_collect_assignment <- renderUI({
   resp <- assignment_name()
-  # if (length(resp) == 0) {
   if (is_empty(resp)) {
     HTML("<label>No assignments available for specified input values</label>")
   } else {
@@ -62,7 +62,7 @@ output$ui_collect_user_file <- renderUI({
     }
   }
   textInput(
-    "collect_user_file", "Upload file with student tokens:", 
+    "collect_user_file", "Upload file with student tokens:",
     value = init, placeholder = "Open student CSV file"
   )
 })

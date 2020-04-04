@@ -93,7 +93,7 @@ groupr <- function(groupname, path, token, server) {
 #'
 #' @export
 add_users_repo <- function(
-  token, repo, userfile, permission = 20, 
+  token, repo, userfile, permission = 20,
   server = "https://gitlab.com/api/v4/"
 ) {
 
@@ -237,7 +237,7 @@ create_group <- function(
 }
 
 get_allprojects <- function(
-  token, server, owned = TRUE, search = "", 
+  token, server, owned = TRUE, search = "",
   everything = FALSE, turn = 1, page = 1
 ) {
 
@@ -288,14 +288,14 @@ get_allprojects <- function(
 
   if (is.numeric(nr_pages) && nr_pages > page) {
     next_page <- get_allprojects(
-      token, server, owned = owned, search = search, 
+      token, server, owned = owned, search = search,
       everything = everything, turn = turn, page = page + 1
-    ) 
+    )
     np_mainproj <- next_page[["repos"]]
     if (is.data.frame(np_mainproj) && nrow(np_mainproj) > 0) {
       mainproj <- jsonlite::rbind_pages(list(mainproj, np_mainproj))
     }
-  } 
+  }
   list(status = "OKAY", repos = mainproj)
 }
 
@@ -351,7 +351,7 @@ renameRepo <- function(project_id, token, newname, server) {
 }
 
 setupteam <- function(
-  token, leader, others, git_leader, git_others, 
+  token, leader, others, git_leader, git_others,
   project_id, server, search = ""
 ) {
   ##fork if needed for team lead
@@ -400,7 +400,7 @@ add_team <- function(proj_id, token, team_mates, server) {
 
   apply(team_mates, 1, function(others) {
     murl <- paste0(
-      server, "projects/", proj_id, "/members?user_id=", 
+      server, "projects/", proj_id, "/members?user_id=",
       gsub(" ", "", others[2]), "&access_level=40"
     )
     resp <- curl_fetch_memory(murl, h)
@@ -511,7 +511,7 @@ maker <- function(repo_name, token, server, namespace = "") {
     resp <- groupID(namespace, namespace, token, server)
     if (resp$status != "OKAY")
       return(list(
-        status = "NOSUCHGROUP", 
+        status = "NOSUCHGROUP",
         content = "Namespace to create repo does not exist"
       ))
     namespace_id <- resp$group_id
@@ -567,8 +567,8 @@ maker <- function(repo_name, token, server, namespace = "") {
 #'
 #' @export
 create_repo <- function(
-  username = Sys.getenv("git.user"), token = Sys.getenv("git.token"), 
-  repo = basename(getwd()), base_dir = dirname(getwd()), groupname = "", 
+  username = Sys.getenv("git.user"), token = Sys.getenv("git.token"),
+  repo = basename(getwd()), base_dir = dirname(getwd()), groupname = "",
   pre = "", ssh = FALSE, server = "https://gitlab.com/api/v4/"
 ) {
 
@@ -619,12 +619,17 @@ create_repo <- function(
       cat(file = paste0(basename(adir), ".code-workspace"))
   }
 
+  url <- sub("\\s*(https://|http://)?([^/:]+).*", "\\1\\2", server)
+
   if (gn == "") gn <- username
   if (isTRUE(ssh)) {
-    murl <- paste0("git@gitlab.com:", gn, "/", paste0(pre, repo), ".git")
+    url <- sub("(https://|http://)", "git@", url)
+    murl <- paste0(url, ":", gn, "/", paste0(pre, repo), ".git")
   } else {
-    murl <- paste0("https://gitlab.com/", gn, "/", paste0(pre, repo), ".git")
+    murl <- paste0(url, "/", gn, "/", paste0(pre, repo), ".git")
   }
+  murl <- gsub("//", "/", murl)
+  print(murl)
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
@@ -718,7 +723,7 @@ collect_work <- function(
     stop("Error connecting to server: check token/server")
 
   token <- resp$token
-  search <- strsplit(assignment, "/")[[1]] %>% 
+  search <- strsplit(assignment, "/")[[1]] %>%
     {ifelse(length(.) > 1, .[2], .[1])}
   resp <- projID(assignment, token, server, owned = TRUE, search = search)
 
@@ -767,7 +772,7 @@ collect_work <- function(
 #'
 #' @export
 fetch_work <- function(
-  token, assignment, page = 1, 
+  token, assignment, page = 1,
   server = "https://gitlab.com/api/v4/"
 ) {
 
@@ -796,9 +801,9 @@ fetch_work <- function(
   ## collecting information on (max) 100 merge requests
   resp <- curl_fetch_memory(
     paste0(
-      server, "projects/", project_id, 
+      server, "projects/", project_id,
       "/merge_requests?state=all&per_page=100&page=", page
-    ), 
+    ),
     h
   )
 
@@ -842,7 +847,7 @@ fetch_work <- function(
   tmp <- apply(mrdat, 1, create_branch)
 
   if (next_page) {
-    fetch_work(token, assignment, server = server, page = page + 1) 
+    fetch_work(token, assignment, server = server, page = page + 1)
     message(paste0("Finished fetch attempt for page ", page, "\n"))
   } else {
     message("Finished fetch attempt. Check the console for messages\n")
