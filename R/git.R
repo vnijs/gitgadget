@@ -237,7 +237,7 @@ create_group <- function(
 }
 
 get_allprojects <- function(
-  token, server, owned = TRUE, search = "",
+  token, server, namespace = "", owned = TRUE, search = "",
   everything = FALSE, turn = 1, page = 1
 ) {
 
@@ -250,17 +250,19 @@ get_allprojects <- function(
   }
 
   if (owned) {
-    resp <- curl_fetch_memory(paste0(server, "projects?owned=true", search, "&per_page=100&page=", page), h)
+    murl <- paste0(server, "projects?owned=true", search, "&per_page=100&page=", page)
   } else {
-    resp <- curl_fetch_memory(paste0(server, "projects?membership=true", search, "&per_page=100&page=", page), h)
+    murl <- paste0(server, "projects?membership=true", search, "&per_page=100&page=", page)
   }
+
+  resp <- curl_fetch_memory(murl, h)
 
   if (checkerr(resp$status_code) == FALSE) {
     if (turn < 6) {
       message("SERVER_ERROR: Problem getting projects")
       message("Sleeping for 5 seconds and then trying again")
       Sys.sleep(5)
-      return(get_allprojects(token, server, owned = owned, everything = everything, turn = turn + 1, page = page))
+      return(get_allprojects(token, server, namespace = namespace, owned = owned, everything = everything, turn = turn + 1, page = page))
     } else {
       message("****************************************************************************")
       message("Tried 5 times and failed to get list of projects. GitLab message shown below")
@@ -286,9 +288,9 @@ get_allprojects <- function(
     }
   }
 
-  if (is.numeric(nr_pages) && nr_pages > page) {
+  if (!is_empty(nr_pages) > 0 && is.numeric(nr_pages) && nr_pages > page) {
     next_page <- get_allprojects(
-      token, server, owned = owned, search = search,
+      token, server, namespace = namespace, owned = owned, search = search,
       everything = everything, turn = turn, page = page + 1
     )
     np_mainproj <- next_page[["repos"]]
@@ -453,17 +455,18 @@ assign_work <- function(
     stop("Error getting assignment ", upstream_name)
 
   project_id <- resp$project_id
-  add_users <- function(dat, permission) {
+
+  add_users_df <- function(dat, permission) {
     add_user_repo(dat$git_id, project_id, token, permission, server = server)
+    dat
+  }
+  remove_users_df <- function(dat) {
+    remove_user_repo(dat$git_id, project_id, token, server = server)
     dat
   }
 
   student_data <- read_ufile(userfile)
   student_data$git_id <- userIDs(student_data$userid, token, server)
-
-  resp <- student_data %>%
-    group_by_at(.vars = "git_id") %>%
-    do(add_users(., 20))
 
   if (type == "individual")
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
@@ -475,7 +478,7 @@ assign_work <- function(
 
     resp <- ta_data %>%
       group_by_at(.vars = "git_id") %>%
-      do(add_users(., 40))
+      do(add_users_df(., 40))
   } else {
     ta_data <- head(student_data, 0)
   }
@@ -484,6 +487,12 @@ assign_work <- function(
   teams <- unique(student_data$team)
   vars <- c("token", "userid", "git_id")
   setup <- function(dat) {
+
+    ## adding access to the main repo
+    resp <- dat %>%
+      group_by_at(.vars = "git_id") %>%
+      do(add_users_df(., 20))
+
     setup_dat <- bind_rows(dat[, vars], ta_data[, vars])
     setupteam(
       setup_dat$token[leader],
@@ -495,6 +504,11 @@ assign_work <- function(
       server,
       search = assignment
     )
+
+    ## removing access to the main repo
+    resp <- dat %>%
+      group_by_at(.vars = "git_id") %>%
+      do(remove_users_df(.))
   }
 
   for (i in teams) {
@@ -509,6 +523,16 @@ maker <- function(repo_name, token, server, namespace = "") {
     namespace_id <- namespace
   } else {
     resp <- groupID(namespace, namespace, token, server)
+
+    if (resp$status == "NOSUCHGROUP") {
+      message("Creating group ", namespace)
+      resp <- groupr(namespace, namespace, token, server = server)
+      resp <- groupID(namespace, namespace, token, server)
+    } else if (resp$status != "OKAY") {
+      print(resp)
+      stop("Problem getting or creating group using the 'maker' function")
+    }
+
     if (resp$status != "OKAY")
       return(list(
         status = "NOSUCHGROUP",
@@ -520,7 +544,7 @@ maker <- function(repo_name, token, server, namespace = "") {
   ## check if repo already exists
   h <- new_handle()
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl <- paste0(server, "projects?owned=true&per_page=100&page=1")
+  murl <- paste0(server, "projects?owned=true", paste0("&search=", repo_name), "&per_page=100&page=1")
   if (!is_empty(namespace_id))
     murl <- paste0(murl, "&namespace_id=", namespace_id)
   resp <- curl_fetch_memory(murl, h)
@@ -580,6 +604,7 @@ create_repo <- function(
   gn <- ifelse (groupname == "" || groupname == username, "", groupname)
 
   message("Making repo ", paste0(pre, repo), " in group ", ifelse (gn == "", username, gn))
+
   resp <- maker(paste0(pre, repo), token, server, gn)
 
   if (resp$status == "NOSUCHGROUP")
@@ -629,7 +654,6 @@ create_repo <- function(
     murl <- paste0(url, "/", gn, "/", paste0(pre, repo), ".git")
   }
   murl <- gsub("//", "/", murl)
-  print(murl)
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
@@ -747,17 +771,27 @@ collect_work <- function(
 
   udat$git_id <- userIDs(udat$userid, token, server)
 
-  ## ensuring that users have the required access to create a merge request
-  add_users <- function(dat) {
-    add_user_repo(dat$git_id, project_id, token, 20, server = server)
+  add_users_df <- function(dat, permission) {
+    add_user_repo(dat$git_id, project_id, token, permission, server = server)
+    dat
+  }
+  remove_users_df <- function(dat) {
+    remove_user_repo(dat$git_id, project_id, token, server = server)
     dat
   }
 
+  ## ensuring that users have the required access to create a merge request
   resp <- udat %>%
     group_by_at(.vars = "git_id") %>%
-    do(add_users(.))
+    do(add_users_df(., 20))
 
   resp <- apply(udat[, c("token", "userid")], 1, merger, project_id, search = search, server)
+
+  ## removing user access
+  resp <- udat %>%
+    group_by_at(.vars = "git_id") %>%
+    do(remove_users_df(.))
+
   message("Finished attempt to collect all merge requests. Check the console for messages\n")
 }
 
@@ -812,7 +846,7 @@ fetch_work <- function(
     sub("X-Total-Pages:\\s+", "", .) %>%
     as.numeric()
 
-  next_page <- if (is.numeric(nr_pages) && nr_pages > page) TRUE else FALSE
+  next_page <- if (!is_empty(nr_pages) && is.numeric(nr_pages) && nr_pages > page) TRUE else FALSE
   mr <- fromJSON(rawToChar(resp$content))
   mrdat <-
     data_frame(id = mr$iid, un = mr$author$username) %>%

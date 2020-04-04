@@ -1,3 +1,7 @@
+# gitgadget 0.5.6.0
+
+* By default, Create and Collect now _Hide_ (i.e., remove permissions) the main repo that was forked for each student
+
 # gitgadget 0.5.5.0
 
 * Fix for fork synch

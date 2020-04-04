@@ -20,7 +20,7 @@ output$ui_create_directory <- renderUI({
     init <- shinyFiles::parseDirPath(gg_volumes, input$create_directory_find)
   }
   textInput(
-    "create_directory", "Local directory:", value = init, 
+    "create_directory", "Local directory:", value = init,
     placeholder = "Base directory for the git repo"
   )
 })
@@ -42,7 +42,7 @@ output$ui_create_user_file <- renderUI({
     }
   }
   textInput(
-    "create_user_file", "Upload file with student tokens:", 
+    "create_user_file", "Upload file with student tokens:",
     value = init, placeholder = "Open student CSV file"
   )
 })
@@ -64,7 +64,7 @@ output$ui_create_ta_file <- renderUI({
     }
   }
   textInput(
-    "create_ta_file", "Upload file with TA tokens:", 
+    "create_ta_file", "Upload file with TA tokens:",
     value = init, placeholder = "Open TA CSV file"
   )
 })
@@ -73,15 +73,15 @@ output$ui_create_buttons <- renderUI({
   if (input$intro_user_type == "faculty" && !is_empty(input$create_user_file)) {
     tagList(
       actionButton(
-        "create", "Create", 
+        "create", "Create",
         title = "Create a new repo using the gitlab API"
       ),
       actionButton(
-        "create_hide_repo", "Hide", 
+        "create_hide_repo", "Hide",
         title = "Hide class repo from students", class = "btn-warning"
       ),
       actionButton(
-        "create_show_repo", "Show", 
+        "create_show_repo", "Show",
         title = "Show class repo to students", class = "btn-success"
       )
     )
@@ -120,8 +120,8 @@ observeEvent(input$remove_git_show, {
       footer = tagList(
         modalButton("Cancel"),
         actionButton(
-          "remove_git", "Remove .git", 
-          title = "Remove previous .git directory if present", 
+          "remove_git", "Remove .git",
+          title = "Remove previous .git directory if present",
           class = "btn-danger"
         )
       )
@@ -158,14 +158,14 @@ observeEvent(input$remove_remote_show, {
             td(modalButton("Cancel")),
             td(conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
               actionButton(
-                "remove_forks", "Remove forks", 
-                title = "Remove forks from current repo created for students", 
+                "remove_forks", "Remove forks",
+                title = "Remove forks from current repo created for students",
                 class = "btn-danger"
               )
             )),
             td(actionButton(
-              "remove_gitlab", "Remove remote", 
-              title = "Remove previous remote repo if present", 
+              "remove_gitlab", "Remove remote",
+              title = "Remove previous remote repo if present",
               class = "btn-danger"
             ))
           ))
@@ -208,7 +208,7 @@ remove_gitlab <- observeEvent(input$remove_gitlab, {
     cat("Removing remote repo ...\n")
 
     id <- projID(
-      paste0(create_group_lc, "/", create_pre_lc, repo), 
+      paste0(create_group_lc, "/", create_pre_lc, repo),
       input$create_token, input$create_server
     )
     if (id$status == "OKAY") {
@@ -245,7 +245,7 @@ remove_forks <- observeEvent(input$remove_forks, {
     students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
     for (i in seq_len(nrow(students))) {
       id <- projID(
-        paste0(students[i, "userid"], "/", create_pre_lc, repo), 
+        paste0(students[i, "userid"], "/", create_pre_lc, repo),
         students[i, "token"], "https://gitlab.com/api/v4/"
       )
       if (id$status == "OKAY") {
@@ -307,7 +307,7 @@ create <- eventReactive(input$create, {
       cat("Creating repo ...\n")
       mess <- capture.output(create_repo(
         input$create_user_name, input$create_token, repo, directory, create_group_lc,
-        pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE), 
+        pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE),
         server = input$create_server
       )) %>% paste0(mess, "\n\n", .)
       if (!is_empty(input$create_user_file)) {
