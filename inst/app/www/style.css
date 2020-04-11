@@ -29,3 +29,11 @@
     font-weight: bold;
     font-size: 20px;
 }
+
+.sF-dirWindow {
+  min-height: 30vh !important;
+}
+
+.sF-dirInfo>div {
+  height: 28vh !important;
+}
