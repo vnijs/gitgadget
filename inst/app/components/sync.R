@@ -128,7 +128,7 @@ observeEvent(input$sync_push, {
 
 output$ui_sync_check <- renderUI({
   req(input$sync_check > 0)
-  assn <- assignment_name(github = TRUE, url = TRUE)
+  assn <- assignment_name(github = FALSE, url = TRUE)
   hash <- suppressWarnings(system(paste("git -C", input$repo_directory, "rev-parse --short HEAD"), intern = TRUE))
   if (!is_empty(hash) && length(hash) == 1) {
     assn <- paste0(assn, "/commit/", hash)
@@ -259,6 +259,7 @@ output$sync_output <- renderPrint({
 color_diff_html <- function(mess) {
   # adapted from https://gist.github.com/stopyoukid/5888146
   html <- "<html> <head> <meta charset=\"utf-8\"> <style> .modal-lg .file-diff>div { width: 100%; } .modal-lg .modal-body { overflow: auto; } .modal-lg pre::-webkit-scrollbar { /* hide scrollbar on chrome, safari, and edge */ display: none; } .modal-lg pre { /* hide scrollbar on firefox */ scrollbar-width: none; } .modal-lg pre { padding: 0; margin: 0; margin-left: 5px; font-size: 12px; text-align: left; border: 0; border-radius: 0; background-color: rgb(255, 255, 255); line-height: 1.75em; } .modal-lg .file { margin-bottom: 1em; border: 1px; } .modal-lg .delete { background-color: #fdd; } .modal-lg .insert { background-color: #dfd; } .modal-lg .info { background-color: #888 } .modal-lg .context { color: #aaa; } </style> </head> <body>"
+  ## for testing purposes
   # html <- paste0(readLines("~/Desktop/format.html"), collapse = "\n")
   first <- 1
   diffseen <- lastonly <- 0

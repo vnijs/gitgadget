@@ -1,33 +1,18 @@
 assignment_name <- function(github = FALSE, url = FALSE) {
   assignment <- remote_info()
   assn <- NULL
-  if (any(grepl("(https://github.com)|(git@github.com)", assignment))) {
-    if (github) {
-      if (any(grepl("https://github.com", assignment))) {
-        server <- "https://github.com"
-        assn <- gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", assignment) %>% unique()
-      } else {
-        server <- "git@github.com"
-        assn <- gsub(paste0("^.*", server, ":(.*).git.*"), "\\1", assignment) %>% unique()
-      }
-    } else {
-      message("GitGadget does not (yet) support assignment management on GitHub.com")
-      ""
-    }
-    if (url) {
-      assn <- paste0("https://github.com/", assn)
-    }
-  } else{
-    if (any(grepl("https://gitlab.com", assignment))) {
-      server <- "https://gitlab.com"
-      assn <- gsub(paste0("^.*", server, "/(.*).git.*"), "\\1", assignment) %>% unique()
-    } else {
-      server <- "git@gitlab.com"
-      assn <- gsub(paste0("^.*", server, ":(.*).git.*"), "\\1", assignment) %>% unique()
-    }
-    if (url) {
-      assn <- paste0("https://gitlab.com/", assn)
-    }
+  if (any(grepl("( git@)", assignment))) {
+    server <- gsub("^.* git@([^:]+).*", "https://\\1", assignment)
+    assn <- gsub("^.*:(.*).git.*", "\\1", assignment)
+  } else if (any(grepl(" https://", assignment))) {
+    server <- gsub("^.* https://([^/]+).*", "https://\\1", assignment)
+    assn <- gsub("^.* https://[^/]+/(.*).git.*", "\\1", assignment)
+  } else {
+    cat(assignment)
+    stop("Unable to determine the server and assignment name from the information printed above")
+  }
+  if (url) {
+    assn <- paste0(server, "/", assn)
   }
   assn
 }
