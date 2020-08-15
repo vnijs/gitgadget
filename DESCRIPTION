@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: Rstudio Addin for Version Control and Assignment Management using Git
-Version: 0.5.6
-Date: 2020-4-1
+Version: 0.6.0
+Date: 2020-8-15
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -12,7 +12,7 @@ Description: An Rstudio addin for version control that allows users to clone
     Furthermore, the addin uses the GitLab API to allow instructors to create
     forks and merge requests for all students/teams with one click of a button.
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.6.0)
 Imports:
     shiny (>= 1.4.0),
     miniUI (>= 0.1.1.1),

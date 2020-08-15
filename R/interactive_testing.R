@@ -6,14 +6,16 @@ if (main_git__) {
   library(curl)
   library(jsonlite)
   library(dplyr)
+  source("./R/git.R")
 
   ## settings
-  server <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  # server <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  server <- Sys.getenv("git.server", "https://rsm-gitlab.ucsd.edu/api/v4/")
   username <- Sys.getenv("git.user")
   token <- Sys.getenv("git.token")
   # groupname <- "rady-mgta-bc-2016"
   groupname <- Sys.getenv("git.group")
-  userfile <- "~/git/test-gitlab.csv"
+  userfile <- "~/git/msba-test-gitlab.csv"
   stopifnot(file.exists(userfile))
 
   ## to debug code
@@ -23,8 +25,8 @@ if (main_git__) {
   ## in the student's namespace, i.e., two faculty might have assignment1
   assignment <- "assignment1"
   type <- "individual"
-  pre <- paste0(groupname,"-")
-  directory <- paste0("~/bc/", groupname)
+  # pre <- paste0(groupname,"-")
+  # directory <- paste0("~/bc/", groupname)
 
   ## uncomment to cleanup
   # remove_group(token, groupname, server)
@@ -32,9 +34,8 @@ if (main_git__) {
   ## uncomment to remove all student projects!
   ## highly destructive!
   userfile <- "~/git/msba-test-gitlab.csv"
-  students <- read_ufile(userfile)
-  students
-  remove_student_projects(userfile, Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
+  students <- read.csv(userfile, stringsAsFactors = FALSE)
+  gitgadget:::remove_student_projects(userfile, Sys.getenv("git.server", "https://rsm-gitlab.ucsd.edu/api/v4/"))
 
   ## repo <- "gitgadget-test-repo"
   # id <- projID(paste0("vnijs/",repo), token, server)$project_id
@@ -48,11 +49,11 @@ if (main_git__) {
 
   ## check tokens
   userfile <- "~/msba-test-gitlab.csv"
-  # students <- read.csv(userfile, stringsAsFactors = FALSE)
-  students <- read_ufile(userfile)
+  students <- read.csv(userfile, stringsAsFactors = FALSE)
 
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {
+    i <- 1
     token <- students[i, "token"]
     if (token != "")
       id <- get_allprojects(token, server)

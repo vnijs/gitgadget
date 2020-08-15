@@ -225,6 +225,7 @@ remove_gitlab <- observeEvent(input$remove_gitlab, {
 
 remove_forks <- observeEvent(input$remove_forks, {
   removeModal()
+  req(input$create_server)
   if (is_empty(input$create_token)) {
     cat("Token required to remove student forks")
     return(invisible())
@@ -246,10 +247,10 @@ remove_forks <- observeEvent(input$remove_forks, {
     for (i in seq_len(nrow(students))) {
       id <- projID(
         paste0(students[i, "userid"], "/", create_pre_lc, repo),
-        students[i, "token"], "https://gitlab.com/api/v4/"
+        students[i, "token"], input$create_server
       )
       if (id$status == "OKAY") {
-        remove_project(students[i, "token"], id$project_id, "https://gitlab.com/api/v4/")
+        remove_project(students[i, "token"], id$project_id, input$create_server)
         message(paste0("Project fork ", id$project_id, " removed for ", students[i, "userid"], " in ", students[i, "team"]))
       }
     }

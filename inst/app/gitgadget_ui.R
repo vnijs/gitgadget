@@ -191,8 +191,8 @@ gitgadget_ui <- function() {
             title = "Push all commited updates to the remote repo\n\nGit command: git push"
           ),
           actionButton(
-            "sync_check", "Check",
-            title = "Check the gitlab.com (github.com) site for the pushed changes"
+            "sync_check", "Check", class = "btn-success",
+            title = "Check the git server for the pushed changes"
           ),
           actionButton(
             "sync_reset_show", "Reset", class = "btn-danger",

@@ -3,10 +3,10 @@ assignment_name <- function(github = FALSE, url = FALSE) {
   assn <- NULL
   if (any(grepl("( git@)", assignment))) {
     server <- gsub("^.* git@([^:]+).*", "https://\\1", assignment)
-    assn <- gsub("^.*:(.*).git.*", "\\1", assignment)
+    assn <- gsub("^.*:(.*)\\.git.*", "\\1", assignment)
   } else if (any(grepl(" https://", assignment))) {
     server <- gsub("^.* https://([^/]+).*", "https://\\1", assignment)
-    assn <- gsub("^.* https://[^/]+/(.*).git.*", "\\1", assignment)
+    assn <- gsub("^.* https://[^/]+/(.*)\\.git.*", "\\1", assignment)
   } else {
     cat(assignment)
     stop("Unable to determine the server and assignment name from the information printed above")

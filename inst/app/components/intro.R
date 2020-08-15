@@ -126,10 +126,14 @@ observeEvent(input$intro_git, {
 
 shinyFiles::shinyDirChoose(input, "intro_git_home_open", roots = gg_volumes)
 
-output$ui_intro_get_token <- renderUI({
+server_url <- reactive({
   init <- input$intro_server
   if (is_empty(init)) init <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
-  url <- sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
+  sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
+})
+
+output$ui_intro_get_token <- renderUI({
+  url <- server_url()
   actionButton(
     "intro_token_gl_get", "Create",
     title = "Browse to git server to get a PAT",
@@ -151,10 +155,7 @@ output$ui_intro_git_home <- renderUI({
 })
 
 output$ui_intro_buttons <- renderUI({
-  ## intend to remove SSH functionality below
-  init <- input$intro_server
-  if (is_empty(init)) init <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
-  url <- sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
+  url <- server_url()
   tagList(
     fillRow(height = "70px", width = "300px",
       textInput("intro_keyname", "Key name:", value = "id_rsa"),
@@ -175,6 +176,9 @@ output$ui_intro_buttons <- renderUI({
 })
 
 intro_ssh <- eventReactive(input$intro_ssh, {
+  url <- server_url()
+  url_keys <- paste0(url, "/profile/keys")
+  url_short <- sub("\\s*(https://|http://)?([^/]+).*", "\\2", url)
   if (os_type != "Windows") {
     email <- system("git config --global --list", intern = TRUE) %>%
       .[grepl("^user.email", .)] %>%
@@ -198,10 +202,10 @@ intro_ssh <- eventReactive(input$intro_ssh, {
         out <- pipe("pbcopy")
         cat(key, file = out)
         close(out)
-        cat("\nYour new public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+        cat(paste0("\nYour new public SSH key has been copied to the clipboard. Navigate to ",  url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       } else {
         cat(paste0("\n", key))
-        cat("\n\nCopy the new public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+        cat(paste0("\n\nCopy the new public SSH key to ", url_keys,". Paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       }
     } else {
       key <- readLines(.ssh_exists(), warn = FALSE)
@@ -209,10 +213,10 @@ intro_ssh <- eventReactive(input$intro_ssh, {
         out <- pipe("pbcopy")
         cat(key, file = out)
         close(out)
-        cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+        cat(paste0("\nYour public SSH key has been copied to the clipboard. Navigate to ", url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       } else {
         cat(paste0("\n", key))
-        cat("\n\nCopy the public SSH key to https://gitlab.com/profile/keys. Paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+        cat(paste0("\n\nCopy the public SSH key to ", url_keys, ". Paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       }
     }
 
@@ -220,20 +224,16 @@ intro_ssh <- eventReactive(input$intro_ssh, {
     Sys.setenv(GIT_SSH_COMMAND = paste0("'ssh -i '", ssh_dir, "/", keyname))
 
     if (file.exists(file.path(ssh_dir, "known_hosts"))) {
-      if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
-        system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
-      }
-      if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
-        system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+      if (!any(grepl(url_short, readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
+        system(paste0("ssh-keyscan -t rsa,dsa ", url_short, " >> ", ssh_dir, "/known_hosts"))
       }
     } else {
-      system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
-      system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+      system(paste0("ssh-keyscan -t rsa,dsa ", url_short, " >> ", ssh_dir, "/known_hosts"))
     }
 
     if (keyname != "id_rsa") {
       cat("\nYou will also need to add the lines below to ~/.ssh/config\n")
-      cat("\nHost gitlab.com\n")
+      cat(paste0("\nHost ", url_short, "\n"))
       cat(paste0("    IdentityFile ~/.ssh/", keyname))
       cat("", file = "~/.ssh/config", append = TRUE)
 
@@ -246,26 +246,22 @@ intro_ssh <- eventReactive(input$intro_ssh, {
   } else {
     if (!is_empty(.ssh_exists())) {
       ssh_dir <- file.path(homedir, ".ssh")
+
       if (file.exists(file.path(ssh_dir, "known_hosts"))) {
-        if (!any(grepl("gitlab\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
-          system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
-        }
-        if (!any(grepl("github\\.com", readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
-          system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+        if (!any(grepl(url_short, readLines(file.path(ssh_dir, "known_hosts"), warn = FALSE)))) {
+          system(paste0("ssh-keyscan -t rsa,dsa ", url_short, " >> ", ssh_dir, "/known_hosts"))
         }
       } else {
-        system(paste0("ssh-keyscan -t rsa,dsa gitlab.com >> ", ssh_dir, "/known_hosts"))
-        system(paste0("ssh-keyscan -t rsa,dsa github.com >> ", ssh_dir, "/known_hosts"))
+        system(paste0("ssh-keyscan -t rsa,dsa ", url_short, " >> ", ssh_dir, "/known_hosts"))
       }
+
       key <- readLines(.ssh_exists(), warn = FALSE)
       cat(key, file = "clipboard")
-      cat("\nYour public SSH key has been copied to the clipboard. Navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+      cat(paste0("\nYour public SSH key has been copied to the clipboard. Navigate to ", url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
     } else {
-      cat("\nSSH keys cannot be generated from Git Gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to https://gitlab.com/profile/keys in your browser, paste the key into the 'Key' text input on gitlab, and click 'Add key'\n")
+      cat(paste0("\nSSH keys cannot be generated from Git Gadget on Windows. In RStudio go to Tools > Global Options and select Git/SVN. Click 'Create RSA Key' and then 'View public key'. Copy the key to the clipboard, navigate to ", url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
     }
   }
-  # browseURL("https://gitlab.com/profile/keys")
-  # browseURL("https://github.com/settings/keys")
 })
 
 observeEvent(input$intro_restart, {
