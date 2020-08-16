@@ -12,11 +12,6 @@ gitgadget(port = get_port(), launch.browser = TRUE)
 
 \item{launch.browser}{Launch app in viewer (browsers) or only show the URL}
 }
-\description{
-gitgadget
-
-Launch gitgadget in Rstudio viewer if available
-}
 \details{
 See \url{https://github.com/vnijs/gitgadget} for documentation
 }

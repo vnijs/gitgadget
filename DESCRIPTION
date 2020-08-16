@@ -31,7 +31,7 @@ URL: URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Encoding: UTF-8
 Language: en-US
 VignetteBuilder: knitr
