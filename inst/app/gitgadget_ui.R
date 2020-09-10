@@ -56,7 +56,8 @@ gitgadget_ui <- function() {
       ),
       miniTabPanel("Create", value = "create", icon = icon("git"),
         miniContentPanel(
-          HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
+          # HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
+          HTML("<h2>Create a repo on GitLab</h2>"),
           selectInput("create_remote", NULL, choices = "GitLab", selected = "GitLab"),
           # selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
           conditionalPanel("input.create_remote == 'GitLab'",
