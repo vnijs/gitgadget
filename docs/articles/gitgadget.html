@@ -39,7 +39,7 @@
 <li>
   <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -56,7 +56,7 @@
 <li>
   <a href="https://github.com/vnijs/gitgadget">
     <span class="fa fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -67,28 +67,28 @@
 </div>
 <!--/.navbar -->
 
-      
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Using Git Gadget</h1>
                         <h4 class="author">Vincent Nijs</h4>
-            
+
             <h4 class="date">2019-10-09</h4>
-      
+
       <small class="dont-index">Source: <a href="https://github.com/vnijs/gitgadget/blob/master/vignettes/gitgadget.Rmd"><code>vignettes/gitgadget.Rmd</code></a></small>
       <div class="hidden name"><code>gitgadget.Rmd</code></div>
 
     </div>
 
-    
-    
+
+
 <div id="git-gadget" class="section level1">
 <h1 class="hasAnchor">
 <a href="#git-gadget" class="anchor"></a>Git Gadget</h1>
 <p><a href="https://travis-ci.org/vnijs/gitgadget"><img src="https://travis-ci.org/vnijs/gitgadget.png?branch=master" alt="Build Status"></a></p>
 <p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for use with GitHub are welcome. For alternative that uses GitHub see <a href="https://github.com/rundel/ghclass" class="uri">https://github.com/rundel/ghclass</a> although this does not (currently) have a shiny user interface.</p>
-<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="http://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
+<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com/" target="_blank">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="https://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
 <p><code>gitgadget</code> requires Rstudio version 1.2 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"gitgadget"</span>, <span class="dt">repos =</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span>)</a></code></pre></div>
 <p>To start <code>gitgadget</code> click on the Addins menu in Rstudio and then on <code>gitgadget</code>.</p>
@@ -102,7 +102,7 @@
 <div id="introduce" class="section level2">
 <h2 class="hasAnchor">
 <a href="#introduce" class="anchor"></a>Introduce</h2>
-<p>To start using git and <code>gitgadget</code> first <a href="http://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on an appropriate credential helper for your operating system. See <a href="http://happygitwithr.com/credential-caching.html">http://happygitwithr.com/credential-caching.html</a> for additional information.</p>
+<p>To start using git and <code>gitgadget</code> first <a href="https://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on an appropriate credential helper for your operating system. See <a href="https://happygitwithr.com/credential-caching.html">https://happygitwithr.com/credential-caching.html</a> for additional information.</p>
 <p>To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the <a href="https://gitlab.com/profile/personal_access_tokens">token on GitLab</a> and then copy-and-paste it in the <code>Token</code> input.</p>
 <p>Unless you plan to use <code>gitgadget</code> to manage student assignments, select <code>student</code> as the <code>User type</code>. Finally, enter the main directory where you plan to clone code repos (e.g., “C:/Users/me/git”)</p>
 <p>If you want to use an SSH key, make sure to click on the <code>Introduce</code> button, restart Rstudio, and then click on the <code>SSH key</code> button. Copy the key shown in GitGadget to the <a href="https://gitlab.com/profile/keys">gitlab.com page</a> that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use <code>git clone git@some-private-repo</code> from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the videos below for a demonstration.</p>
@@ -213,7 +213,7 @@
 </tr>
 </tbody>
 </table>
-<p>Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a></p>
+<p>Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a></p>
 <p><code><a href="../reference/collect_work.html">collect_work(...)</a></code></p>
 <p>Generates Merge Requests for all students or teams. Requires a csv file with the structure shown above.</p>
 <p><code><a href="../reference/fetch_work.html">fetch_work(...)</a></code></p>
@@ -272,7 +272,7 @@
       </footer>
 </div>
 
-  
+
 
   </body>
 </html>

@@ -4,7 +4,7 @@
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome.
 
-`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. `gitgadget` provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) by Jenny Bryan.
+`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com/" target="_blank">gitkraken</a>. `gitgadget` provide a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](https://happygitwithr.com/) by Jenny Bryan.
 
 `gitgadget` requires Rstudio version 1.1 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
 
@@ -18,7 +18,7 @@ To start `gitgadget` click on the Addins menu in Rstudio and then on `gitgadget`
 
 ## Introduce
 
-To start using git and `gitgadget` first [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-caching.html) for additional information. 
+To start using git and `gitgadget` first [introduce yourself to git](https://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on credential helpers for your platform. See [https://happygitwithr.com/credential-caching.html](https://happygitwithr.com/credential-caching.html) for additional information. 
 
 To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the token on GitLab (https://gitlab.com/profile/personal_access_tokens) and then copy-and-paste it in the `Token` input.
 
@@ -73,7 +73,7 @@ Used to create a group for a course. The `Group name` variable should be set to 
 | id2    | team1 | student2@gmail.com | n9....... |
 | id3    | team2 | student3@gmail.com | VR....... |
 
-Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
+Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
 
 `create_repo(...)`
 

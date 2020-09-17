@@ -18,7 +18,7 @@ get_port <- function() {
   port
 }
 
-#' Launch gitgadget in Rstudio viewer if available
+#' @description Launch gitgadget in an Rstudio viewer if available
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for documentation
 #'

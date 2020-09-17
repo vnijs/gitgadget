@@ -4,7 +4,7 @@
 
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://gitlab.com) API. PRs for use with GitHub are welcome. For alternative that uses GitHub see https://github.com/rundel/ghclass although this does not (currently) have a shiny user interface.
 
-`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="http://www.sourcetreeapp.com/" target="_blank">sourcetree</a>. `gitgadget` provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](http://happygitwithr.com/) and [talk about version control](https://peerj.com/preprints/3159/) by Jenny Bryan and [git for humans](https://speakerdeck.com/alicebartlett/git-for-humans) by Alice Bartlett.
+`gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com/" target="_blank">gitkraken</a>. `gitgadget` provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](https://happygitwithr.com/) and [talk about version control](https://peerj.com/preprints/3159/) by Jenny Bryan and [git for humans](https://speakerdeck.com/alicebartlett/git-for-humans) by Alice Bartlett.
 
 `gitgadget` requires Rstudio version 1.2 or later. Please use the [issue tracker](https://github.com/vnijs/gitgadget/issues) on GitHub to suggest enhancements or report problems. To install the latest version of `gitgadget` use the command below:
 
@@ -28,7 +28,7 @@ https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Lat
 
 ## Introduce
 
-To start using git and `gitgadget` first [introduce yourself to git](http://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on an appropriate credential helper for your operating system. See [http://happygitwithr.com/credential-caching.html](http://happygitwithr.com/credential-caching.html) for additional information. 
+To start using git and `gitgadget` first [introduce yourself to git](https://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on an appropriate credential helper for your operating system. See [https://happygitwithr.com/credential-caching.html](https://happygitwithr.com/credential-caching.html) for additional information. 
 
 To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the [token on GitLab](https://gitlab.com/profile/personal_access_tokens) and then copy-and-paste it in the `Token` input.
 
@@ -120,7 +120,7 @@ Forks the assignment repo uploaded by a faculty member or TA for each student/te
 | id2    | team1 | student2@gmail.com | n9....... |
 | id3    | team2 | student3@gmail.com | VR....... |
 
-Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
+Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
 
 `collect_work(...)`
 
