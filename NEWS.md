@@ -1,6 +1,7 @@
-# gitgadget 0.5.6.0
+# gitgadget 0.6.0
 
-* By default, Create and Collect now _Hide_ (i.e., remove permissions) the main repo that was forked for each student
+* By default, Create and Collect now _Hide_ (i.e., remove permissions) to the main repo that was forked for each student
+* If it now possible to specify self-hosted gitlab server APIs to use with gitgadget
 
 # gitgadget 0.5.5.0
 
