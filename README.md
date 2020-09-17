@@ -120,7 +120,7 @@ Forks the assignment repo uploaded by a faculty member or TA for each student/te
 | id2    | team1 | student2@gmail.com | n9....... |
 | id3    | team2 | student3@gmail.com | VR....... |
 
-Note: Markdown for the table above was generated using <a href="http://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
+Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
 
 `collect_work(...)`
 
