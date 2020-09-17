@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>gitgadget — gitgadget • gitgadget</title>
+<title>Check student tokens — check_tokens • gitgadget</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="gitgadget — gitgadget" />
-<meta property="og:description" content="Run gitgadget in Rstudio viewer if available" />
+<meta property="og:title" content="Check student tokens — check_tokens" />
+<meta property="og:description" content="Check student tokens" />
 
 
 
@@ -114,33 +114,36 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>gitgadget</h1>
-    <small class="dont-index">Source: <a href='https://github.com/vnijs/gitgadget/blob/master/R/aaa.R'><code>R/aaa.R</code></a>, <a href='https://github.com/vnijs/gitgadget/blob/master/R/gadget.R'><code>R/gadget.R</code></a></small>
-    <div class="hidden name"><code>gitgadget.Rd</code></div>
+    <h1>Check student tokens</h1>
+    <small class="dont-index">Source: <a href='https://github.com/vnijs/gitgadget/blob/master/R/git.R'><code>R/git.R</code></a></small>
+    <div class="hidden name"><code>check_tokens.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Run gitgadget in Rstudio viewer if available</p>
+    <p>Check student tokens</p>
     </div>
 
-    <pre class="usage"><span class='fu'>gitgadget</span>(<span class='kw'>port</span> <span class='kw'>=</span> <span class='fu'><a href='get_port.html'>get_port</a></span>(), <span class='kw'>launch.browser</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>check_tokens</span>(
+  <span class='no'>userfile</span>,
+  <span class='kw'>server</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"git.server"</span>, <span class='st'>"https://gitlab.com/api/v4/"</span>)
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>port</th>
-      <td><p>Port to use for the app</p></td>
+      <th>userfile</th>
+      <td><p>A csv file with student information (i.e., username, token, and email)</p></td>
     </tr>
     <tr>
-      <th>launch.browser</th>
-      <td><p>Launch app in viewer (browsers) or only show the URL</p></td>
+      <th>server</th>
+      <td><p>The gitlab API server</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>See <a href='https://github.com/vnijs/gitgadget'>https://github.com/vnijs/gitgadget</a> for documentation</p>
+    <p>See <a href='https://github.com/vnijs/gitgadget'>https://github.com/vnijs/gitgadget</a> for additional documentation</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

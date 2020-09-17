@@ -1,5 +1,30 @@
 ## Resubmission
 
+This is a resubmission. In this version I have added some new features. See the NEWS.md file for details
+
+## Test environments
+
+* local OS X install, R 4.0.2
+* local Windows install, R 4.0.2
+* win-builder (devel)
+* Rhub
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the link below. This occurs because access required a gitlab accout. I'd prefer to keep this link if possible
+
+```
+URL: https://gitlab.com/profile/personal_access_tokens
+    From: inst/doc/gitgadget.html
+          README.md
+    Status: 503
+    Message: Service Unavailable
+```
+
+## Previous cran-comments
+
+## Resubmission
+
 This is a resubmission. In this version I have added some new features and fixed a few bugs. See the NEWS.md file for details
 
 ## Test environments
@@ -12,7 +37,6 @@ This is a resubmission. In this version I have added some new features and fixed
 
 There were no ERRORs or WARNINGs.
 
-## Previous cran-comments
 
 ## Resubmission
 
