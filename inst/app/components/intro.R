@@ -335,7 +335,7 @@ output$introduce_output <- renderPrint({
     })
 
     if (length(crh) == 0) {
-      cat("\nSetting up credential help failed. Go to http://happygitwithr.com/credential-caching.html in your browser for additional suggestions\n")
+      cat("\nSetting up credential help failed. Go to https://happygitwithr.com/credential-caching.html in your browser for additional suggestions\n")
       crh <- ""
     }
 
