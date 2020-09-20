@@ -6,21 +6,22 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rstudio Addin for Version Control and Assignment Management using Git • gitgadget</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
+<script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Rstudio Addin for Version Control and Assignment Management using Git">
 <meta property="og:description" content="An Rstudio addin for version control that allows users to clone
     repositories, create and delete branches, and sync forks on GitHub, GitLab, etc.
     Furthermore, the addin uses the GitLab API to allow instructors to create
     forks and merge requests for all students/teams with one click of a button.">
-<meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-<body>
+<body data-spy="scroll" data-target="#toc">
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -33,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">gitgadget</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
       </span>
     </div>
 
@@ -41,8 +42,8 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fa fa-home fa-lg"></span>
-
+    <span class="fas fa fas fa-home fa-lg"></span>
+     
   </a>
 </li>
 <li>
@@ -57,9 +58,9 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/vnijs/gitgadget">
-    <span class="fa fa-github fa-lg"></span>
-
+  <a href="https://github.com/vnijs/gitgadget/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
   </a>
 </li>
       </ul>
@@ -70,6 +71,7 @@
 </div>
 <!--/.navbar -->
 
+      
 
       </header><div class="row">
   <div class="contents col-md-9">
@@ -78,12 +80,14 @@
 <a href="#git-gadget" class="anchor"></a>Git Gadget</h1></div>
 
 <p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for use with GitHub are welcome. For alternative that uses GitHub see <a href="https://github.com/rundel/ghclass" class="uri">https://github.com/rundel/ghclass</a> although this does not (currently) have a shiny user interface.</p>
-<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com/" target="_blank">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="https://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
+<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com" target="_blank">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="http://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
 <p><code>gitgadget</code> requires Rstudio version 1.2 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"gitgadget"</span>, <span class="dt">repos =</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"gitgadget"</span>, repos = <span class="st">"https://radiant-rstats.github.io/minicran/"</span>)
+</pre></div>
 <p>To start <code>gitgadget</code> click on the Addins menu in Rstudio and then on <code>gitgadget</code>.</p>
 <p>On macOS, you will you will need to run the command below from a terminal to get access to git commands:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="ex">xcode-select</span> --install<span class="kw">;</span></a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">xcode-select</span> --install<span class="kw">;</span></span></code></pre></div>
 <p>On Windows you will need to install git bash from <a href="https://git-scm.com/download/win" class="uri">https://git-scm.com/download/win</a>. Alternatively, you can use the following installer that we use with our students to ensure git is setup correctly for use with gitgadget:</p>
 <p><a href="https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe" class="uri">https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe</a></p>
 <blockquote>
@@ -213,27 +217,27 @@
 <h2 class="hasAnchor">
 <a href="#initial-settings" class="anchor"></a>Initial settings</h2>
 <p>GitGadget supports the following input from an .Renviron file (e.g., “C:/Users/me/.Renviron”). The easiest way to view <code>.Renviron</code> is to click on the <code>Check</code> button in the <em>Introduce</em> tab or use <code><a href="https://usethis.r-lib.org/reference/edit.html">usethis::edit_r_environ()</a></code>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="ex">git.email</span> = <span class="st">"youremail@ucsd.edu"</span></a>
-<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="ex">git.token</span> = <span class="st">"abc123"</span></a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="ex">git.home</span> = <span class="st">"~/git"</span></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="ex">git.server</span> = <span class="st">"https://gitlab.com/api/v4/"</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="ex">git.group</span> = <span class="st">"school-courseid-2019"</span></a>
-<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="ex">git.prefix</span> = <span class="st">"school-courseid-2019-"</span></a>
-<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="ex">git.userfile</span> = <span class="st">"path-to-user-file.csv"</span></a>
-<a class="sourceLine" id="cb3-9" data-line-number="9"><span class="ex">git.tafile</span> = <span class="st">"path-to-ta-file.csv"</span></a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="ex">git.user.type</span> = <span class="st">"faculty"</span></a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">git.email</span> = <span class="st">"youremail@ucsd.edu"</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="ex">git.token</span> = <span class="st">"abc123"</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="ex">git.home</span> = <span class="st">"~/git"</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">git.server</span> = <span class="st">"https://gitlab.com/api/v4/"</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="ex">git.group</span> = <span class="st">"school-courseid-2019"</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="ex">git.prefix</span> = <span class="st">"school-courseid-2019-"</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="ex">git.userfile</span> = <span class="st">"path-to-user-file.csv"</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="ex">git.tafile</span> = <span class="st">"path-to-ta-file.csv"</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="ex">git.user.type</span> = <span class="st">"faculty"</span></span></code></pre></div>
 </div>
 </div>
   </div>
 
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
 <li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=gitgadget">https://​cloud.r-project.org/​package=gitgadget</a>
 </li>
-<li>Browse source code at <br><a href="https://github.com/vnijs/gitgadget">https://​github.com/​vnijs/​gitgadget</a>
+<li>Browse source code at <br><a href="https://github.com/vnijs/gitgadget/">https://​github.com/​vnijs/​gitgadget/​</a>
 </li>
 <li>Report a bug at <br><a href="https://github.com/vnijs/gitgadget/issues">https://​github.com/​vnijs/​gitgadget/​issues</a>
 </li>
@@ -262,16 +266,19 @@
 </div>
 </div>
 
+
       <footer><div class="copyright">
   <p>Developed by Vincent Nijs, Sanjiv Erat.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
+
       </footer>
 </div>
 
+  
 
 
   </body>

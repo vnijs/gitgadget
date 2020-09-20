@@ -1,6 +1,7 @@
-pandoc: 2.3.1
-pkgdown: 1.3.0
+pandoc: 2.7.3
+pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   gitgadget: gitgadget.html
+last_built: 2020-09-20T08:20Z
 
