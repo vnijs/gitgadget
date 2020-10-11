@@ -281,6 +281,7 @@ gitgadget_ui <- function() {
                   title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors"
                 )
               ),
+              downloadButton("collect_check_status", "Check status", title = "Check status of student repo", class = "btn-warning"),
               fillRow(height = "70px", width = "475px",
                 uiOutput("ui_collect_ta_file"),
                 shinyFiles::shinyFilesButton(

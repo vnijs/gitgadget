@@ -74,56 +74,28 @@ output$ui_collect_ta_file <- renderUI({
   textInput("collect_ta_file", "Upload file with TA tokens:", value = init, placeholder = "Open TA CSV file")
 })
 
-collect <- eventReactive(input$collect, {
-  req(input$collect_token, input$collect_server, input$collect_user_file)
-
-  cat("Generating merge requests ...\n")
-
-  ## pre not used when called from the gadget interface because the full
-  ## assignment name is retrieved from gitlab
-  # input$collect_token, input$collect_group,
-  withProgress(message = "Generating merge requests", value = 0, style = "old", {
-    mess <- capture.output(collect_work(
-      input$collect_token, input$collect_assignment,
-      input$collect_user_file,
-      type = input$collect_type, server = input$collect_server
-    ))
-  })
-  if (is_empty(mess)) mess <- "No messages"
-  showModal(
-    modalDialog(
-      title = "Fetching merge request messages",
-      span(HTML(paste0(mess, collapse = "</br>")))
-    )
+collect_check_status <- reactive({
+  req(
+    input$collect_token, input$collect_server, input$collect_user_file,
+    input$collect_type, input$collect_assignment
   )
-  message("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
+
+  withProgress(message = "Checking status", value = 0, style = "old", {
+    check_status(
+      input$collect_token, input$collect_assignment, input$collect_user_file,
+      input$collect_type, server = input$collect_server
+    )
+  })
 })
 
-collect_fetch <- eventReactive(input$collect_fetch, {
-  remote_fetch <- system(paste("git -C", input$repo_directory, "config --get-all remote.origin.fetch"), intern = TRUE)
-  if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
-    system(paste("git  -C", input$repo_directory, "config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*"))
+output$collect_check_status <- downloadHandler(
+  filename = function() {
+    paste0(input$collect_assignment, "-status.csv")
+  },
+  content = function(file) {
+    write.csv(collect_check_status(), file, row.names = FALSE)
   }
-
-  ## pre not used when called from the gadget interface because the full
-  ## assignment name is retrieved from gitlab
-  withProgress(message = "Fetching merge requests", value = 0, style = "old", {
-    owd <- setwd(input$repo_directory)
-    on.exit(setwd(owd))
-    mess <- capture.output(fetch_work(
-      input$collect_token, input$collect_assignment,
-      server = input$collect_server
-    ))
-  })
-  if (is_empty(mess)) mess <- "No messages"
-  showModal(
-    modalDialog(
-      title = "Fetching merge request messages",
-      span(HTML(paste0(mess, collapse = "</br>")))
-    )
-  )
-  message("\nUse the Git tab in R-studio (click refresh first) to switch between different student assignment submissions\n")
-})
+)
 
 observeEvent(input$collect_hide_repo, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_assignment)
@@ -208,6 +180,58 @@ observeEvent(input$collect_show_to_ta, {
     )
   )
 })
+
+collect <- eventReactive(input$collect, {
+  req(input$collect_token, input$collect_server, input$collect_user_file)
+
+  cat("Generating merge requests ...\n")
+
+  ## pre not used when called from the gadget interface because the full
+  ## assignment name is retrieved from gitlab
+  # input$collect_token, input$collect_group,
+  withProgress(message = "Generating merge requests", value = 0, style = "old", {
+    mess <- capture.output(collect_work(
+      input$collect_token, input$collect_assignment,
+      input$collect_user_file,
+      type = input$collect_type, server = input$collect_server
+    ))
+  })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Fetching merge request messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
+  message("\nGenerating merge requests complete. Check the console for messages. Click the 'Fetch' button to review the merge requests locally or view and comment on gitlab")
+})
+
+collect_fetch <- eventReactive(input$collect_fetch, {
+  remote_fetch <- system(paste("git -C", input$repo_directory, "config --get-all remote.origin.fetch"), intern = TRUE)
+  if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
+    system(paste("git  -C", input$repo_directory, "config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*"))
+  }
+
+  ## pre not used when called from the gadget interface because the full
+  ## assignment name is retrieved from gitlab
+  withProgress(message = "Fetching merge requests", value = 0, style = "old", {
+    owd <- setwd(input$repo_directory)
+    on.exit(setwd(owd))
+    mess <- capture.output(fetch_work(
+      input$collect_token, input$collect_assignment,
+      server = input$collect_server
+    ))
+  })
+  if (is_empty(mess)) mess <- "No messages"
+  showModal(
+    modalDialog(
+      title = "Fetching merge request messages",
+      span(HTML(paste0(mess, collapse = "</br>")))
+    )
+  )
+  message("\nUse the Git tab in R-studio (click refresh first) to switch between different student assignment submissions\n")
+})
+
 
 output$collect_output <- renderPrint({
   if (is_empty(input$collect_assignment) || is_empty(input$collect_user_file)) {

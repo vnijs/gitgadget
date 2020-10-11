@@ -725,6 +725,69 @@ merger <- function(
   }
 }
 
+check_status <- function(
+  token,
+  assignment,
+  userfile,
+  type = "individual",
+  server = "https://gitlab.com/api/v4/"
+) {
+  resp <- connect(token, server)
+  if (resp$status != 'OKAY')
+    stop("Error connecting to server: check token/server")
+
+  token <- resp$token
+  search <- strsplit(assignment, "/")[[1]] %>%
+    {ifelse(length(.) > 1, .[2], .[1])}
+  resp <- projID(assignment, token, server, owned = TRUE, search = search)
+
+  if (resp$status != "OKAY") {
+    resp <- projID(assignment, token, server, owned = FALSE, search = search)
+    if (resp$status != "OKAY") {
+      stop("Error getting assignment ", assignment)
+    }
+  }
+
+  project_id <- resp$project_id
+  udat <- read_ufile(userfile)
+
+  if (type == "individual") {
+    udat$team <- paste("ind", seq_len(nrow(udat)))
+  } else {
+    ## MR only from team lead
+    udat <- group_by_at(udat, .vars = "team") %>%
+      slice(1)
+  }
+
+  ## getting the actual status
+  get_status <- function(st_token, server = server, search = search) {
+    resp <- get_allprojects(st_token[1], server, search = search)
+    pid <- resp$repos$id
+
+    h <- new_handle()
+    handle_setopt(h, customrequest = "GET")
+    handle_setheaders(h, "PRIVATE-TOKEN" = st_token[1])
+    murl <- paste0(server, "projects/", pid, "/pipelines")
+    resp <- curl_fetch_memory(murl, h)
+    resp$content <- fromJSON(rawToChar(resp$content))
+    status <- resp$content$status
+    if (length(status) == 0) status <- "unknown"
+    c(status[1], length(status))
+  }
+
+  udat$status <- "unknown"
+  udat$attempts <- 0
+  for (i in seq_len(nrow(udat))) {
+    udat[i, c("status", "attempts")] <- get_status(udat[i, "token"], server, search)
+  }
+
+  rbind(
+    filter(udat, status == "unknown"),
+    filter(udat, status == "failed"),
+    filter(udat, !status %in% c("unknown", "failed"))
+  )
+}
+
 #' Create merge requests for each student/team
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
