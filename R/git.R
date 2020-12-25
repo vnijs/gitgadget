@@ -1,3 +1,10 @@
+#' Check error status
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param code Code returned by an API request
+#'
+#' @export
 checkerr <- function(code) floor(code / 100) == 2
 is_not <- function(x) length(x) == 0 || (length(x) == 1 && is.na(x))
 is_empty <- function(x, empty = "\\s*") {
@@ -301,6 +308,17 @@ get_allprojects <- function(
   list(status = "OKAY", repos = mainproj)
 }
 
+#' Find project ID
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param path_with_namespace Repo name together with the group or user namespace
+#' @param token GitLab token
+#' @param server The gitlab API server
+#' @param owned Restrict listing to only repos owned by the user? TRUE or FALSE
+#' @param search Search term to use to narrow down the set of projects
+#'
+#' @export
 projID <- function(path_with_namespace, token, server, owned = TRUE, search = "") {
 
   resp <- get_allprojects(token, server, search = search, owned = owned)
@@ -629,7 +647,7 @@ create_repo <- function(
 
   ## avoid CI unless already setup by user
   if (!file.exists(".gitlab-ci.yml"))
-    cat("job:\n  script:\n    - echo \"\"", file = ".gitlab-ci.yml")
+    cat("test:\n  script:\n  - echo \"\"", file = ".gitlab-ci.yml")
 
   ## make project file if needed
   rproj <- list.files(path = adir, pattern = "*.Rproj")
@@ -968,6 +986,15 @@ remove_projects <- function(token, server) {
   })
 }
 
+#' Remove a project
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param token GitLab token
+#' @param id Project ID
+#' @param server The gitlab API server
+#'
+#' @export
 remove_project <- function(token, id, server) {
   h <- new_handle()
   handle_setopt(h, customrequest = "DELETE")

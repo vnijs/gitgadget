@@ -1,5 +1,5 @@
 # to avoid 'no visible binding for global variable' NOTE
-globalVariables(c(".", "un", "directory", "base64_enc", "server", "team", "gitgadget_ui"))
+globalVariables(c(".", "un", "directory", "base64_enc", "server", "team", "gitgadget_ui", "status"))
 
 #' gitgadget
 #'
