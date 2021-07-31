@@ -16,13 +16,14 @@ observeEvent(input$intro_git, {
 
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*git.user\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\ngit.user = \"", input$intro_user_name, "\"\n")
+      cat(renv, file = renvir)
     } else {
-      paste0("git.user = \"", input$intro_user_name, "\"\n") %>% cat(file = renvir)
+      renv <- paste0("git.user = \"", input$intro_user_name, "\"\n")
+      cat(renv, file = renvir)
     }
   }
 
@@ -33,24 +34,25 @@ observeEvent(input$intro_git, {
 
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*git.email\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\ngit.email = \"", input$intro_user_email, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\ngit.email = \"", input$intro_user_email, "\"\n")
+      cat(renv, file = renvir)
     } else {
-      paste0("git.email = \"", input$intro_user_email, "\"\n") %>% cat(file = renvir)
+      renv <- paste0("git.email = \"", input$intro_user_email, "\"\n")
+      cat(renv, file = renvir)
     }
   }
 
   if (!is_empty(input$intro_server)) {
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*git.server\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\ngit.server = \"", input$intro_server, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\ngit.server = \"", input$intro_server, "\"\n")
+      cat(renv, file = renvir)
     }
   }
 
@@ -62,20 +64,20 @@ observeEvent(input$intro_git, {
       if (length(token_ind) > 0) {
         envir[token_ind] <- paste0("# ", envir[token_ind])
       }
-      paste0(envir, collapse = "\n") %>%
-        paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n") %>%
-        cat(file = renvir)
+      renv <- paste0(envir, collapse = "\n") %>%
+        paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n")
+      cat(renv, file = renvir)
     }
   }
 
   if (!is_empty(input$intro_token_gh)) {
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*GITHUB_PAT\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\nGITHUB_PAT = \"", input$intro_token_gh, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\nGITHUB_PAT = \"", input$intro_token_gh, "\"\n")
+      cat(renv, file = renvir)
     }
   }
 
@@ -85,13 +87,14 @@ observeEvent(input$intro_git, {
     if (!dir.exists(git_home)) dir.create(git_home, recursive = TRUE)
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*git.home\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\ngit.home = \"", git_home, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\ngit.home = \"", git_home, "\"\n")
+      cat(renv, file = renvir)
     } else {
-      paste0("git.home = \"", git_home, "\")\n") %>% cat(file = renvir)
+      renv <- paste0("git.home = \"", git_home, "\")\n")
+      cat(renv, file = renvir)
     }
     cat("Updated git home in .Renviron. Restart Rstudio to see the changes\n")
   }
@@ -101,11 +104,11 @@ observeEvent(input$intro_git, {
   if (!is_empty(git_user_type) && git_user_type != Sys.getenv("git.user.type", "student")) {
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
-      readLines(renvir, warn = FALSE) %>%
+      renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*git.user.type\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
-        paste0(., "\ngit.user.type = \"", git_user_type, "\"\n") %>%
-        cat(file = renvir)
+        paste0(., "\ngit.user.type = \"", git_user_type, "\"\n")
+      cat(renv, file = renvir)
     } else {
       paste0("git.user.type = \"", git_user_type, "\"\n") %>% cat(file = renvir)
     }

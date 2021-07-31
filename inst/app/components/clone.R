@@ -99,14 +99,14 @@ output$clone_output <- renderPrint({
 
       rproj <- list.files(path = dir, pattern = "*.Rproj")
       if (length(rproj) == 0) {
-        "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTex\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n" %>%
-          cat(file = file.path(dir, paste0(basename(dir), ".Rproj")))
+        cnt <- "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTex\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n"
+        cat(cnt, file = file.path(dir, paste0(basename(dir), ".Rproj")))
       }
 
       vscode <- list.files(path = dir, pattern = "*.code-workspace")
       if (length(vscode) == 0) {
-        '{"folders": [{"path": "."}], "settings": {}}'
-          cat(file = file.path(dir, paste0(basename(dir), ".code-workspace")))
+        cnt <- '{"folders": [{"path": "."}], "settings": {}}'
+        cat(cnt, file = file.path(dir, paste0(basename(dir), ".code-workspace")))
       }
 
       gitignore <- list.files(path = dir, all.files = TRUE, pattern = ".gitignore")

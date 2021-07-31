@@ -652,14 +652,14 @@ create_repo <- function(
   ## make project file if needed
   rproj <- list.files(path = adir, pattern = "*.Rproj")
   if (length(rproj) == 0) {
-    "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTeX\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n" %>%
-      cat(file = paste0(basename(adir), ".Rproj"))
+    cnt <- "Version: 1.0\n\nRestoreWorkspace: No\nSaveWorkspace: No\nAlwaysSaveHistory: Default\n\nEnableCodeIndexing: Yes\nUseSpacesForTab: Yes\nNumSpacesForTab: 2\nEncoding: UTF-8\n\nRnwWeave: knitr\nLaTex: pdfLaTeX\n\nAutoAppendNewline: Yes\n\nBuildType: Package\nPackageUseDevtools: Yes\nPackageInstallArgs: --no-multiarch --with-keep.source\nPackageRoxygenize: rd,collate,namespace\n"
+    cat(cnt, file = paste0(basename(adir), ".Rproj"))
   }
 
   vscode <- list.files(path = adir, pattern = "*.code-workspace")
   if (length(vscode) == 0) {
-    '{"folders": [{"path": "."}], "settings": {}}' %>%
-      cat(file = paste0(basename(adir), ".code-workspace"))
+    cnt <- '{"folders": [{"path": "."}], "settings": {}}'
+    cat(cnt, file = paste0(basename(adir), ".code-workspace"))
   }
 
   url <- sub("\\s*(https://|http://)?([^/:]+).*", "\\1\\2", server)
