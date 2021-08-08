@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gitgadget</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.4</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -56,7 +56,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/vnijs/gitgadget/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -70,13 +70,13 @@
 
       
 
-      </header><script src="gitgadget_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="gitgadget_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using Git Gadget</h1>
                         <h4 class="author">Vincent Nijs</h4>
             
-            <h4 class="date">2020-09-20</h4>
+            <h4 class="date">2021-08-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/vnijs/gitgadget/blob/master/vignettes/gitgadget.Rmd"><code>vignettes/gitgadget.Rmd</code></a></small>
       <div class="hidden name"><code>gitgadget.Rmd</code></div>
@@ -92,12 +92,11 @@
 <p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for use with GitHub are welcome. For alternative that uses GitHub see <a href="https://github.com/rundel/ghclass" class="uri">https://github.com/rundel/ghclass</a> although this does not (currently) have a shiny user interface.</p>
 <p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com" target="_blank">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="https://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
 <p><code>gitgadget</code> requires Rstudio version 1.2 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"gitgadget"</span>, repos = <span class="st">"https://radiant-rstats.github.io/minicran/"</span>)
-</pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"gitgadget"</span>, repos <span class="op">=</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span><span class="op">)</span></code></pre></div>
 <p>To start <code>gitgadget</code> click on the Addins menu in Rstudio and then on <code>gitgadget</code>.</p>
 <p>On macOS, you will you will need to run the command below from a terminal to get access to git commands:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">xcode-select</span> --install<span class="kw">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xcode-select</span> <span class="at">--install</span><span class="kw">;</span></span></code></pre></div>
 <p>On Windows you will need to install git bash from <a href="https://git-scm.com/download/win" class="uri">https://git-scm.com/download/win</a>. Alternatively, you can use the following installer that we use with our students to ensure git is setup correctly for use with gitgadget:</p>
 <p><a href="https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe" class="uri">https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe</a></p>
 <blockquote>
@@ -149,10 +148,10 @@
 <a href="#clone" class="anchor"></a>Clone</h2>
 <p>Clone a repo from GitLab (or GitHub) (e.g., <code>git@gitlab.com:username/test-repo.git</code>). The name for the directory placed inside <code>Base directory to clone repo into</code> will be taken from the repo name unless a <code>Custom directory to clone repo into</code> is provided. If there is no R-studio project file (<code>.Rproj</code>) in the remote repo, one will be created.</p>
 <blockquote>
-<p>Note: To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal</p>
+<p>Note: To use an SSH key with GitGadget you should clone from a terminal the first time. See the video linked above (<em>Setup for git and gitlab</em>) for a demo. As mentioned above, for Windows users we recommend using HTTPS to clone and create repos.</p>
 </blockquote>
 <blockquote>
-<p>Note: To use an SSH key with GitGadget you should clone from a terminal the first time. See the video linked above (<em>Setup for git and gitlab</em>) for a demo. As mentioned above, for Windows users we recommend using HTTPS to clone and create repos.</p>
+<p>Note: To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal</p>
 </blockquote>
 </div>
 <div id="branch" class="section level2">
@@ -217,8 +216,9 @@
 </tr>
 </tbody>
 </table>
-<p>Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a></p>
-<p><code><a href="../reference/collect_work.html">collect_work(...)</a></code></p>
+<!-- 
+Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a> 
+--><p><code><a href="../reference/collect_work.html">collect_work(...)</a></code></p>
 <p>Generates Merge Requests for all students or teams. Requires a csv file with the structure shown above.</p>
 <p><code><a href="../reference/fetch_work.html">fetch_work(...)</a></code></p>
 <p>Fetch Merge Requests for all students or teams from the GitLab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.</p>
@@ -227,16 +227,16 @@
 <h2 class="hasAnchor">
 <a href="#initial-settings" class="anchor"></a>Initial settings</h2>
 <p>GitGadget supports the following input from an .Renviron file (e.g., “C:/Users/me/.Renviron”). The easiest way to view <code>.Renviron</code> is to click on the <code>Check</code> button in the <em>Introduce</em> tab or use <code><a href="https://usethis.r-lib.org/reference/edit.html">usethis::edit_r_environ()</a></code>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">git.email</span> = <span class="st">"youremail@ucsd.edu"</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="ex">git.token</span> = <span class="st">"abc123"</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="ex">git.home</span> = <span class="st">"~/git"</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">git.server</span> = <span class="st">"https://gitlab.com/api/v4/"</span></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="ex">git.group</span> = <span class="st">"school-courseid-2019"</span></span>
-<span id="cb3-7"><a href="#cb3-7"></a><span class="ex">git.prefix</span> = <span class="st">"school-courseid-2019-"</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a><span class="ex">git.userfile</span> = <span class="st">"path-to-user-file.csv"</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a><span class="ex">git.tafile</span> = <span class="st">"path-to-ta-file.csv"</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a><span class="ex">git.user.type</span> = <span class="st">"faculty"</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">git.email</span> = <span class="st">"youremail@ucsd.edu"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">git.token</span> = <span class="st">"abc123"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">git.home</span> = <span class="st">"~/git"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">git.server</span> = <span class="st">"https://gitlab.com/api/v4/"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">git.group</span> = <span class="st">"school-courseid-2019"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">git.prefix</span> = <span class="st">"school-courseid-2019-"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">git.userfile</span> = <span class="st">"path-to-user-file.csv"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">git.tafile</span> = <span class="st">"path-to-ta-file.csv"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">git.user.type</span> = <span class="st">"faculty"</span></span></code></pre></div>
 </div>
 </div>
   </div>

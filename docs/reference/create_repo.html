@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gitgadget</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.4</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -97,7 +97,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/vnijs/gitgadget/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -123,16 +123,16 @@
     <p>Create the main repo from a local directory</p>
     </div>
 
-    <pre class="usage"><span class='fu'>create_repo</span>(
-  username = <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"git.user"</span>),
-  token = <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"git.token"</span>),
-  repo = <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>basename</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span>()),
-  base_dir = <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span>()),
-  groupname = <span class='st'>""</span>,
-  pre = <span class='st'>""</span>,
-  ssh = <span class='fl'>FALSE</span>,
-  server = <span class='st'>"https://gitlab.com/api/v4/"</span>
-)</pre>
+    <pre class="usage"><span class='fu'>create_repo</span><span class='op'>(</span>
+  username <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span><span class='op'>(</span><span class='st'>"git.user"</span><span class='op'>)</span>,
+  token <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span><span class='op'>(</span><span class='st'>"git.token"</span><span class='op'>)</span>,
+  repo <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>basename</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,
+  base_dir <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>,
+  groupname <span class='op'>=</span> <span class='st'>""</span>,
+  pre <span class='op'>=</span> <span class='st'>""</span>,
+  ssh <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  server <span class='op'>=</span> <span class='st'>"https://gitlab.com/api/v4/"</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

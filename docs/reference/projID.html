@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>gitgadget — gitgadget • gitgadget</title>
+<title>Find project ID — projID • gitgadget</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="gitgadget — gitgadget" />
-<meta property="og:description" content="Run gitgadget in the Rstudio viewer if available" />
+<meta property="og:title" content="Find project ID — projID" />
+<meta property="og:description" content="Find project ID" />
 
 
 
@@ -114,33 +114,45 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>gitgadget</h1>
-    <small class="dont-index">Source: <a href='https://github.com/vnijs/gitgadget/blob/master/R/aaa.R'><code>R/aaa.R</code></a>, <a href='https://github.com/vnijs/gitgadget/blob/master/R/gadget.R'><code>R/gadget.R</code></a></small>
-    <div class="hidden name"><code>gitgadget.Rd</code></div>
+    <h1>Find project ID</h1>
+    <small class="dont-index">Source: <a href='https://github.com/vnijs/gitgadget/blob/master/R/git.R'><code>R/git.R</code></a></small>
+    <div class="hidden name"><code>projID.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Run gitgadget in the Rstudio viewer if available</p>
+    <p>Find project ID</p>
     </div>
 
-    <pre class="usage"><span class='fu'>gitgadget</span><span class='op'>(</span>port <span class='op'>=</span> <span class='fu'><a href='get_port.html'>get_port</a></span><span class='op'>(</span><span class='op'>)</span>, launch.browser <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>projID</span><span class='op'>(</span><span class='va'>path_with_namespace</span>, <span class='va'>token</span>, <span class='va'>server</span>, owned <span class='op'>=</span> <span class='cn'>TRUE</span>, search <span class='op'>=</span> <span class='st'>""</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>port</th>
-      <td><p>Port to use for the app</p></td>
+      <th>path_with_namespace</th>
+      <td><p>Repo name together with the group or user namespace</p></td>
     </tr>
     <tr>
-      <th>launch.browser</th>
-      <td><p>Launch app in viewer (browsers) or only show the URL</p></td>
+      <th>token</th>
+      <td><p>GitLab token</p></td>
+    </tr>
+    <tr>
+      <th>server</th>
+      <td><p>The gitlab API server</p></td>
+    </tr>
+    <tr>
+      <th>owned</th>
+      <td><p>Restrict listing to only repos owned by the user? TRUE or FALSE</p></td>
+    </tr>
+    <tr>
+      <th>search</th>
+      <td><p>Search term to use to narrow down the set of projects</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>See <a href='https://github.com/vnijs/gitgadget'>https://github.com/vnijs/gitgadget</a> for documentation</p>
+    <p>See <a href='https://github.com/vnijs/gitgadget'>https://github.com/vnijs/gitgadget</a> for additional documentation</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
