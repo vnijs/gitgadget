@@ -1,5 +1,32 @@
 ## Resubmission
 
+This is a resubmission. In this version I have fixed a bug. See the NEWS.md file for details
+
+## Test environments
+
+* Ubuntu 20.04 through WSL2, R 4.0.5
+* win-builder (devel)
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab accout. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
+
+## Previous cran-comments
+
+## Resubmission
+
 This is a resubmission. In this version I have added some new features. See the NEWS.md file for details
 
 ## Test environments
@@ -24,8 +51,6 @@ URL: https://gitlab.com/profile/personal_access_tokens
         README.md
   Status: 503
 ```
-
-## Previous cran-comments
 
 ## Resubmission
 

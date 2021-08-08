@@ -2,7 +2,7 @@ Package: gitgadget
 Type: Package
 Title: 'Rstudio' Addin for Version Control and Assignment Management using Git
 Version: 0.6.4
-Date: 2021-7-31
+Date: 2021-8-8
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -30,7 +30,6 @@ Suggests:
 URL: URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
-LazyData: true
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 Language: en-US

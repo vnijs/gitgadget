@@ -1,3 +1,7 @@
+# gitgadget 0.6.4.0
+
+* Information provided through the "Introduce" was not being properly stored. Issue addressed in this release
+
 # gitgadget 0.6.0.0
 
 * By default, Create and Collect now _Hide_ (i.e., remove permissions) the main repo that was forked for each student

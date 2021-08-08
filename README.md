@@ -68,9 +68,9 @@ If a CSV file with TA information is specified they will be added as "Maintainer
 
 Clone a repo from GitLab (or GitHub) (e.g., `git@gitlab.com:username/test-repo.git`). The name for the directory placed inside `Base directory to clone repo into` will be taken from the repo name unless a `Custom directory to clone repo into` is provided. If there is no R-studio project file (`.Rproj`) in the remote repo, one will be created.
 
-> Note: To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal
-
 > Note: To use an SSH key with GitGadget you should clone from a terminal the first time. See the video linked above (_Setup for git and gitlab_) for a demo. As mentioned above, for Windows users we recommend using HTTPS to clone and create repos.
+
+> Note: To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal
 
 ## Branch
 
@@ -120,7 +120,9 @@ Forks the assignment repo uploaded by a faculty member or TA for each student/te
 | id2    | team1 | student2@gmail.com | n9....... |
 | id3    | team2 | student3@gmail.com | VR....... |
 
-Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a>
+<!-- 
+Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a> 
+-->
 
 `collect_work(...)`
 
