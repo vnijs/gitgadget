@@ -13,4 +13,6 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server", "team", "gitga
 #' @importFrom stats na.omit setNames
 #' @importFrom utils packageVersion browseURL head
 #' @importFrom usethis edit_r_environ edit_r_profile use_git use_github
+#' @importFrom shinyFiles shinyDirButton shinyFilesButton parseDirPath
+#'   parseFilePaths shinyFileChoose shinyDirChoose
 NULL

@@ -1,6 +1,6 @@
 ## Resubmission
 
-This is a resubmission. In this version I have fixed a bug. See the NEWS.md file for details
+This is a resubmission. In this version I have addressed the link issue found during CRAN testing
 
 ## Test environments
 
@@ -24,6 +24,32 @@ URL: https://gitlab.com/profile/personal_access_tokens
 ```
 
 ## Previous cran-comments
+
+## Resubmission
+
+This is a resubmission. In this version I have fixed a bug. See the NEWS.md file for details
+
+## Test environments
+
+* Ubuntu 20.04 through WSL2, R 4.0.5
+* win-builder (devel)
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab accout. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
+
 
 ## Resubmission
 
