@@ -9,7 +9,7 @@ checkerr <- function(code) floor(code / 100) == 2
 is_not <- function(x) length(x) == 0 || (length(x) == 1 && is.na(x))
 is_empty <- function(x, empty = "\\s*") {
   is_not(x) || (length(x) == 1 && grepl(paste0("^", empty, "$"), x))
-}
+  }
 pressed <- function(x) !is.null(x) && (is.list(x) || x > 0)
 not_pressed <- function(x) !pressed(x)
 
@@ -30,11 +30,13 @@ read_ufile <- function(userfile, cols = c("userid", "team", "token")) {
   }
 }
 
-groupID <- function(name, path, token, server) {
+groupID <- function(name, path, token, server, page = 1) {
+
   h <- new_handle()
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
-  murl <- paste0(server, "groups")
+  murl <- paste0(server, paste0("groups?per_page=100&page=", page, "&search=", name))
   resp <- curl_fetch_memory(murl, h)
+
   if (checkerr(resp$status_code) == FALSE)
     return(list(status = "SERVER_ERROR"))
 
@@ -42,7 +44,6 @@ groupID <- function(name, path, token, server) {
 
   ## check if group exists
   id <- which(name == resp$content$name & path == resp$content$path)
-
   if (length(id) == 0) {
     list(status = "NOSUCHGROUP")
   } else {
@@ -223,8 +224,9 @@ create_group <- function(
   token <- resp$token
   resp <- groupID(groupname, groupname, token, server)
 
-  if (resp$status == "NOSUCHGROUP")
+  if (resp$status == "NOSUCHGROUP") {
     resp <- groupr(groupname, groupname, token, server = server)
+  }
 
   if (resp$status != "OKAY") {
     message("Unable to create or get group: ", resp$message)
