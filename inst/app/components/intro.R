@@ -1,5 +1,5 @@
 # observeEvent(input$intro_token_gl_get, {
-#   utils::browseURL("https://gitlab.com/profile/personal_access_tokens")
+#   utils::browseURL("https://gitlab.com/-/profile/personal_access_tokens")
 # })
 
 # observeEvent(input$intro_token_gh_get, {
@@ -141,7 +141,7 @@ output$ui_intro_get_token <- renderUI({
     "intro_token_gl_get", "Create",
     title = "Browse to git server to get a PAT",
     style = "margin-top: 25px;",
-    onclick = paste0("window.open('", url, "/profile/personal_access_tokens', '_blank')")
+    onclick = paste0("window.open('", url, "/-/profile/personal_access_tokens', '_blank')")
   )
 })
 
@@ -171,7 +171,7 @@ output$ui_intro_buttons <- renderUI({
     actionButton(
       "intro_ssh", "SSH key",
       title = "Create an SSH key and copy the public-key to the clipboard",
-      onclick = paste0("window.open('", url, "/profile/keys', '_blank')")
+      onclick = paste0("window.open('", url, "/-/profile/keys', '_blank')")
     ),
     actionButton("intro_restart", "Restart", title = "Restart GitGadget"),
     actionButton("intro_check", "Check", title = "Check settings")
@@ -180,7 +180,7 @@ output$ui_intro_buttons <- renderUI({
 
 intro_ssh <- eventReactive(input$intro_ssh, {
   url <- server_url()
-  url_keys <- paste0(url, "/profile/keys")
+  url_keys <- paste0(url, "/-/profile/keys")
   url_short <- sub("\\s*(https://|http://)?([^/]+).*", "\\2", url)
   if (os_type != "Windows") {
     email <- system("git config --global --list", intern = TRUE) %>%

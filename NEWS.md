@@ -1,3 +1,7 @@
+# gitgadget 0.6.5.0
+
+* Fix to accomodate that GitLab now uses "/-/" in their profile URLs
+
 # gitgadget 0.6.4.0
 
 * Information provided through the "Introduce" was not being properly stored. Issue addressed in this release

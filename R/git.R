@@ -746,11 +746,9 @@ merger <- function(
 }
 
 check_status <- function(
-                         token,
-                         assignment,
-                         userfile,
-                         type = "individual",
-                         server = "https://gitlab.com/api/v4/"
+  token, assignment, userfile,
+  type = "individual",
+  server = "https://gitlab.com/api/v4/"
 ) {
   resp <- connect(token, server)
   if (resp$status != 'OKAY')
@@ -786,16 +784,19 @@ check_status <- function(
       resp$repos <- filter(resp$repos, name == {{ search }})
     }
     pid <- resp$repos$id
-
-    h <- new_handle()
-    handle_setopt(h, customrequest = "GET")
-    handle_setheaders(h, "PRIVATE-TOKEN" = st_token[1])
-    murl <- paste0(server, "projects/", pid, "/pipelines")
-    resp <- curl_fetch_memory(murl, h)
-    resp$content <- fromJSON(rawToChar(resp$content))
-    status <- resp$content$status
-    if (length(status) == 0) status <- "unknown"
-    list(status[1], length(status))
+    if (length(pid) != 1) {
+      list("unclear", 0)
+    } else {
+      h <- new_handle()
+      handle_setopt(h, customrequest = "GET")
+      handle_setheaders(h, "PRIVATE-TOKEN" = st_token[1])
+      murl <- paste0(server, "projects/", pid, "/pipelines")
+      resp <- curl_fetch_memory(murl, h)
+      resp$content <- fromJSON(rawToChar(resp$content))
+      status <- resp$content$status
+      if (length(status) == 0) status <- "unknown"
+      list(status[1], length(status))
+    }
   }
 
   udat$status <- "unknown"
