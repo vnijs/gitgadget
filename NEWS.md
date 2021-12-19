@@ -1,3 +1,8 @@
+# gitgadget 0.6.6.0
+
+* Updates to accomodate Shiny 1.7.1
+* Check if a user or ta file exists before loading
+
 # gitgadget 0.6.5.0
 
 * Fix to accomodate that GitLab now uses "/-/" in their profile URLs

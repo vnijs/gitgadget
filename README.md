@@ -28,7 +28,7 @@ https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Lat
 
 ## Introduce
 
-To start using git and `gitgadget` first [introduce yourself to git](https://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on an appropriate credential helper for your operating system. See [https://happygitwithr.com/credential-caching.html](https://happygitwithr.com/credential-caching.html) for additional information. 
+To start using git and `gitgadget` first [introduce yourself to git](https://happygitwithr.com/hello-git.html). Set a global user name and email for git (e.g., your GitLab user name and email). By default, `gitgadget` will try to turn on an appropriate credential helper for your operating system. See [https://happygitwithr.com/https-pat.html](https://happygitwithr.com/https-pat.html) for additional information. 
 
 To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the [token on GitLab](https://gitlab.com/-/profile/personal_access_tokens/) and then copy-and-paste it in the `Token` input.
 

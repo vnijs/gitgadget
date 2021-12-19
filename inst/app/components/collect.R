@@ -133,7 +133,8 @@ observeEvent(input$collect_hide_from_ta, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
   withProgress(message = "Hiding student forks from TA", value = 0, style = "old", {
     repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
-    students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    # students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    students <- read_ufile(input$collect_user_file)
     if (input$collect_type == "team") {
       students <- distinct(students, team, .keep_all = TRUE)
     }
@@ -159,7 +160,8 @@ observeEvent(input$collect_show_to_ta, {
   req(input$collect_token, input$collect_server, input$collect_user_file, input$collect_ta_file, input$collect_assignment)
   withProgress(message = "Showing student forks to TA", value = 0, style = "old", {
     repo <- strsplit(input$collect_assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
-    students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    # students <- read.csv(input$collect_user_file, stringsAsFactors = FALSE)
+    students <- read_ufile(input$collect_user_file)
     if (input$collect_type == "team") {
       students <- distinct(students, team, .keep_all = TRUE)
     }

@@ -20,13 +20,24 @@ connect <- function(token = Sys.getenv("git.token"), server = "https://gitlab.co
     list(status = "OKAY", token = token)
   }
 }
-
+#' Reach user file
+#'
+#' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
+#'
+#' @param userfile File with student information
+#' @param cols Column names that must exists in the file
+#'
+#' @export
 read_ufile <- function(userfile, cols = c("userid", "team", "token")) {
-  users <- read.csv(userfile, stringsAsFactors = FALSE)
-  if (all(cols %in% colnames(users))) {
-    users
+  if (!file.exists(userfile)) {
+    stop("Userfile does not exist")
   } else {
-    stop("Userfile must include the columns ", paste0(cols, collapse = ", "))
+    users <- read.csv(userfile, stringsAsFactors = FALSE)
+    if (all(cols %in% colnames(users))) {
+      users
+    } else {
+      stop("Userfile must include the columns ", paste0(cols, collapse = ", "))
+    }
   }
 }
 

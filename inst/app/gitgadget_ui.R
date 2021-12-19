@@ -10,7 +10,7 @@ gitgadget_ui <- function() {
     ),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
     miniTabstripPanel(id = "tabs",
-      miniTabPanel("Introduce", value = "intro", icon = icon("hand-paper-o"),
+      miniTabPanel("Introduce", value = "intro", icon = icon("hand-paper"),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput(
@@ -157,7 +157,7 @@ gitgadget_ui <- function() {
           fillRow(height = "40px", width = "475px",
             HTML("<h4>Change the repo directory</h4>"),
             # actionButton("repo_refresh", "Refresh", icon = icon("refresh"))
-            tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("refresh"), ""))
+            tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("sync"), ""))
           ),
           fillRow(height = "40px", width = "475px",
             uiOutput("ui_repo_directory"),
@@ -169,7 +169,7 @@ gitgadget_ui <- function() {
           verbatimTextOutput("repo_output")
         )
       ),
-      miniTabPanel("Sync", value = "sync", icon = icon("refresh"),
+      miniTabPanel("Sync", value = "sync", icon = icon("sync"),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
           uiOutput("ui_sync_commit_message"),
@@ -222,7 +222,7 @@ gitgadget_ui <- function() {
           verbatimTextOutput("sync_output")
         )
       ),
-      miniTabPanel("Branch", value = "branch", icon = icon("code-fork"),
+      miniTabPanel("Branch", value = "branch", icon = icon("code-branch"),
         miniContentPanel(
           HTML("<h4>Create a new branch</h4>"),
           uiOutput("ui_branch_create_name"),
@@ -266,7 +266,7 @@ gitgadget_ui <- function() {
           br(), br()
         )
       ),
-      miniTabPanel("Collect", value = "collect", icon = icon("cloud-download"),
+      miniTabPanel("Collect", value = "collect", icon = icon("cloud-download-alt"),
         miniContentPanel(
           conditionalPanel("input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),

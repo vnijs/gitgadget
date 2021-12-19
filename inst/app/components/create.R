@@ -243,7 +243,8 @@ remove_forks <- observeEvent(input$remove_forks, {
 
     message("Removing student forks ...\n")
 
-    students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
+    # students <- read.csv(input$create_user_file, stringsAsFactors = FALSE)
+    students <- read_ufile(input$create_user_file)
     for (i in seq_len(nrow(students))) {
       id <- projID(
         paste0(students[i, "userid"], "/", create_pre_lc, repo),

@@ -34,7 +34,7 @@ if (main_git__) {
   ## uncomment to remove all student projects!
   ## highly destructive!
   userfile <- "~/git/msba-test-gitlab.csv"
-  students <- read.csv(userfile, stringsAsFactors = FALSE)
+  students <- gitgadget::read_ufile(userfile)
   gitgadget:::remove_student_projects(userfile, Sys.getenv("git.server", "https://rsm-gitlab.ucsd.edu/api/v4/"))
 
   ## repo <- "gitgadget-test-repo"
@@ -49,7 +49,7 @@ if (main_git__) {
 
   ## check tokens
   userfile <- "~/msba-test-gitlab.csv"
-  students <- read.csv(userfile, stringsAsFactors = FALSE)
+  students <- gitgadget::read_ufile(userfile)
 
   ## testing if student tokens work
   for (i in seq_len(nrow(students))) {
