@@ -26,7 +26,7 @@ get_port <- function() {
 #' @param launch.browser Launch app in viewer (browsers) or only show the URL
 #'
 #' @export
-gitgadget <- function(port = get_port(), host = "0.0.0.0", launch.browser = TRUE) {
+gitgadget <- function(port = get_port(), host = "127.0.0.1", launch.browser = TRUE) {
   gitgadget_dir <- system.file(package = "gitgadget")
   source(file.path(gitgadget_dir, "app/init.R"), local = TRUE)
   source(file.path(gitgadget_dir, "app/gitgadget_ui.R"), local = TRUE)
