@@ -26,7 +26,7 @@ get_port <- function() {
 #' @param launch.browser Launch app in viewer (browsers) or only show the URL
 #'
 #' @export
-gitgadget <- function(port = get_port(), launch.browser = TRUE) {
+gitgadget <- function(port = get_port(), host = "0.0.0.0", launch.browser = TRUE) {
   gitgadget_dir <- system.file(package = "gitgadget")
   source(file.path(gitgadget_dir, "app/init.R"), local = TRUE)
   source(file.path(gitgadget_dir, "app/gitgadget_ui.R"), local = TRUE)
@@ -50,7 +50,7 @@ gitgadget <- function(port = get_port(), launch.browser = TRUE) {
   if (rstudioapi::isAvailable() && launch.browser) {
     runGadget(shinyApp(ui, server), port = port, viewer = shiny::paneViewer(minHeight = 725))
   } else {
-    runApp(shinyApp(ui, server), port = port, launch.browser = launch.browser)
+    runApp(shinyApp(ui, server), port = port, host = host, launch.browser = launch.browser)
   }
 }
 
@@ -76,7 +76,9 @@ gitgadget_url <- function() {
 #' @export
 gitgadget_callr <- function() {
   port <- get_port()
-  callr::r_bg(function(port) { gitgadget::gitgadget(port = port) }, args = list(port), user_profile = TRUE)
+  callr::r_bg(function(port) {
+    gitgadget::gitgadget(port = port)
+  }, args = list(port), user_profile = TRUE)
   Sys.sleep(1)
   getOption("viewer")(paste0("http://localhost:", port, "/"))
 }

@@ -4,8 +4,10 @@ find_home <- function(os_type = Sys.info()["sysname"]) {
   if (os_type == "Windows") {
     ## gives /Users/x and not /Users/x/Documents
     normalizePath(
-      file.path(Sys.getenv("HOMEDRIVE"),
-        Sys.getenv("HOMEPATH")),
+      file.path(
+        Sys.getenv("HOMEDRIVE"),
+        Sys.getenv("HOMEPATH")
+      ),
       winslash = "/"
     )
   } else {
@@ -40,6 +42,11 @@ if (git_home != "") {
   gg_volumes <- setNames(c(git_home, gg_volumes), c(basename(git_home), names(gg_volumes)))
 }
 
+is_repo_fun <- function(dr = input$repo_directory) {
+  dr <- getwd()
+  is_empty(suppressWarnings(system(paste("git -C", dr, "rev-parse --is-inside-work-tree 2>/dev/null"), intern = TRUE))) == FALSE
+}
+
 projdir <- basedir <- git_home
 if (rstudioapi::isAvailable()) {
   pdir <- rstudioapi::getActiveProject()
@@ -48,7 +55,7 @@ if (rstudioapi::isAvailable()) {
 } else {
   wd <- getwd()
   if (grepl("^/srv/", wd)) wd <- git_home
-  if (is_empty(wd)) {
+  if (is_repo_fun(wd)) {
     projdir <- basedir <- wd
   }
 }
@@ -56,7 +63,8 @@ if (rstudioapi::isAvailable()) {
 if (is_empty(projdir)) {
   projdir <- basedir <- normalizePath(homedir, winslash = "/")
 } else {
-  if (!projdir %in% gg_volumes) 
+  if (!projdir %in% gg_volumes) {
     gg_volumes <- setNames(c(projdir, gg_volumes), c(basename(projdir), names(gg_volumes)))
+  }
   projdir <- basedir <- normalizePath(projdir, winslash = "/")
 }

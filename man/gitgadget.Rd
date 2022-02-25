@@ -5,7 +5,7 @@
 \alias{gitgadget}
 \title{gitgadget}
 \usage{
-gitgadget(port = get_port(), launch.browser = TRUE)
+gitgadget(port = get_port(), host = "127.0.0.1", launch.browser = TRUE)
 }
 \arguments{
 \item{port}{Port to use for the app}
