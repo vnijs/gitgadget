@@ -42,8 +42,7 @@ if (git_home != "") {
   gg_volumes <- setNames(c(git_home, gg_volumes), c(basename(git_home), names(gg_volumes)))
 }
 
-is_repo_fun <- function(dr = input$repo_directory) {
-  dr <- getwd()
+is_repo_fun <- function(dr) {
   is_empty(suppressWarnings(system(paste("git -C", dr, "rev-parse --is-inside-work-tree 2>/dev/null"), intern = TRUE))) == FALSE
 }
 

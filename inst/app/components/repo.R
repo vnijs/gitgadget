@@ -22,7 +22,7 @@ outputOptions(output, "ui_repo_directory", suspendWhenHidden = FALSE)
 
 is_repo <- reactive({
   input$repo_refresh
-  is_repo_fun()
+  is_repo_fun(input$repo_directory)
 })
 
 output$repo_output <- renderPrint({
