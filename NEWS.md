@@ -1,3 +1,6 @@
+# gitgadget 0.6.9.0
+
+* Added option to specify the host ip to use. This makes is possible to use gitgadget with docker on ARM64 processors without requiring shiny-server
 # gitgadget 0.6.6.0
 
 * Updates to accomodate Shiny 1.7.1
@@ -5,7 +8,7 @@
 
 # gitgadget 0.6.5.0
 
-* Fix to accomodate that GitLab now uses "/-/" in their profile URLs
+* Fix to accommodate that GitLab now uses "/-/" in their profile URLs
 
 # gitgadget 0.6.4.0
 

@@ -23,6 +23,7 @@ get_port <- function() {
 #' @details See \url{https://github.com/vnijs/gitgadget} for documentation
 #'
 #' @param port Port to use for the app
+#' @param host Host ip to use
 #' @param launch.browser Launch app in viewer (browsers) or only show the URL
 #'
 #' @export

@@ -1,5 +1,29 @@
 ## Resubmission
 
+This is a resubmission. In this version I have added an option to specify the host ip to use. This makes is possible to use the tool with docker on ARM64 processors without requiring shiny-server.
+## Test environments
+
+* macOs R 4.2.0
+* win-builder (devel)
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab accout. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/-/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/-/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
+
+
+## Resubmission
+
 This is a resubmission. In this version I have updated icons to work with shiny 1.7.1 and added a check that specified data files exist
 
 ## Test environments
