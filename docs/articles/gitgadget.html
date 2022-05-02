@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">gitgadget</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.9</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/gitgadget.html">Get started</a>
 </li>
@@ -55,7 +51,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/vnijs/gitgadget/">
+  <a href="https://github.com/vnijs/gitgadget/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -70,82 +66,82 @@
 
       
 
-      </header><script src="gitgadget_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using Git Gadget</h1>
-                        <h4 class="author">Vincent Nijs</h4>
+                        <h4 data-toc-skip class="author">Vincent Nijs</h4>
             
-            <h4 class="date">2021-08-08</h4>
+            <h4 data-toc-skip class="date">2022-05-02</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/vnijs/gitgadget/blob/master/vignettes/gitgadget.Rmd"><code>vignettes/gitgadget.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/vnijs/gitgadget/blob/HEAD/vignettes/gitgadget.Rmd" class="external-link"><code>vignettes/gitgadget.Rmd</code></a></small>
       <div class="hidden name"><code>gitgadget.Rmd</code></div>
 
     </div>
 
     
     
-<div id="git-gadget" class="section level1">
-<h1 class="hasAnchor">
-<a href="#git-gadget" class="anchor"></a>Git Gadget</h1>
-<p><a href="https://travis-ci.org/vnijs/gitgadget"><img src="https://travis-ci.org/vnijs/gitgadget.png?branch=master" alt="Build Status"></a></p>
-<p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://gitlab.com">GitLab</a> API. PRs for use with GitHub are welcome. For alternative that uses GitHub see <a href="https://github.com/rundel/ghclass" class="uri">https://github.com/rundel/ghclass</a> although this does not (currently) have a shiny user interface.</p>
-<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com" target="_blank">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="https://happygitwithr.com/">happy git with R</a> and <a href="https://peerj.com/preprints/3159/">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans">git for humans</a> by Alice Bartlett.</p>
-<p><code>gitgadget</code> requires Rstudio version 1.2 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
+<div class="section level2">
+<h2 id="git-gadget">Git Gadget<a class="anchor" aria-label="anchor" href="#git-gadget"></a>
+</h2>
+<p><a href="https://travis-ci.org/vnijs/gitgadget" class="external-link"><img src="https://travis-ci.org/vnijs/gitgadget.png?branch=master" alt="Build Status"></a></p>
+<p><code>gitgadget</code> is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the <a href="https://about.gitlab.com/" class="external-link">GitLab</a> API. PRs for use with GitHub are welcome. For alternative that uses GitHub see <a href="https://github.com/rundel/ghclass" class="external-link uri">https://github.com/rundel/ghclass</a> although this does not (currently) have a shiny user interface.</p>
+<p><code>gitgadget</code> is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com" target="_blank" class="external-link">gitkraken</a>. <code>gitgadget</code> provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see <a href="https://happygitwithr.com/" class="external-link">happy git with R</a> and <a href="https://peerj.com/preprints/3159/" class="external-link">talk about version control</a> by Jenny Bryan and <a href="https://speakerdeck.com/alicebartlett/git-for-humans/" class="external-link">git for humans</a> by Alice Bartlett.</p>
+<p><code>gitgadget</code> requires Rstudio version 1.2 or later. Please use the <a href="https://github.com/vnijs/gitgadget/issues/" class="external-link">issue tracker</a> on GitHub to suggest enhancements or report problems. To install the latest version of <code>gitgadget</code> use the command below:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"gitgadget"</span>, repos <span class="op">=</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"gitgadget"</span>, repos <span class="op">=</span> <span class="st">"https://radiant-rstats.github.io/minicran/"</span><span class="op">)</span></code></pre></div>
 <p>To start <code>gitgadget</code> click on the Addins menu in Rstudio and then on <code>gitgadget</code>.</p>
 <p>On macOS, you will you will need to run the command below from a terminal to get access to git commands:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">xcode-select</span> <span class="at">--install</span><span class="kw">;</span></span></code></pre></div>
-<p>On Windows you will need to install git bash from <a href="https://git-scm.com/download/win" class="uri">https://git-scm.com/download/win</a>. Alternatively, you can use the following installer that we use with our students to ensure git is setup correctly for use with gitgadget:</p>
-<p><a href="https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe" class="uri">https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe</a></p>
+<p>On Windows you will need to install git bash from <a href="https://git-scm.com/download/win/" class="external-link uri">https://git-scm.com/download/win/</a>. Alternatively, you can use the following installer that we use with our students to ensure git is setup correctly for use with gitgadget:</p>
+<p><a href="https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe" class="external-link uri">https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe</a></p>
 <blockquote>
 <p>Note: Hover over any button in the <code>gitgadget</code> application for additional information about what clicking the button will accomplish</p>
 </blockquote>
-<div id="introduce" class="section level2">
-<h2 class="hasAnchor">
-<a href="#introduce" class="anchor"></a>Introduce</h2>
-<p>To start using git and <code>gitgadget</code> first <a href="https://happygitwithr.com/hello-git.html">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on an appropriate credential helper for your operating system. See <a href="https://happygitwithr.com/credential-caching.html">https://happygitwithr.com/credential-caching.html</a> for additional information.</p>
-<p>To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the <a href="https://gitlab.com/profile/personal_access_tokens">token on GitLab</a> and then copy-and-paste it in the <code>Token</code> input.</p>
+<div class="section level3">
+<h3 id="introduce">Introduce<a class="anchor" aria-label="anchor" href="#introduce"></a>
+</h3>
+<p>To start using git and <code>gitgadget</code> first <a href="https://happygitwithr.com/hello-git.html" class="external-link">introduce yourself to git</a>. Set a global user name and email for git (e.g., your GitLab user name and email). By default, <code>gitgadget</code> will try to turn on an appropriate credential helper for your operating system. See <a href="https://happygitwithr.com/https-pat.html" class="external-link">https://happygitwithr.com/https-pat.html</a> for additional information.</p>
+<p>To create and fork repos and collect merge requests you will need to provide a GitLab personal access token. First create the <a href="https://gitlab.com/-/profile/personal_access_tokens/" class="external-link">token on GitLab</a> and then copy-and-paste it in the <code>Token</code> input.</p>
 <p>Unless you plan to use <code>gitgadget</code> to manage student assignments, select <code>student</code> as the <code>User type</code>. Finally, enter the main directory where you plan to clone code repos (e.g., “C:/Users/me/git”)</p>
-<p>If you want to use an SSH key, make sure to click on the <code>Introduce</code> button, restart Rstudio, and then click on the <code>SSH key</code> button. Copy the key shown in GitGadget to the <a href="https://gitlab.com/profile/keys">gitlab.com page</a> that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use <code>git clone git@some-private-repo</code> from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the videos below for a demonstration.</p>
+<p>If you want to use an SSH key, make sure to click on the <code>Introduce</code> button, restart Rstudio, and then click on the <code>SSH key</code> button. Copy the key shown in GitGadget to the <a href="https://gitlab.com/-/profile/keys/" class="external-link">gitlab.com page</a> that should have opened in your default browser. To securely connect to gitlab from your computer you will need to restart Rstudio and use <code>git clone git@some-private-repo</code> from a terminal in Rstudio the first time you clone a repo. After that, cloning, creating, etc. from GitGadget should work smoothly. See the videos below for a demonstration.</p>
 <blockquote>
 <p>Note: On Windows we recommend cloning and creating repos using HTTPS rather than SSH</p>
 </blockquote>
-<div id="setup-for-git-and-gitlab" class="section level4">
-<h4 class="hasAnchor">
-<a href="#setup-for-git-and-gitlab" class="anchor"></a>Setup for git and gitlab</h4>
-<p><a href="https://youtu.be/FQx_3EDQaXc" class="uri">https://youtu.be/FQx_3EDQaXc</a></p>
+<div class="section level5">
+<h5 id="setup-for-git-and-gitlab">Setup for git and gitlab<a class="anchor" aria-label="anchor" href="#setup-for-git-and-gitlab"></a>
+</h5>
+<p><a href="https://youtu.be/FQx_3EDQaXc" class="external-link uri">https://youtu.be/FQx_3EDQaXc</a></p>
 </div>
-<div id="individual-assignment-practice" class="section level4">
-<h4 class="hasAnchor">
-<a href="#individual-assignment-practice" class="anchor"></a>Individual assignment practice</h4>
-<p><a href="https://youtu.be/CANV6-mfZ9I" class="uri">https://youtu.be/CANV6-mfZ9I</a></p>
+<div class="section level5">
+<h5 id="individual-assignment-practice">Individual assignment practice<a class="anchor" aria-label="anchor" href="#individual-assignment-practice"></a>
+</h5>
+<p><a href="https://youtu.be/CANV6-mfZ9I" class="external-link uri">https://youtu.be/CANV6-mfZ9I</a></p>
 </div>
-<div id="merge-conflicts" class="section level4">
-<h4 class="hasAnchor">
-<a href="#merge-conflicts" class="anchor"></a>Merge conflicts</h4>
-<p><a href="https://youtu.be/elq5UUG0RbE" class="uri">https://youtu.be/elq5UUG0RbE</a></p>
+<div class="section level5">
+<h5 id="merge-conflicts">Merge conflicts<a class="anchor" aria-label="anchor" href="#merge-conflicts"></a>
+</h5>
+<p><a href="https://youtu.be/elq5UUG0RbE" class="external-link uri">https://youtu.be/elq5UUG0RbE</a></p>
 </div>
-<div id="group-assignment-practice" class="section level4">
-<h4 class="hasAnchor">
-<a href="#group-assignment-practice" class="anchor"></a>Group assignment practice</h4>
-<p><a href="https://youtu.be/uwqUHl3z37o" class="uri">https://youtu.be/uwqUHl3z37o</a></p>
+<div class="section level5">
+<h5 id="group-assignment-practice">Group assignment practice<a class="anchor" aria-label="anchor" href="#group-assignment-practice"></a>
+</h5>
+<p><a href="https://youtu.be/uwqUHl3z37o" class="external-link uri">https://youtu.be/uwqUHl3z37o</a></p>
 <blockquote>
-<p>Note: In these videos we use a docker container (see <a href="https://github.com/radiant-rstats/docker/tree/master/install" class="uri">https://github.com/radiant-rstats/docker/tree/master/install</a>) but this is not required</p>
+<p>Note: In these videos we use a docker container (see <a href="https://github.com/radiant-rstats/docker/tree/master/install/" class="external-link uri">https://github.com/radiant-rstats/docker/tree/master/install/</a>) but this is not required</p>
 </blockquote>
 </div>
 </div>
-<div id="create-gitlab-only" class="section level2">
-<h2 class="hasAnchor">
-<a href="#create-gitlab-only" class="anchor"></a>Create (GitLab only)</h2>
+<div class="section level3">
+<h3 id="create-gitlab-only">Create (GitLab only)<a class="anchor" aria-label="anchor" href="#create-gitlab-only"></a>
+</h3>
 <p>Enter the path to a local directory to create a repo on GitLab. If the local directory does not yet exist it will be created. You can also click the <code>Open</code> button and navigate to an existing directory. If a <code>Group name</code> is provided it will be used to place the repo on GitLab. This is recommended if you are using <code>gitgadget</code> for assignment management. If left blank, the GitLab user name will be used as the group. A <code>Prefix</code> can be added and will default to the value of <code>git.prefix</code> in .Renviron (see <em>Initial settings</em> below). The prefix can be used to avoid conflicting assignment names across classes (e.g., multiple classes using “assignment1”).</p>
 <p>If you selected <code>faculty</code> as the <code>User type</code> in the <em>Introduce</em> tab you will have the option to upload a CSV file with student tokens (see below). If a user file is provided, a radio button will be shown that can be used to indicate if the work should be completed individually or in teams. Furthermore, you can choose if you want to <em>hide</em> or <em>show</em> the master class repo to students. <em>Hiding</em> the master repo can avoid confusion where a student might accidentally clone the wrong repo (i.e., the class repo rather than their own fork) and not be able to push there changes back to gitlab. <em>Showing</em> the master repo, on the other hand, will make it possible to <em>sync</em> any changes to the class repo after it was forked for each student.</p>
 <p>If a CSV file with TA information is specified they will be added as “Maintainer” to the class repo. The will also be added as “Maintainer” to all created student (or team) forks. TA information should include <code>userid</code>, <code>token</code>, and <code>email</code>.</p>
 </div>
-<div id="clone" class="section level2">
-<h2 class="hasAnchor">
-<a href="#clone" class="anchor"></a>Clone</h2>
+<div class="section level3">
+<h3 id="clone">Clone<a class="anchor" aria-label="anchor" href="#clone"></a>
+</h3>
 <p>Clone a repo from GitLab (or GitHub) (e.g., <code>git@gitlab.com:username/test-repo.git</code>). The name for the directory placed inside <code>Base directory to clone repo into</code> will be taken from the repo name unless a <code>Custom directory to clone repo into</code> is provided. If there is no R-studio project file (<code>.Rproj</code>) in the remote repo, one will be created.</p>
 <blockquote>
 <p>Note: To use an SSH key with GitGadget you should clone from a terminal the first time. See the video linked above (<em>Setup for git and gitlab</em>) for a demo. As mentioned above, for Windows users we recommend using HTTPS to clone and create repos.</p>
@@ -154,39 +150,39 @@
 <p>Note: To activate an HTTPS credential helper the first time you clone a repo from GitHub or GitLab you will be asked to provide your username and password in the Rstudio terminal</p>
 </blockquote>
 </div>
-<div id="branch" class="section level2">
-<h2 class="hasAnchor">
-<a href="#branch" class="anchor"></a>Branch</h2>
+<div class="section level3">
+<h3 id="branch">Branch<a class="anchor" aria-label="anchor" href="#branch"></a>
+</h3>
 <p>Create a local branch from the active branch by providing a name for the new branch and clicking <code>Create local</code>. Link and push to the (GitLab) remote by clicking the <code>Link remote</code> button. If remote branches exist click the <code>Check out</code> button to work with a branch locally. If branches other than <code>master</code> exist you can <code>Merge branches</code> or delete them if they are no longer needed. To undo a merge-in-progress, e.g., with merge conflicts, click the <code>Abort merge</code> button. <code>Unlink remote</code> will not remove the local or the remote branch but only the link to the remote (i.e., the push/pull arrows in R-studio will gray-out).</p>
 <blockquote>
 <p>Note: Changes to the list of available branches may only be visible in R-studio after clicking the <code>refresh</code> button in the Git tab.</p>
 </blockquote>
 </div>
-<div id="sync" class="section level2">
-<h2 class="hasAnchor">
-<a href="#sync" class="anchor"></a>Sync</h2>
+<div class="section level3">
+<h3 id="sync">Sync<a class="anchor" aria-label="anchor" href="#sync"></a>
+</h3>
 <p>To commit changes to the local copy of your repo provide a <code>Commit message</code> and then click the <code>Commit</code> button. If you committed changes you are not sure about, the <code>Undo</code> button will let you revert the latest commit (after confirmation).</p>
 <p>If the remote repo contains changes you do not yet have locally press the <code>Pull</code> button. To add committed local changes to the remote repo, click the <code>Push</code> button. It you completely broke the local repo and want to start over with a clean copy of the remote repo, press the <code>Reset</code> button.</p>
 <p>If the repo you are working on is a fork you probably want to make sure it is up to date and merge any changes into the version you are working on locally. The first step is to ensure that git knows about the upstream repo you forked from. Copy the SSH or HTTPS link to clone the original repo into the <code>Sync repo with remote it was forked from</code> input in the <em>Sync</em> tab and then press <code>Sync</code>. The repo you forked will now be added as a <em>remote</em>. Click <code>Merge</code> to update your local copy of the repo with any changes to the original remote repo. Fix merge conflicts, if any, and proceed to work on the local repo. To undo a merge with merge conflicts click the <code>Abort merge</code> button. Click the <code>Unlink</code> to remove the reference to the upstream repo you forked from.</p>
 </div>
-<div id="collect-gitlab-only" class="section level2">
-<h2 class="hasAnchor">
-<a href="#collect-gitlab-only" class="anchor"></a>Collect (GitLab only)</h2>
+<div class="section level3">
+<h3 id="collect-gitlab-only">Collect (GitLab only)<a class="anchor" aria-label="anchor" href="#collect-gitlab-only"></a>
+</h3>
 <p>Collect assignments from students/teams using Merge Requests (MR) on GitLab. Inputs will only be shown if the user type in the <em>Introduce</em> tab is set to <code>faculty</code>.</p>
 <p>If a CSV file with TA information is specified they removed from (<em>Hide</em>) or added to (<em>Show</em>) to all created student (or team) forks as a “Maintainer”. TA information should include <code>userid</code>, <code>token</code>, and <code>email</code>.</p>
 <p>To collect and fetch assignments linked to class repo you must first open a clone of that repo in Rstudio and provide your <code>Token</code>. The <code>Assignment name</code> input should now show the assignment repo name on gitlab.com. Next, indicate of the assignment was <code>individual</code> or <code>team</code> and click the <code>Collect</code> button to generate Merge Requests for all students (or team leads). Once this step is completed you can review and comment on the MRs using the GitLab UI. Collecting assignments requires that MRs be generated, which in turn requires that the class repo be visible to students. The <code>Hide</code> button can be used to ensure students will not have access to the MRs. However, since this is likely to be after the assignment due data, visibility of the class repo and MRs may not be or much concern. The <code>Show</code> button will provide students access to the class repo and MRs.</p>
 <p>To view, run, and edit the MRs locally, press the <code>Fetch</code> button. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments and/or fixes. Use the Git tab in R-studio or the <em>Sync</em> tab in <code>gitgadget</code> to push local changes to the remote branch. Notify students of the comments/fixes by providing a link to the branch in the comments on the original MR.</p>
 <p>If students update their assignment repo these changes will be visible in the MRs as long as the class repo is visible to students (click the <code>Show</code> button to ensure access). If you want to <code>Fetch</code> these updates for local review you should first delete the existing branches for one or more students. This can be done through the <em>Branch</em> tab by selecting all branches you want to delete and clicking the <code>Delete local</code> button. Then click the <code>Fetch</code> button in the <em>Collect</em> tab again to obtain the latest version.</p>
 </div>
-<div id="assignment-management" class="section level2">
-<h2 class="hasAnchor">
-<a href="#assignment-management" class="anchor"></a>Assignment management</h2>
+<div class="section level3">
+<h3 id="assignment-management">Assignment management<a class="anchor" aria-label="anchor" href="#assignment-management"></a>
+</h3>
 <p>Key functions in <code>git.R</code> that can be accessed through the <code>gitgadget</code> interface are:</p>
-<p><code><a href="../reference/create_group.html">create_group(...)</a></code></p>
-<p>Used to create a group for a course. The <code>Group name</code> variable should be set to something like “school-courseid-year”. This creates the group and adds students as, for example, <code>reporters</code> with read-only access on GitLab. Make sure to specify a <a href="https://docs.gitlab.com/ee/api/access_requests.html">valid permission number</a>.</p>
-<p><code><a href="../reference/create_repo.html">create_repo(...)</a></code></p>
+<p><code>create_group(...)</code></p>
+<p>Used to create a group for a course. The <code>Group name</code> variable should be set to something like “school-courseid-year”. This creates the group and adds students as, for example, <code>reporters</code> with read-only access on GitLab. Make sure to specify a <a href="https://docs.gitlab.com/ee/api/access_requests.html" class="external-link">valid permission number</a>.</p>
+<p><code>create_repo(...)</code></p>
 <p>To create an assignment repo set <code>Local directory</code> to the directory with the assignment files. A <code>Prefix</code> could be added to avoid conflicts across courses that might use the same assignment name (e.g., assignment1). Access this functionality through the <em>Create</em> tab in <code>gitgadget</code>.</p>
-<p><code><a href="../reference/assign_work.html">assign_work(...)</a></code></p>
+<p><code>assign_work(...)</code></p>
 <p>Forks the assignment repo uploaded by a faculty member or TA for each student/team and creates the appropriate groups for team work. This requires a csv file with the structure shown below, including the students’ (GitLab) private token.</p>
 <table class="table">
 <thead><tr class="header">
@@ -218,15 +214,15 @@
 </table>
 <!-- 
 Note: Markdown for the table above was generated using <a href="https://www.tablesgenerator.com/markdown_tables" target="_blank">tablegenerator.com</a> 
---><p><code><a href="../reference/collect_work.html">collect_work(...)</a></code></p>
+--><p><code>collect_work(...)</code></p>
 <p>Generates Merge Requests for all students or teams. Requires a csv file with the structure shown above.</p>
-<p><code><a href="../reference/fetch_work.html">fetch_work(...)</a></code></p>
+<p><code>fetch_work(...)</code></p>
 <p>Fetch Merge Requests for all students or teams from the GitLab server. After fetching all MRs they are converted to branches using the student-id as the branch name and pushed back up to the server. Switch between branches to test code and provide comments. Push to update the remote branch with the local changes.</p>
 </div>
-<div id="initial-settings" class="section level2">
-<h2 class="hasAnchor">
-<a href="#initial-settings" class="anchor"></a>Initial settings</h2>
-<p>GitGadget supports the following input from an .Renviron file (e.g., “C:/Users/me/.Renviron”). The easiest way to view <code>.Renviron</code> is to click on the <code>Check</code> button in the <em>Introduce</em> tab or use <code><a href="https://usethis.r-lib.org/reference/edit.html">usethis::edit_r_environ()</a></code>.</p>
+<div class="section level3">
+<h3 id="initial-settings">Initial settings<a class="anchor" aria-label="anchor" href="#initial-settings"></a>
+</h3>
+<p>GitGadget supports the following input from an .Renviron file (e.g., “C:/Users/me/.Renviron”). The easiest way to view <code>.Renviron</code> is to click on the <code>Check</code> button in the <em>Introduce</em> tab or use <code><a href="https://usethis.r-lib.org/reference/edit.html" class="external-link">usethis::edit_r_environ()</a></code>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">git.user</span> = <span class="st">"your-gitlab-id"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">git.email</span> = <span class="st">"youremail@ucsd.edu"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">git.token</span> = <span class="st">"abc123"</span></span>
@@ -252,11 +248,13 @@ Note: Markdown for the table above was generated using <a href="https://www.tabl
 
 
       <footer><div class="copyright">
-  <p>Developed by Vincent Nijs, Sanjiv Erat.</p>
+  <p></p>
+<p>Developed by Vincent Nijs, Sanjiv Erat.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -264,6 +262,8 @@ Note: Markdown for the table above was generated using <a href="https://www.tabl
 
   
 
+
+  
 
   </body>
 </html>
