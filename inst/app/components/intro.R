@@ -8,7 +8,6 @@
 # })
 
 observeEvent(input$intro_git, {
-
   if (!is_empty(input$intro_user_name)) {
     cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
     resp <- system(cmd, intern = TRUE)
@@ -160,7 +159,8 @@ output$ui_intro_git_home <- renderUI({
 output$ui_intro_buttons <- renderUI({
   url <- server_url()
   tagList(
-    fillRow(height = "70px", width = "300px",
+    fillRow(
+      height = "70px", width = "300px",
       textInput("intro_keyname", "Key name:", value = "id_rsa"),
       textInput("intro_passphrase", "Pass-phrase:", value = "")
     ),
@@ -205,10 +205,10 @@ intro_ssh <- eventReactive(input$intro_ssh, {
         out <- pipe("pbcopy")
         cat(key, file = out)
         close(out)
-        cat(paste0("\nYour new public SSH key has been copied to the clipboard. Navigate to ",  url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
+        cat(paste0("\nYour new public SSH key has been copied to the clipboard. Navigate to ", url_keys, " in your browser, paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       } else {
         cat(paste0("\n", key))
-        cat(paste0("\n\nCopy the new public SSH key to ", url_keys,". Paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
+        cat(paste0("\n\nCopy the new public SSH key to ", url_keys, ". Paste the key into the 'Key' text input on the site, and click 'Add key'\n"))
       }
     } else {
       key <- readLines(.ssh_exists(), warn = FALSE)
@@ -268,13 +268,11 @@ intro_ssh <- eventReactive(input$intro_ssh, {
 })
 
 observeEvent(input$intro_restart, {
-  ## https://github.com/rstudio/rstudioapi/issues/111
   if (Sys.getenv("SHINY_PORT") == "") {
-    stopApp(cat("\nUse Session > Restart R to update your settings in memory.\nThen start Git Gadget again to clone, create, etc.\n\n"))
-    ## Below is still not the same as using Session > Restart R
-    # stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
-    # cmd <- "gitgadget:::gitgadget()"
-    # rstudioapi::restartSession(cmd)
+    stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
+    rstudioapi::executeCommand("restartR")
+    ## https://github.com/rstudio/rstudioapi/issues/111
+    # rstudioapi::restartSession("gitgadget:::gitgadget()")
   } else {
     showModal(
       modalDialog(
@@ -306,7 +304,7 @@ observeEvent(input$intro_check, {
 output$introduce_output <- renderPrint({
   input$intro_git
   if (file.exists(file.path(find_home(), ".gitconfig")) ||
-      file.exists(file.path(find_home(), "Documents/.gitconfig"))) {
+    file.exists(file.path(find_home(), "Documents/.gitconfig"))) {
     ret <- system("git config --global --list", intern = TRUE) %>%
       .[grepl("^user", .)]
   } else {
@@ -316,10 +314,8 @@ output$introduce_output <- renderPrint({
     cat("No user information set. Enter a user name and email and click the 'Introduce' button\n\nSet user.name : git config --global user.name 'Your Name'\nSet user.email: git config --global user.email 'myemail@gmail.com'\n")
     return(invisible())
   } else {
-
     ptext <- if (not_pressed(input$intro_git)) "Checking credentials" else "Working on introduction"
     withProgress(message = ptext, value = 0, style = "old", {
-
       crh <- system("git config --global --list", intern = TRUE) %>%
         .[grepl("^credential.helper", .)]
 
@@ -357,5 +353,4 @@ output$introduce_output <- renderPrint({
       cat("\nNo SSH keys seem to exist on your system. Click the 'SSH key' button to generate them")
     }
   }
-
 })
