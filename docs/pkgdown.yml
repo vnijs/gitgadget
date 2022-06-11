@@ -1,7 +1,7 @@
-pandoc: '2.12'
+pandoc: 2.17.1.1
 pkgdown: 2.0.3
 pkgdown_sha: ~
 articles:
   gitgadget: gitgadget.html
-last_built: 2022-05-02T19:35Z
+last_built: 2022-06-11T22:00Z
 
