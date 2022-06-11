@@ -148,7 +148,7 @@ observeEvent(input$sync_reset_show, {
         modalButton("Cancel"),
         actionButton(
           "sync_reset", "Reset", class = "btn-danger",
-          title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/master"
+          title = "Completely reset local repo to remote main branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/main"
         )
       )
     )
@@ -158,10 +158,10 @@ observeEvent(input$sync_reset_show, {
 observeEvent(input$sync_reset, {
   removeModal()
   req(input$repo_directory)
-  withProgress(message = "Resetting local repo to remote master branch", value = 0, style = "old", {
+  withProgress(message = "Resetting local repo to remote main branch", value = 0, style = "old", {
     ## Add confirmation dialog
     mess1 <- system(paste("git -C", input$repo_directory, "fetch --all"), intern = TRUE)
-    mess2 <- system(paste("git -C", input$repo_directory, "reset --hard origin/master"), intern = TRUE)
+    mess2 <- system(paste("git -C", input$repo_directory, "reset --hard origin/main"), intern = TRUE)
     message("\nReset attempt completed. Check the console for messages\n")
   })
   mess <- c(mess1, mess2)
@@ -195,8 +195,8 @@ observeEvent(input$sync, {
 observeEvent(input$sync_merge, {
   req(input$repo_directory)
   withProgress(message = "Merging synced repo", value = 0, style = "old", {
-    mess1 <- system(paste("git -C", input$repo_directory, "checkout master"), intern = TRUE)
-    mess2 <- system(paste("git -C", input$repo_directory, "merge upstream/master"), intern = TRUE)
+    mess1 <- system(paste("git -C", input$repo_directory, "checkout main"), intern = TRUE)
+    mess2 <- system(paste("git -C", input$repo_directory, "merge upstream/main"), intern = TRUE)
   })
   mess <- c(mess1, mess2)
   showModal(

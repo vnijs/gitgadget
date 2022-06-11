@@ -8,3 +8,4 @@
 gitgadget.code-workspace
 cran-comments.md
 .vscode
+^CRAN-SUBMISSION$

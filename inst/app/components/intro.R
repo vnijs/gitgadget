@@ -8,6 +8,12 @@
 # })
 
 observeEvent(input$intro_git, {
+
+  # set default branch to 'main'
+  cmd <- "git config --global init.defaultBranch 'main'"
+  resp <- system(cmd, intern = TRUE)
+  cat("Used:", cmd, "\n")
+
   if (!is_empty(input$intro_user_name)) {
     cmd <- paste("git config --global --replace-all user.name", input$intro_user_name)
     resp <- system(cmd, intern = TRUE)
@@ -166,7 +172,7 @@ output$ui_intro_buttons <- renderUI({
     ),
     actionButton(
       "intro_git", "Introduce",
-      title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>"
+      title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>\ngit config --global init.defaultBranch 'main'"
     ),
     actionButton(
       "intro_ssh", "SSH key",

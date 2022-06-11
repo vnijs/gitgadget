@@ -1,9 +1,14 @@
+# gitgadget 0.7.0.0
+
+* Setting `main` as the default branch
+
 # gitgadget 0.6.9.0
 
 * Added option to specify the host ip to use. This makes is possible to use gitgadget with docker on ARM64 processors without requiring shiny-server
+
 # gitgadget 0.6.6.0
 
-* Updates to accomodate Shiny 1.7.1
+* Updates to accommodate Shiny 1.7.1
 * Check if a user or ta file exists before loading
 
 # gitgadget 0.6.5.0

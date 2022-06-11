@@ -1,6 +1,35 @@
 ## Resubmission
 
+This is a resubmission. In this version I have update the app to use `main` as the default branch.
+
+## Test environments
+
+* macOs R 4.2.0
+* win-builder (devel)
+* Rhub
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab accout. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/-/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/-/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
+
+## Previous cran-comments
+
+## Resubmission
+
 This is a resubmission. In this version I have added an option to specify the host ip to use. This makes is possible to use the tool with docker on ARM64 processors without requiring shiny-server.
+
 ## Test environments
 
 * macOs R 4.2.0
@@ -46,8 +75,6 @@ URL: https://gitlab.com/-/profile/personal_access_tokens
         README.md
   Status: 503
 ```
-
-## Previous cran-comments
 
 ## Resubmission
 

@@ -701,14 +701,14 @@ create_repo <- function(
 
   system2("git", c("add", "."))
   system2("git", c("commit", "-m", '"Upload repo using gitgadget"'))
-  system2("git", c("push", "-u", "origin", "master"))
+  system2("git", c("push", "-u", "origin", "main"))
 }
 
 merger <- function(
                    token, to, search = "", server,
                    title = "submission",
-                   frombranch = "master",
-                   tobranch = "master"
+                   frombranch = "main",
+                   tobranch = "main"
 ) {
 
   resp <- get_allprojects(token[1], server, search = search)

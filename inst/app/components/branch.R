@@ -10,7 +10,7 @@ branches <- reactive({
     c()
   } else {
     br %>% gsub("[\\* ]+", "", .) %>%
-    {.[!grepl("(^master$)|(^remotes/origin/master$)|(^remotes/origin/HEAD)", .)]}
+    {.[!grepl("(^main$|^master$)|(^remotes/origin/main$)|(^remotes/origin/master$)|(^remotes/origin/HEAD)", .)]}
   }
 })
 
@@ -113,7 +113,7 @@ observeEvent(input$branch_delete, {
   req(input$repo_directory)
   if (!is.null(input$branch_delete_name)) {
     withProgress(message = "Deleting branch", value = 0, style = "old", {
-      mess <- system(paste("git -C", input$repo_directory, "checkout master"), intern = TRUE)
+      mess <- system(paste("git -C", input$repo_directory, "checkout main"), intern = TRUE)
       for (ib in input$branch_delete_name) {
         mess <- c(mess, system(paste("git -C", input$repo_directory, "branch -D", ib), intern = TRUE))
       }
@@ -133,13 +133,13 @@ output$ui_branch_create_name <- renderUI({
     HTML(paste0("<label>", input$repo_directory, " is not a git repo</label></br>"))
   } else {
     init <- isolate(input$branch_create_name)
-    init <- ifelse(is_empty(init), "", init) 
+    init <- ifelse(is_empty(init), "", init)
     textInput("branch_create_name", NULL, value = init, placeholder = "Provide a name for the new branch")
   }
 })
 
 output$ui_branch_merge_branches <- renderUI({
-  br <- c("master", branches()) %>% .[!grepl("origin/", .)]
+  br <- c("main", branches()) %>% .[!grepl("origin/", .)]
   if (length(br) == 1) {
     HTML("<label>No branches available to merge</label>")
   } else {
@@ -166,7 +166,7 @@ rbranches <- reactive({
   } else {
     br %>% {unique(c(.[grepl("\\* ", .)], .))} %>%
     gsub("[\\* ]+", "", .) %>%
-    {.[!grepl("(^remotes/origin/master$)|(^remotes/origin/HEAD)", .)]}
+    {.[!grepl("(^remotes/origin/main$)|(^remotes/origin/main$)|(^remotes/origin/HEAD)", .)]}
   }
 })
 

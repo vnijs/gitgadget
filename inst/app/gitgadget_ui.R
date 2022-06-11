@@ -197,7 +197,7 @@ gitgadget_ui <- function() {
           ),
           actionButton(
             "sync_reset_show", "Reset", class = "btn-danger",
-            title = "Completely reset local repo to remote master branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/master"
+            title = "Completely reset local repo to remote main branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/main"
           ),
           uiOutput("ui_sync_check"),
           HTML("<h2>Sync a fork</h2>"),
@@ -208,7 +208,7 @@ gitgadget_ui <- function() {
           ),
           actionButton(
             "sync_merge", "Merge",
-            title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout master\ngit merge upstream/master"
+            title = "Merge the upstream/ branch(es) from the original with the local branch(es)\n\nGit commands:\ngit checkout main\ngit merge upstream/main"
           ),
           actionButton(
             "synch_abort", "Abort merge",
@@ -261,7 +261,7 @@ gitgadget_ui <- function() {
           ),
           actionButton(
             "branch_delete", "Delete local",
-            title = "Remove the local branch(es)\n\nGit commands:\ngit checkout master\ngit branch -D <branch>"
+            title = "Remove the local branch(es)\n\nGit commands:\ngit checkout main\ngit branch -D <branch>"
           ),
           br(), br()
         )
