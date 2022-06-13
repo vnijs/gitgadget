@@ -1,6 +1,6 @@
 ## Resubmission
 
-This is a resubmission. In this version I have update the app to use `main` as the default branch.
+This is a resubmission. In this version I have update the app to use `main` as the default branch and fixed a URL issue identified by CRAN.
 
 ## Test environments
 

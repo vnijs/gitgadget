@@ -20,9 +20,7 @@ On macOS, you will you will need to run the command below from a terminal to get
 xcode-select --install;
 ```
 
-On Windows you will need to install git bash from https://git-scm.com/download/win/. Alternatively, you can use the following installer that we use with our students to ensure git is setup correctly for use with gitgadget:
-
-https://rady.ucsd.edu/faculty/directory/vnijs/RSM-MSBA-Computing-Environment-Latest.exe
+On Windows you will need to install git bash from https://git-scm.com/download/win/.  
 
 > Note: Hover over any button in the `gitgadget` application for additional information about what clicking the button will accomplish
 
