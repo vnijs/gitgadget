@@ -25,10 +25,9 @@ get_port <- function() {
 #' @param port Port to use for the app
 #' @param host Host ip to use
 #' @param launch.browser Launch app in viewer (browsers) or only show the URL
-#' @param jupyter Starting from Jupyter (default = FALSE)
 #'
 #' @export
-gitgadget <- function(port = get_port(), host = "127.0.0.1", launch.browser = TRUE, jupyter = FALSE) {
+gitgadget <- function(port = get_port(), host = "127.0.0.1", launch.browser = TRUE) {
   gitgadget_dir <- system.file(package = "gitgadget")
   source(file.path(gitgadget_dir, "app/init.R"), local = TRUE)
   source(file.path(gitgadget_dir, "app/gitgadget_ui.R"), local = TRUE)
@@ -45,7 +44,9 @@ gitgadget <- function(port = get_port(), host = "127.0.0.1", launch.browser = TR
     source(file.path(gitgadget_dir, "app/components/sync.R"), local = TRUE)
     source(file.path(gitgadget_dir, "app/components/collect.R"), local = TRUE)
     observeEvent(input$done, {
-      if (!jupyter) stopApp(cat("Stopped GitGadget"))
+      if (!getOption("gitgadget.jupyter", default = FALSE)) {
+        stopApp(cat("Stopped GitGadget"))
+      }
     })
   }
 

@@ -274,7 +274,15 @@ intro_ssh <- eventReactive(input$intro_ssh, {
 })
 
 observeEvent(input$intro_restart, {
-  if (Sys.getenv("SHINY_PORT") == "") {
+  if (getOption("gitgadget.jupyter", default = FALSE)) {
+    showModal(
+      modalDialog(
+        title = "Restart Git Gadget",
+        span("To restart the app with updated settings press the 'Done' button on the top-right. Then refresh your browser and restart Git Gadget"),
+        easyClose = TRUE
+      )
+    )
+  } else if (Sys.getenv("SHINY_PORT") == "") {
     stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
     rstudioapi::executeCommand("restartR")
     ## https://github.com/rstudio/rstudioapi/issues/111
@@ -283,7 +291,7 @@ observeEvent(input$intro_restart, {
     showModal(
       modalDialog(
         title = "Restart Git Gadget",
-        span("To restart the app with updated settings press the 'Done' button on the top-right. Then restart R (or refresh your browser if launching from Jupyter) and restart Git Gadget"),
+        span("To restart the app with updated settings press the 'Done' button on the top-right. Then restart R and restart Git Gadget"),
         easyClose = TRUE
       )
     )
@@ -291,14 +299,25 @@ observeEvent(input$intro_restart, {
 })
 
 observeEvent(input$intro_check, {
-  if (Sys.getenv("SHINY_PORT") == "") {
+  if (getOption("gitgadget.jupyter", default = FALSE)) {
+    path <- usethis:::scoped_path_r("user", ".Renviron", envvar = "R_ENVIRON_USER")
+    Renv <- readLines(path)
+    showModal(
+      modalDialog(
+        title = "Content of .Renviron",
+        span(HTML(paste0(Renv, collapse = "</br>"))),
+        size = "l",
+        easyClose = TRUE
+      )
+    )
+  } else if (Sys.getenv("SHINY_PORT") == "") {
     usethis::edit_r_environ()
   } else {
     path <- usethis:::scoped_path_r("user", ".Renviron", envvar = "R_ENVIRON_USER")
     Renv <- readLines(path)
     showModal(
       modalDialog(
-        title = "Staged file differences",
+        title = "Content of .Renviron",
         span(HTML(paste0(Renv, collapse = "</br>"))),
         size = "l",
         easyClose = TRUE
