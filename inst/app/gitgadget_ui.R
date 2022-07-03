@@ -3,14 +3,17 @@ gitgadget_ui <- function() {
     miniTitleBar(
       paste0("GITGADGET (", packageVersion("gitgadget"), ")"),
       right = actionButton(
-        "done", "Done", class = "btn-sm btn-primary",
+        "done", "Done",
+        class = "btn-sm btn-primary",
         onclick = "setTimeout(function(){window.close();}, 100);"
       ),
       left = miniTitleBarButton("help", "Help", primary = FALSE)
     ),
     includeCSS(file.path(system.file("app", package = "gitgadget"), "www/style.css")),
-    miniTabstripPanel(id = "tabs",
-      miniTabPanel("Introduce", value = "intro", icon = icon("hand-paper"),
+    miniTabstripPanel(
+      id = "tabs",
+      miniTabPanel("Introduce",
+        value = "intro", icon = icon("hand-paper"),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput(
@@ -24,7 +27,8 @@ gitgadget_ui <- function() {
             placeholder = "Provide GitLab/GitHub user email"
           ),
           textInput("intro_server", "Server API:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
-          fillRow(height = "70px", width = "475px",
+          fillRow(
+            height = "70px", width = "475px",
             passwordInput("intro_token_gl", "GitLab token:", value = Sys.getenv("git.token")),
             uiOutput("ui_intro_get_token")
           ),
@@ -41,7 +45,8 @@ gitgadget_ui <- function() {
             Sys.getenv("git.user.type", "student"),
             inline = TRUE
           ),
-          fillRow(height = "70px", width = "475px",
+          fillRow(
+            height = "70px", width = "475px",
             uiOutput("ui_intro_git_home"),
             shinyFiles::shinyDirButton(
               "intro_git_home_open", "Open",
@@ -54,27 +59,33 @@ gitgadget_ui <- function() {
           verbatimTextOutput("introduce_output")
         )
       ),
-      miniTabPanel("Create", value = "create", icon = icon("git"),
+      miniTabPanel("Create",
+        value = "create", icon = icon("git"),
         miniContentPanel(
           # HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
           HTML("<h2>Create a repo on GitLab</h2>"),
           selectInput("create_remote", NULL, choices = "GitLab", selected = "GitLab"),
           # selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
-          conditionalPanel("input.create_remote == 'GitLab'",
+          conditionalPanel(
+            "input.create_remote == 'GitLab'",
             textInput("create_server", "API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
           ),
           radioButtons("create_ssh", "Authentication type:", c("ssh", "https"), "ssh", inline = TRUE),
-          fillRow(height = "70px", width = "300px",
+          fillRow(
+            height = "70px", width = "300px",
             textInput("create_user_name", "User name:", value = Sys.getenv("git.user")),
             uiOutput("ui_create_token")
           ),
-          conditionalPanel("input.create_remote == 'GitLab'",
-            fillRow(height = "70px", width = "300px",
+          conditionalPanel(
+            "input.create_remote == 'GitLab'",
+            fillRow(
+              height = "70px", width = "300px",
               textInput("create_group", "Group name:", value = Sys.getenv("git.group")),
               uiOutput("ui_create_pre")
             )
           ),
-          fillRow(height = "70px", width = "475px",
+          fillRow(
+            height = "70px", width = "475px",
             uiOutput("ui_create_directory"),
             shinyFiles::shinyDirButton(
               "create_directory_find", "Open",
@@ -82,23 +93,29 @@ gitgadget_ui <- function() {
               style = "margin-top: 25px;"
             )
           ),
-          conditionalPanel("input.intro_user_type == 'faculty' && input.create_remote == 'GitLab'",
-            fillRow(height = "70px", width = "475px",
+          conditionalPanel(
+            "input.intro_user_type == 'faculty' && input.create_remote == 'GitLab'",
+            fillRow(
+              height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
               shinyFiles::shinyFilesButton(
-                "create_file_find", "Open", multiple = FALSE,
+                "create_file_find", "Open",
+                multiple = FALSE,
                 title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors"
               )
             ),
-            fillRow(height = "70px", width = "475px",
+            fillRow(
+              height = "70px", width = "475px",
               uiOutput("ui_create_ta_file"),
               shinyFiles::shinyFilesButton(
-                "create_tafile_find", "Open", multiple = FALSE,
+                "create_tafile_find", "Open",
+                multiple = FALSE,
                 title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors",
                 style = "margin-top: 25px;"
               )
             ),
-            conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
+            conditionalPanel(
+              "input.intro_user_type == 'faculty' && input.create_user_file != ''",
               actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
               radioButtons("create_type", "Assignment type:", c("individual", "team"), "individual", inline = TRUE)
             )
@@ -118,14 +135,16 @@ gitgadget_ui <- function() {
           verbatimTextOutput("create_output")
         )
       ),
-      miniTabPanel("Clone", value = "clone", icon = icon("clone"),
+      miniTabPanel("Clone",
+        value = "clone", icon = icon("clone"),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
           textInput(
             "clone_from", "Repo to clone from remote git server:",
             placeholder = "Provide https or ssh link to repo", value = ""
           ),
-          fillRow(height = "70px", width = "475px",
+          fillRow(
+            height = "70px", width = "475px",
             uiOutput("ui_clone_into"),
             shinyFiles::shinyDirButton(
               "clone_into_open", "Open",
@@ -137,13 +156,16 @@ gitgadget_ui <- function() {
             "clone_to", "Custom directory to clone repo into:",
             placeholder = "Use for custom directory only", value = ""
           ),
-          {if (rstudioapi::isAvailable()) {
-            radioButtons(
-              "clone_proj", "Open project in:",
-              c("current session" = "curr", "new session" = "new"),
-              "new", inline = TRUE
-            )
-          }},
+          {
+            if (rstudioapi::isAvailable()) {
+              radioButtons(
+                "clone_proj", "Open project in:",
+                c("current session" = "curr", "new session" = "new"),
+                "new",
+                inline = TRUE
+              )
+            }
+          },
           actionButton(
             "clone", "Clone",
             title = "Clone a repo from, e.g., github or gitlab over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"
@@ -152,14 +174,16 @@ gitgadget_ui <- function() {
           verbatimTextOutput("clone_output")
         )
       ),
-      miniTabPanel("Directory", value = "directory", icon = icon("folder"),
+      miniTabPanel("Directory",
+        value = "directory", icon = icon("folder"),
         miniContentPanel(
-          fillRow(height = "40px", width = "475px",
+          fillRow(
+            height = "40px", width = "475px",
             HTML("<h4>Change the repo directory</h4>"),
-            # actionButton("repo_refresh", "Refresh", icon = icon("refresh"))
             tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("sync"), ""))
           ),
-          fillRow(height = "40px", width = "475px",
+          fillRow(
+            height = "40px", width = "475px",
             uiOutput("ui_repo_directory"),
             shinyFiles::shinyDirButton(
               "repo_directory_find", "Open",
@@ -169,7 +193,8 @@ gitgadget_ui <- function() {
           verbatimTextOutput("repo_output")
         )
       ),
-      miniTabPanel("Sync", value = "sync", icon = icon("sync"),
+      miniTabPanel("Sync",
+        value = "sync", icon = icon("sync"),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
           uiOutput("ui_sync_commit_message"),
@@ -182,7 +207,8 @@ gitgadget_ui <- function() {
             title = "Commit all updated files to the local repo\n\nGit commands:\ngit add .\ngit commit -m \"Commit message\""
           ),
           actionButton(
-            "sync_undo_commit_show", "Undo", class = "btn-danger",
+            "sync_undo_commit_show", "Undo",
+            class = "btn-danger",
             title = "Undo the latest local commit\n\nGit command:\ngit reset ~HEAD"
           ),
           HTML("<h2>Sync with remote</h2>"),
@@ -192,11 +218,13 @@ gitgadget_ui <- function() {
             title = "Push all commited updates to the remote repo\n\nGit command: git push"
           ),
           actionButton(
-            "sync_check", "Check", class = "btn-success",
+            "sync_check", "Check",
+            class = "btn-success",
             title = "Check the git server for the pushed changes"
           ),
           actionButton(
-            "sync_reset_show", "Reset", class = "btn-danger",
+            "sync_reset_show", "Reset",
+            class = "btn-danger",
             title = "Completely reset local repo to remote main branch\n\nGit commands:\ngit fetch --all\ngit reset --hard origin/main"
           ),
           uiOutput("ui_sync_check"),
@@ -222,7 +250,8 @@ gitgadget_ui <- function() {
           verbatimTextOutput("sync_output")
         )
       ),
-      miniTabPanel("Branch", value = "branch", icon = icon("code-branch"),
+      miniTabPanel("Branch",
+        value = "branch", icon = icon("code-branch"),
         miniContentPanel(
           HTML("<h4>Create a new branch</h4>"),
           uiOutput("ui_branch_create_name"),
@@ -239,7 +268,8 @@ gitgadget_ui <- function() {
             title = "Create a local branch from a Merge/Pull request\n"
           ),
           HTML("<h4>Check out a branch</h4>"),
-          fillRow(height = "40px", width = "420px",
+          fillRow(
+            height = "40px", width = "420px",
             uiOutput("ui_branch_checkout_name"),
             actionButton("branch_checkout", "Check out", title = "Check out a branch\n\nGit command:\ngit checkout <branch>")
           ),
@@ -266,31 +296,39 @@ gitgadget_ui <- function() {
           br(), br()
         )
       ),
-      miniTabPanel("Collect", value = "collect", icon = icon("cloud-download-alt"),
+      miniTabPanel("Collect",
+        value = "collect", icon = icon("cloud-download-alt"),
         miniContentPanel(
-          conditionalPanel("input.intro_user_type == 'faculty'",
+          conditionalPanel(
+            "input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
             passwordInput("collect_token", "Token:", value = Sys.getenv("git.token")),
             uiOutput("ui_collect_assignment"),
-            conditionalPanel("input.collect_assignment != undefined && input.collect_assignment != null &&
+            conditionalPanel(
+              "input.collect_assignment != undefined && input.collect_assignment != null &&
                 input.collect_assignment.length > 0",
-              fillRow(height = "70px", width = "475px",
+              fillRow(
+                height = "70px", width = "475px",
                 uiOutput("ui_collect_user_file"),
                 shinyFiles::shinyFilesButton(
-                  "collect_file_find", "Open", multiple = FALSE,
+                  "collect_file_find", "Open",
+                  multiple = FALSE,
                   title = "Browse and select a CSV file with student id and token information. Used for assignment management by instructors"
                 )
               ),
               downloadButton("collect_check_status", "Check status", title = "Check status of student repo", class = "btn-warning"),
-              fillRow(height = "70px", width = "475px",
+              fillRow(
+                height = "70px", width = "475px",
                 uiOutput("ui_collect_ta_file"),
                 shinyFiles::shinyFilesButton(
-                  "collect_tafile_find", "Open", multiple = FALSE,
+                  "collect_tafile_find", "Open",
+                  multiple = FALSE,
                   title = "Browse and select a CSV file with TA id and token information. Used for assignment management by instructors",
                   style = "margin-top: 25px;"
                 )
               ),
-              conditionalPanel("input.intro_user_type == 'faculty' && input.collect_ta_file != ''",
+              conditionalPanel(
+                "input.intro_user_type == 'faculty' && input.collect_ta_file != ''",
                 actionButton(
                   "collect_hide_from_ta", "Hide",
                   title = "Hide student forks from TA",
@@ -317,7 +355,8 @@ gitgadget_ui <- function() {
             hr(),
             verbatimTextOutput("collect_output")
           ),
-          conditionalPanel("input.intro_user_type != 'faculty'",
+          conditionalPanel(
+            "input.intro_user_type != 'faculty'",
             HTML("<h2>Used only for assignment management by faculty</h2>"),
             HTML("<h2>Change setting to 'faculty' in the Introduction tab if needed</h2>")
           )

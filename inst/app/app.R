@@ -11,7 +11,8 @@ pressed <- function(x) !is.null(x) && (is.list(x) || x > 0)
 not_pressed <- function(x) !pressed(x)
 
 source("init.R", local = TRUE)
-source("./gitgadget_ui.R", local = TRUE); ui <- gitgadget_ui()
+source("./gitgadget_ui.R", local = TRUE)
+ui <- gitgadget_ui()
 server <- function(input, output, session) {
   source("components/legacy.R", local = TRUE)
   source("components/help.R", local = TRUE)
