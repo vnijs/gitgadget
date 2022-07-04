@@ -25,7 +25,9 @@ server <- function(input, output, session) {
   source("components/sync.R", local = TRUE)
   source("components/collect.R", local = TRUE)
   observeEvent(input$done, {
-    stopApp(cat("Stopped GitGadget"))
+    if (!getOption("gitgadget.jupyter", default = FALSE)) {
+      stopApp(cat("Stopped GitGadget"))
+    }
   })
 }
 

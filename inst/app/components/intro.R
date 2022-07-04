@@ -274,32 +274,34 @@ intro_ssh <- eventReactive(input$intro_ssh, {
 })
 
 observeEvent(input$intro_restart, {
-  if (getOption("gitgadget.jupyter", default = FALSE)) {
+  mess <- "To restart the app with updated settings press the 'Done' button on the top-right. Then refresh your browser and restart Git Gadget"
+  show_in_modal <- function(mess = mess) {
     showModal(
       modalDialog(
         title = "Restart Git Gadget",
-        span("To restart the app with updated settings press the 'Done' button on the top-right. Then refresh your browser and restart Git Gadget"),
+        span(mess),
         easyClose = TRUE
       )
     )
+  }
+  if (getOption("gitgadget.jupyter", default = FALSE)) {
+    show_in_modal(mess)
+  # } else  if ((exists("launch.browser") && is.logical(launch.browser) FALSE)) {
+  } else  if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
+    show_in_modal(mess)
   } else if (Sys.getenv("SHINY_PORT") == "") {
     stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
     rstudioapi::executeCommand("restartR")
     ## https://github.com/rstudio/rstudioapi/issues/111
     # rstudioapi::restartSession("gitgadget:::gitgadget()")
   } else {
-    showModal(
-      modalDialog(
-        title = "Restart Git Gadget",
-        span("To restart the app with updated settings press the 'Done' button on the top-right. Then restart R and restart Git Gadget"),
-        easyClose = TRUE
-      )
-    )
+    mess <- "To restart the app with updated settings press the 'Done' button on the top-right. Then restart R and restart Git Gadget"
+    show_in_modal(mess)
   }
 })
 
 observeEvent(input$intro_check, {
-  if (getOption("gitgadget.jupyter", default = FALSE)) {
+  show_in_modal <- function() {
     path <- usethis:::scoped_path_r("user", ".Renviron", envvar = "R_ENVIRON_USER")
     Renv <- readLines(path)
     showModal(
@@ -310,19 +312,15 @@ observeEvent(input$intro_check, {
         easyClose = TRUE
       )
     )
+  }
+  if (getOption("gitgadget.jupyter", default = FALSE)) {
+    show_in_modal()
+  } else  if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
+    show_in_modal()
   } else if (Sys.getenv("SHINY_PORT") == "") {
     usethis::edit_r_environ()
   } else {
-    path <- usethis:::scoped_path_r("user", ".Renviron", envvar = "R_ENVIRON_USER")
-    Renv <- readLines(path)
-    showModal(
-      modalDialog(
-        title = "Content of .Renviron",
-        span(HTML(paste0(Renv, collapse = "</br>"))),
-        size = "l",
-        easyClose = TRUE
-      )
-    )
+    show_in_modal()
   }
 })
 
