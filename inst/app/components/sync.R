@@ -1,5 +1,8 @@
 remote_info <- reactive({
-  input$sync; input$sync_unlink; input$branch_link; input$branch_unlink
+  input$sync
+  input$sync_unlink
+  input$branch_link
+  input$branch_unlink
   req(input$repo_directory)
   suppressWarnings(paste0(system(paste("git -C", input$repo_directory, "remote -v"), intern = TRUE), collapse = "\n")) %>%
     gsub("(\t)|(  ) ", " ", .)
@@ -7,7 +10,8 @@ remote_info <- reactive({
 
 
 upstream_info <- function() {
-  input$sync; input$sync_unlink
+  input$sync
+  input$sync_unlink
   req(input$repo_directory)
   suppressWarnings(system(paste("git -C", input$repo_directory, "remote -v"), intern = TRUE)) %>%
     .[grepl("^upstream", .)] %>%
@@ -39,10 +43,11 @@ observeEvent(input$sync_commit, {
   req(input$repo_directory)
   cmess <- input$sync_commit_message
   req(input$repo_directory)
-  if (is_empty(cmess))
+  if (is_empty(cmess)) {
     cmess <- paste0("Updates: ", Sys.time())
-  else
+  } else {
     cmess <- gsub("\"", "'", cmess)
+  }
 
   withProgress(message = "Committing all changes locally", value = 0, style = "old", {
     system(paste("git -C", input$repo_directory, "add ."))
@@ -65,7 +70,8 @@ observeEvent(input$sync_undo_commit_show, {
   commit_mess <- system(paste("git -C", input$repo_directory, "log -1 --pretty=%B"), intern = TRUE)
   req(input$repo_directory)
   showModal(
-    modalDialog(title = "Undo latest local commit",
+    modalDialog(
+      title = "Undo latest local commit",
       span(suppressWarnings(paste0("\"", commit_mess[1], "\""))),
       br(), br(),
       span("Are you sure you want to undo the latest local commit? This will
@@ -74,7 +80,8 @@ observeEvent(input$sync_undo_commit_show, {
       footer = tagList(
         modalButton("Cancel"),
         actionButton(
-          "sync_undo_commit", "Undo", class = "btn-danger",
+          "sync_undo_commit", "Undo",
+          class = "btn-danger",
           title = "Undo the latest local commit\n\nGit command:\ngit reset HEAD~"
         )
       )
@@ -98,26 +105,31 @@ observeEvent(input$sync_undo_commit, {
 
 observeEvent(input$sync_pull, {
   req(input$repo_directory)
+  mess_file <- tempfile()
   withProgress(message = "Pull changes from remote", value = 0, style = "old", {
-    mess <- suppressWarnings(system(paste("git -C", input$repo_directory, "pull"), intern = TRUE))
+    suppressWarnings(system(paste("git -C", input$repo_directory, "pull 2> ", mess_file)))
     message("\nPull attempt completed. Check the console for messages\n")
   })
+  mess <- paste0(readLines(mess_file), collapse = "\n")
+  if (is_empty(mess)) mess <- "Already up to date."
+  unlink(mess_file)
   showModal(
     modalDialog(
       title = "Pull messages",
       span(HTML(paste0(mess, collapse = "</br>")))
     )
   )
-
 })
 
 observeEvent(input$sync_push, {
   req(input$repo_directory)
+  mess_file <- tempfile()
   withProgress(message = "Pushing changes to remote", value = 0, style = "old", {
-    mess <- suppressWarnings(system(paste("git -C", input$repo_directory, "push"), intern = TRUE))
+    suppressWarnings(system(paste("git -C", input$repo_directory, "push 2> ", mess_file)))
     message("\nPush attempt completed. Check the console for messages\n")
   })
-  if (is_empty(mess)) mess <- "Push attempt completed"
+  mess <- paste0(readLines(mess_file), collapse = "\n")
+  unlink(mess_file)
   showModal(
     modalDialog(
       title = "Push messages",
@@ -140,14 +152,16 @@ output$ui_sync_check <- renderUI({
 observeEvent(input$sync_reset_show, {
   ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
   showModal(
-    modalDialog(title = "Reset local repo",
+    modalDialog(
+      title = "Reset local repo",
       span("Are you sure you want to reset the local repo? Only use this
            option if you want to destroy the current state of the local repo
            and make a copy of the remote repo!"),
       footer = tagList(
         modalButton("Cancel"),
         actionButton(
-          "sync_reset", "Reset", class = "btn-danger",
+          "sync_reset", "Reset",
+          class = "btn-danger",
           title = "Completely reset local repo to remote main branch\n\nGit commands:\ngit --fetch all\ngit reset --hard origin/main"
         )
       )
@@ -216,7 +230,6 @@ observeEvent(input$synch_abort, {
       span(HTML(paste0(mess, collapse = "</br>")))
     )
   )
-
 })
 
 observeEvent(input$sync_unlink, {
@@ -236,7 +249,8 @@ output$ui_sync_commit_message <- renderUI({
     HTML(paste0("<label>", input$repo_directory, " is not a git repo</label></br>"))
   } else {
     textAreaInput(
-      "sync_commit_message", "Commit message:", rows = 2, resize = "both", value = "",
+      "sync_commit_message", "Commit message:",
+      rows = 2, resize = "both", value = "",
       placeholder = "Provide a commit message that describes the changes you made to the repo"
     )
   }
@@ -292,17 +306,18 @@ color_diff_html <- function(mess) {
         }
       }
       if (lastonly == 0) currSection <- ""
-        lastonly <- 1
+      lastonly <- 1
     } else if (t4 == "diff") {
       cls <- "file"
       s <- sub("^.* b/", ">>> ", s)
 
-      if (diffseen == 1)
+      if (diffseen == 1) {
         html <- addDiffToPage(currFile, currSection, html)
+      }
       diffseen <- 1
       currSection <- ""
       lastonly <- 0
-    } else if (t3 == '+++') {
+    } else if (t3 == "+++") {
       lastonly <- 0
       next
     } else if (t3 == "---") {
