@@ -49,8 +49,15 @@ is_repo_fun <- function(dr) {
 projdir <- basedir <- git_home
 if (rstudioapi::isAvailable()) {
   pdir <- rstudioapi::getActiveProject()
-  if (!is_empty(pdir)) projdir <- basedir <- pdir
-  if (rstudioapi::getVersion() < "1.1") stop("GitGadget requires Rstudio version 1.1 or later")
+  if (!is_empty(pdir)) {
+    projdir <- basedir <- pdir
+  } else {
+    wd <- getwd()
+    if (grepl("^/srv/", wd)) wd <- git_home
+    if (is_repo_fun(wd)) {
+      projdir <- basedir <- wd
+    }
+  }
 } else {
   wd <- getwd()
   if (grepl("^/srv/", wd)) wd <- git_home
