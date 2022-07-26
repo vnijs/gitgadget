@@ -13,7 +13,7 @@ gitgadget_ui <- function() {
     miniTabstripPanel(
       id = "tabs",
       miniTabPanel("Introduce",
-        value = "intro", icon = icon("hand-paper"),
+        value = "intro", icon = icon("hand-paper", verify_fa = FALSE),
         miniContentPanel(
           HTML("<h2>Introduce yourself to git</h2>"),
           textInput(
@@ -60,7 +60,7 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Create",
-        value = "create", icon = icon("git"),
+        value = "create", icon = icon("git", verify_fa = FALSE),
         miniContentPanel(
           # HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
           HTML("<h2>Create a repo on GitLab</h2>"),
@@ -136,7 +136,7 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Clone",
-        value = "clone", icon = icon("clone"),
+        value = "clone", icon = icon("clone", verify_fa = FALSE),
         miniContentPanel(
           HTML("<h2>Clone a repo</h2>"),
           textInput(
@@ -175,12 +175,12 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Directory",
-        value = "directory", icon = icon("folder"),
+        value = "directory", icon = icon("folder", verify_fa = FALSE),
         miniContentPanel(
           fillRow(
             height = "40px", width = "475px",
             HTML("<h4>Change the repo directory</h4>"),
-            tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("sync"), ""))
+            tags$a(id = "repo_refresh", href = "#", class = "action-button", list(icon("sync", verify_fa = FALSE), ""))
           ),
           fillRow(
             height = "40px", width = "475px",
@@ -194,7 +194,7 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Sync",
-        value = "sync", icon = icon("sync"),
+        value = "sync", icon = icon("sync", verify_fa = FALSE),
         miniContentPanel(
           HTML("<h2>Commit changes locally</h2>"),
           uiOutput("ui_sync_commit_message"),
@@ -251,7 +251,7 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Branch",
-        value = "branch", icon = icon("code-branch"),
+        value = "branch", icon = icon("code-branch", verify_fa = FALSE),
         miniContentPanel(
           HTML("<h4>Create a new branch</h4>"),
           uiOutput("ui_branch_create_name"),
@@ -297,7 +297,7 @@ gitgadget_ui <- function() {
         )
       ),
       miniTabPanel("Collect",
-        value = "collect", icon = icon("cloud-download-alt"),
+        value = "collect", icon = icon("cloud-download-alt", verify_fa = FALSE),
         miniContentPanel(
           conditionalPanel(
             "input.intro_user_type == 'faculty'",
