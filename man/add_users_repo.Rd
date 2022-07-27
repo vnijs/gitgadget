@@ -21,7 +21,7 @@ add_users_repo(
 
 \item{permission}{Permission setting for the repo (default is 20, i.e., reporter)}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Add users to a repo

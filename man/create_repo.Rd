@@ -24,13 +24,13 @@ create_repo(
 
 \item{base_dir}{Base directory for the repo. file.path(directory, assignment) should exist}
 
-\item{groupname}{Group to create on gitlab (defaults to user's namespace)}
+\item{groupname}{Group to create on GitLab (defaults to user's namespace)}
 
 \item{pre}{Pre-amble for the repo (assignment) name}
 
 \item{ssh}{Use SSH for authentication}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Create the main repo from a local directory

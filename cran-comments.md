@@ -4,7 +4,7 @@ This is a resubmission. In this version I have update the app to use `main` as t
 
 ## Test environments
 
-* macOs R 4.2.0
+* macOS R 4.2.1
 * win-builder (devel)
 * Rhub
 

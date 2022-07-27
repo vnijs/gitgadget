@@ -11,7 +11,7 @@ projID(path_with_namespace, token, server, owned = TRUE, search = "")
 
 \item{token}{GitLab token}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 
 \item{owned}{Restrict listing to only repos owned by the user? TRUE or FALSE}
 

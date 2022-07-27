@@ -2,7 +2,7 @@
 % Please edit documentation in R/git.R
 \name{create_group}
 \alias{create_group}
-\title{Create a group on gitlab using the API}
+\title{Create a group on GitLab using the API}
 \usage{
 create_group(
   token,
@@ -15,16 +15,16 @@ create_group(
 \arguments{
 \item{token}{GitLab token}
 
-\item{groupname}{Group to create on gitlab (defaults to user's namespace)}
+\item{groupname}{Group to create on GitLab (defaults to user's namespace)}
 
 \item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
 \item{permission}{Permission setting for the group (default is 20, i.e., reporter)}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
-Create a group on gitlab using the API
+Create a group on GitLab using the API
 }
 \details{
 See \url{https://github.com/vnijs/gitgadget} for additional documentation

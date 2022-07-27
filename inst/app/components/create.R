@@ -20,7 +20,8 @@ output$ui_create_directory <- renderUI({
     init <- shinyFiles::parseDirPath(gg_volumes, input$create_directory_find)
   }
   textInput(
-    "create_directory", "Local directory:", value = init,
+    "create_directory", "Local directory:",
+    value = init,
     placeholder = "Base directory for the git repo"
   )
 })
@@ -74,7 +75,7 @@ output$ui_create_buttons <- renderUI({
     tagList(
       actionButton(
         "create", "Create",
-        title = "Create a new repo using the gitlab API"
+        title = "Create a new repo using the GitLab API"
       ),
       actionButton(
         "create_hide_repo", "Hide",
@@ -104,7 +105,8 @@ observeEvent(input$create_check_tokens, {
     })
   }
   showModal(
-    modalDialog(title = "Check token messages",
+    modalDialog(
+      title = "Check token messages",
       span(HTML(paste0(mess, collapse = "</br>")))
     )
   )
@@ -115,7 +117,8 @@ observeEvent(input$create_check_tokens, {
 observeEvent(input$remove_git_show, {
   ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
   showModal(
-    modalDialog(title = "Remove local .git directory",
+    modalDialog(
+      title = "Remove local .git directory",
       span("Are you sure you want to remove the local .git directory? Use only if you want to destroy all local history and restart!"),
       footer = tagList(
         modalButton("Cancel"),
@@ -150,13 +153,15 @@ observeEvent(input$remove_remote_show, {
   ## See https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
   if (input$create_remote == "GitLab") {
     showModal(
-      modalDialog(title = "Remove remote GitLab repo",
+      modalDialog(
+        title = "Remove remote GitLab repo",
         span("Are you sure you want to remove the remote repo on GitLab? Use only if you want to destroy all remote files and history and restart!"),
         footer = tagList(
           with(tags, table(
             align = "right",
             td(modalButton("Cancel")),
-            td(conditionalPanel("input.intro_user_type == 'faculty' && input.create_user_file != ''",
+            td(conditionalPanel(
+              "input.intro_user_type == 'faculty' && input.create_user_file != ''",
               actionButton(
                 "remove_forks", "Remove forks",
                 title = "Remove forks from current repo created for students",
@@ -174,7 +179,8 @@ observeEvent(input$remove_remote_show, {
     )
   } else {
     showModal(
-      modalDialog(title = "Remove remote GitHub repo",
+      modalDialog(
+        title = "Remove remote GitHub repo",
         span("This feature has not yet been implemented for GitHub repos")
       )
     )
@@ -195,7 +201,9 @@ remove_gitlab <- observeEvent(input$remove_gitlab, {
 
   withProgress(message = "Removing remote repo", value = 0, style = "old", {
     create_group_lc <- tolower(input$create_group) %>%
-      {ifelse(is_empty(.), Sys.getenv("git.user", ""), .)}
+      {
+        ifelse(is_empty(.), Sys.getenv("git.user", ""), .)
+      }
 
     if (is_empty(create_group_lc)) {
       cat("No group or user name provided. Please provide this information and try again")
@@ -213,10 +221,11 @@ remove_gitlab <- observeEvent(input$remove_gitlab, {
     )
     if (id$status == "OKAY") {
       resp <- remove_project(input$create_token, id$project_id, input$create_server)
-      if (checkerr(resp$status_code))
+      if (checkerr(resp$status_code)) {
         cat("\nRemote repo successfully removed\n")
-      else
+      } else {
         cat("\nProblem removing remote repo. See the console for messages\n")
+      }
     } else {
       cat("\nNo remote repo found\n")
     }
@@ -260,7 +269,6 @@ remove_forks <- observeEvent(input$remove_forks, {
 })
 
 create <- eventReactive(input$create, {
-
   if (is_empty(input$create_user_name) || is_empty(input$create_token)) {
     cat("Username and token required to create a new repo")
     return(invisible())
@@ -294,7 +302,6 @@ create <- eventReactive(input$create, {
 
   if (input$create_remote == "GitLab") {
     withProgress(message = "Creating and forking repo", value = 0, style = "old", {
-
       create_group_lc <- tolower(input$create_group)
       create_pre_lc <- tolower(input$create_pre)
 
@@ -307,11 +314,11 @@ create <- eventReactive(input$create, {
       }
 
       cat("Creating repo ...\n")
-      mess <- capture.output(create_repo(
+      mess <- create_repo(
         input$create_user_name, input$create_token, repo, directory, create_group_lc,
         pre = create_pre_lc, ssh = ifelse(isTRUE(input$create_ssh == "ssh"), TRUE, FALSE),
         server = input$create_server
-      )) %>% paste0(mess, "\n\n", .)
+      ) %>% paste0(mess, "\n\n", .)
       if (!is_empty(input$create_user_file)) {
         if (is_empty(input$create_group)) {
           cat("A groupname is required when assigning work.\n")
@@ -394,6 +401,6 @@ observeEvent(input$create_show_repo, {
 })
 
 output$create_output <- renderPrint({
-  input$create  ## creating a dependency
+  input$create ## creating a dependency
   ret <- create()
 })

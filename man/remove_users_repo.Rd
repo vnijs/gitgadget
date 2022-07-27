@@ -13,7 +13,7 @@ remove_users_repo(token, repo, userfile, server = "https://gitlab.com/api/v4/")
 
 \item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Remove users from a repo

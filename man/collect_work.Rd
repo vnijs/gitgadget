@@ -21,7 +21,7 @@ collect_work(
 
 \item{type}{Individual or Team work}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Create merge requests for each student/team

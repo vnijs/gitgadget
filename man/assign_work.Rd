@@ -18,7 +18,7 @@ assign_work(
 \arguments{
 \item{token}{GitLab token}
 
-\item{groupname}{Group to create on gitlab (defaults to user's namespace)}
+\item{groupname}{Group to create on GitLab (defaults to user's namespace)}
 
 \item{assignment}{Name of the assignment to assign}
 
@@ -30,7 +30,7 @@ assign_work(
 
 \item{pre}{Pre-amble for the assignment name, usually groupname + "-"}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Assign work to each student/team by creating a fork of the main repo

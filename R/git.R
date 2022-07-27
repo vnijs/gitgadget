@@ -9,7 +9,7 @@ checkerr <- function(code) floor(code / 100) == 2
 is_not <- function(x) length(x) == 0 || (length(x) == 1 && is.na(x))
 is_empty <- function(x, empty = "\\s*") {
   is_not(x) || (length(x) == 1 && grepl(paste0("^", empty, "$"), x))
-  }
+}
 pressed <- function(x) !is.null(x) && (is.list(x) || x > 0)
 not_pressed <- function(x) !pressed(x)
 
@@ -42,14 +42,14 @@ read_ufile <- function(userfile, cols = c("userid", "team", "token")) {
 }
 
 groupID <- function(name, path, token, server, page = 1) {
-
   h <- new_handle()
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, paste0("groups?per_page=100&page=", page, "&search=", name))
   resp <- curl_fetch_memory(murl, h)
 
-  if (checkerr(resp$status_code) == FALSE)
+  if (checkerr(resp$status_code) == FALSE) {
     return(list(status = "SERVER_ERROR"))
+  }
 
   resp$content <- fromJSON(rawToChar(resp$content))
 
@@ -75,8 +75,9 @@ userID <- function(id, token, server) {
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   resp <- curl_fetch_memory(paste0(server, "users?username=", id), h)
 
-  if (checkerr(resp$status_code) == FALSE)
+  if (checkerr(resp$status_code) == FALSE) {
     return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
+  }
 
   uid <- fromJSON(rawToChar(resp$content))$id
 
@@ -93,8 +94,9 @@ groupr <- function(groupname, path, token, server) {
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "groups?name=", groupname, "&path=", path, "&visibility_level=0")
   resp <- curl_fetch_memory(murl, h)
-  if (checkerr(resp$status_code) == FALSE)
+  if (checkerr(resp$status_code) == FALSE) {
     return(list(status = "SERVER_ERROR", message = rawToChar(resp$content)))
+  }
 
   group_id <- fromJSON(rawToChar(resp$content))$id
   list(status = "OKAY", group_id = group_id)
@@ -108,17 +110,15 @@ groupr <- function(groupname, path, token, server) {
 #' @param repo Repo to update
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param permission Permission setting for the repo (default is 20, i.e., reporter)
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-add_users_repo <- function(
-                           token, repo, userfile, permission = 20,
-                           server = "https://gitlab.com/api/v4/"
-) {
-
+add_users_repo <- function(token, repo, userfile, permission = 20,
+                           server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   resp <- projID(repo, token, server)
 
@@ -168,14 +168,14 @@ add_user_repo <- function(user_id, repo_id, token, permission, server) {
 #' @param token GitLab token
 #' @param repo Repo the update
 #' @param userfile A csv file with student information (i.e., username, token, and email)
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
 remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.com/api/v4/") {
-
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   resp <- projID(repo, token, server)
 
@@ -212,25 +212,23 @@ remove_user_repo <- function(user_id, repo_id, token, server) {
   }
 }
 
-#' Create a group on gitlab using the API
+#' Create a group on GitLab using the API
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token GitLab token
-#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param groupname Group to create on GitLab (defaults to user's namespace)
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param permission Permission setting for the group (default is 20, i.e., reporter)
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-create_group <- function(
-                         token, groupname = "", userfile = "",
-                         permission = 20, server = "https://gitlab.com/api/v4/"
-) {
-
+create_group <- function(token, groupname = "", userfile = "",
+                         permission = 20, server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != "OKAY")
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   token <- resp$token
   resp <- groupID(groupname, groupname, token, server)
@@ -256,17 +254,14 @@ create_group <- function(
   }
 }
 
-get_allprojects <- function(
-                            token, server, namespace = "", owned = TRUE, search = "",
-                            everything = FALSE, turn = 1, page = 1
-) {
-
+get_allprojects <- function(token, server, namespace = "", owned = TRUE, search = "",
+                            everything = FALSE, turn = 1, page = 1) {
   h <- new_handle()
   handle_setopt(h, customrequest = "GET")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
   if (!is_empty(search)) {
-    search = paste0("&search=", search)
+    search <- paste0("&search=", search)
   }
 
   if (owned) {
@@ -310,7 +305,8 @@ get_allprojects <- function(
 
   if (!is_empty(nr_pages) > 0 && is.numeric(nr_pages) && nr_pages > page) {
     next_page <- get_allprojects(
-      token, server, namespace = namespace, owned = owned, search = search,
+      token, server,
+      namespace = namespace, owned = owned, search = search,
       everything = everything, turn = turn, page = page + 1
     )
     np_mainproj <- next_page[["repos"]]
@@ -327,16 +323,17 @@ get_allprojects <- function(
 #'
 #' @param path_with_namespace Repo name together with the group or user namespace
 #' @param token GitLab token
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #' @param owned Restrict listing to only repos owned by the user? TRUE or FALSE
 #' @param search Search term to use to narrow down the set of projects
 #'
 #' @export
 projID <- function(path_with_namespace, token, server, owned = TRUE, search = "") {
-
   resp <- get_allprojects(token, server, search = search, owned = owned)
 
-  if (resp$status != "OKAY") return(resp)
+  if (resp$status != "OKAY") {
+    return(resp)
+  }
   mainproj <- resp$repos
   if (is_empty(mainproj)) {
     message("No such repo: ", path_with_namespace)
@@ -383,17 +380,14 @@ renameRepo <- function(project_id, token, newname, server) {
   }
 }
 
-setupteam <- function(
-                      token, leader, others, git_leader, git_others,
-                      project_id, server, search = ""
-) {
+setupteam <- function(token, leader, others, git_leader, git_others,
+                      project_id, server, search = "") {
   ## fork if needed for team lead
   resp <- get_allprojects(token, server, everything = TRUE, owned = TRUE, search = search)
 
   if (!"forked_from_project" %in% names(resp$repos) ||
     is_empty(resp$repos$forked_from_project) ||
     !project_id %in% resp$repos$forked_from_project$id) {
-
     message("Creating fork for ", leader)
 
     resp <- forkRepo(token, project_id, server)
@@ -456,34 +450,34 @@ add_team <- function(proj_id, token, team_mates, server) {
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param token GitLab token
-#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param groupname Group to create on GitLab (defaults to user's namespace)
 #' @param assignment Name of the assignment to assign
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param tafile A optional csv file with TA information (i.e., username, token, and email)
 #' @param type Individual or Team work
 #' @param pre Pre-amble for the assignment name, usually groupname + "-"
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-assign_work <- function(
-                        token, groupname, assignment, userfile,
+assign_work <- function(token, groupname, assignment, userfile,
                         tafile = "", type = "individual", pre = "",
-                        server = "https://gitlab.com/api/v4/"
-) {
-
+                        server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
-  if (is_empty(groupname))
+  if (is_empty(groupname)) {
     stop("A groupname is required to assign work. Please add a groupname and try again")
+  }
 
   token <- resp$token
   upstream_name <- paste0(groupname, "/", paste0(pre, assignment))
   resp <- projID(upstream_name, token, server)
 
-  if (resp$status != "OKAY")
+  if (resp$status != "OKAY") {
     stop("Error getting assignment ", upstream_name)
+  }
 
   project_id <- resp$project_id
 
@@ -499,8 +493,9 @@ assign_work <- function(
   student_data <- read_ufile(userfile)
   student_data$git_id <- userIDs(student_data$userid, token, server)
 
-  if (type == "individual")
+  if (type == "individual") {
     student_data$team <- paste0("team", seq_len(nrow(student_data)))
+  }
 
   if (!is_empty(tafile)) {
     ta_data <- read_ufile(tafile, cols = c("userid", "token"))
@@ -549,7 +544,6 @@ assign_work <- function(
 }
 
 maker <- function(repo_name, token, server, namespace = "") {
-
   if (namespace == "") {
     namespace_id <- namespace
   } else {
@@ -564,11 +558,12 @@ maker <- function(repo_name, token, server, namespace = "") {
       stop("Problem getting or creating group using the 'maker' function")
     }
 
-    if (resp$status != "OKAY")
+    if (resp$status != "OKAY") {
       return(list(
         status = "NOSUCHGROUP",
         content = "Namespace to create repo does not exist"
       ))
+    }
     namespace_id <- resp$group_id
   }
 
@@ -576,8 +571,9 @@ maker <- function(repo_name, token, server, namespace = "") {
   h <- new_handle()
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "projects?owned=true", paste0("&search=", repo_name), "&per_page=100&page=1")
-  if (!is_empty(namespace_id))
+  if (!is_empty(namespace_id)) {
     murl <- paste0(murl, "&namespace_id=", namespace_id)
+  }
   resp <- curl_fetch_memory(murl, h)
   content <- fromJSON(rawToChar(resp$content))
   id <- which(repo_name == content$name)
@@ -592,8 +588,9 @@ maker <- function(repo_name, token, server, namespace = "") {
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
 
   murl <- paste0(server, "projects?", "name=", repo_name)
-  if (!is_empty(namespace_id))
+  if (!is_empty(namespace_id)) {
     murl <- paste0(murl, "&namespace_id=", namespace_id)
+  }
   resp <- curl_fetch_memory(murl, h)
   content <- fromJSON(rawToChar(resp$content))
   if (checkerr(resp$status_code) == TRUE) {
@@ -615,21 +612,19 @@ maker <- function(repo_name, token, server, namespace = "") {
 #' @param token Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))
 #' @param repo Name of the repo (assignment)
 #' @param base_dir Base directory for the repo. file.path(directory, assignment) should exist
-#' @param groupname Group to create on gitlab (defaults to user's namespace)
+#' @param groupname Group to create on GitLab (defaults to user's namespace)
 #' @param pre Pre-amble for the repo (assignment) name
 #' @param ssh Use SSH for authentication
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-create_repo <- function(
-                        username = Sys.getenv("git.user"), token = Sys.getenv("git.token"),
+create_repo <- function(username = Sys.getenv("git.user"), token = Sys.getenv("git.token"),
                         repo = basename(getwd()), base_dir = dirname(getwd()), groupname = "",
-                        pre = "", ssh = FALSE, server = "https://gitlab.com/api/v4/"
-) {
-
-  resp <- connect(token, server);
-  if (resp$status != 'OKAY')
+                        pre = "", ssh = FALSE, server = "https://gitlab.com/api/v4/") {
+  resp <- connect(token, server)
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check username/token/server")
+  }
 
   token <- resp$token
   gn <- ifelse(groupname == "" || groupname == username, "", groupname)
@@ -638,8 +633,9 @@ create_repo <- function(
 
   resp <- maker(paste0(pre, repo), token, server, gn)
 
-  if (resp$status == "NOSUCHGROUP")
+  if (resp$status == "NOSUCHGROUP") {
     stop("Add group ", gn, " before pushing ", repo)
+  }
 
   ## set directory and reset to current on function exit
   adir <- file.path(base_dir, repo)
@@ -651,16 +647,21 @@ create_repo <- function(
   owd <- setwd(adir)
   on.exit(setwd(owd))
 
+  ## storing all git output in a temp file
+  mess_file <- tempfile()
+
   ## initialize git repo if it doesn't exist yet
-  if (!dir.exists(".git")) system2("git", "init")
+  if (!dir.exists(".git")) system2("git", "init", "-b", "main", ">>", mess_file, "2>&1")
 
   ## make sure .gitignore is added before create
-  if (!file.exists(".gitignore"))
+  if (!file.exists(".gitignore")) {
     cat(".Rproj.user\n.Rhistory\n.RData\n.Ruserdata\n.DS_Store\n.ipynb_checkpoints\n.mypy_cache\n.vscode\n", file = ".gitignore")
+  }
 
   ## avoid CI unless already setup by user
-  if (!file.exists(".gitlab-ci.yml"))
+  if (!file.exists(".gitlab-ci.yml")) {
     cat("test:\n  script:\n  - echo \"\"", file = ".gitlab-ci.yml")
+  }
 
   ## make project file if needed
   rproj <- list.files(path = adir, pattern = "*.Rproj")
@@ -688,29 +689,30 @@ create_repo <- function(
   rorg <- system("git remote -v", intern = TRUE)
 
   if (length(rorg) == 0) {
-    system2("git", c("remote", "add", "origin", murl))
+    system2("git", c("remote", "add", "origin", murl, ">>", mess_file, "2>&1"))
   } else {
-    system2("git", c("remote", "set-url", "origin", murl))
+    system2("git", c("remote", "set-url", "origin", murl, ">>", mess_file, "2>&1"))
   }
 
   ## allow fetching of MRs
   ## https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/workflow/merge_requests.md#checkout-merge-requests-locally
   remote_fetch <- system("git config --get-all remote.origin.fetch", intern = TRUE)
-  if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch)
+  if (!"+refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*" %in% remote_fetch) {
     system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
+  }
 
-  system2("git", c("add", "."))
-  system2("git", c("commit", "-m", '"Upload repo using gitgadget"'))
-  system2("git", c("push", "-u", "origin", "main"))
+  system2("git", c("add", ".", ">>", mess_file, "2>&1"))
+  system2("git", c("commit", "-m", '"Upload repo using gitgadget"', ">>", mess_file, "2>&1"))
+  system2("git", c("push", "-u", "origin", "main", ">>", mess_file, "2>&1"))
+
+  # return messages
+  paste0(readLines(mess_file), collapse = "\n")
 }
 
-merger <- function(
-                   token, to, search = "", server,
+merger <- function(token, to, search = "", server,
                    title = "submission",
                    frombranch = "main",
-                   tobranch = "main"
-) {
-
+                   tobranch = "main") {
   resp <- get_allprojects(token[1], server, search = search)
 
   if (length(resp$repos) == 0) {
@@ -756,18 +758,17 @@ merger <- function(
   }
 }
 
-check_status <- function(
-  token, assignment, userfile,
-  type = "individual",
-  server = "https://gitlab.com/api/v4/"
-) {
+check_status <- function(token, assignment, userfile,
+                         type = "individual",
+                         server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   token <- resp$token
   search <- strsplit(assignment, "/")[[1]] %>%
-    {ifelse(length(.) > 1, .[2], .[1])}
+    (function(x) ifelse(length(x) > 1, x[2], x[1]))
   resp <- projID(assignment, token, server, owned = TRUE, search = search)
 
   if (resp$status != "OKAY") {
@@ -831,22 +832,20 @@ check_status <- function(
 #' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param type Individual or Team work
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-collect_work <- function(
-                         token, assignment, userfile,
+collect_work <- function(token, assignment, userfile,
                          type = "individual",
-                         server = "https://gitlab.com/api/v4/"
-) {
-
+                         server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   token <- resp$token
   search <- strsplit(assignment, "/")[[1]] %>%
-    {ifelse(length(.) > 1, .[2], .[1])}
+    (function(x) ifelse(length(x) > 1, x[2], x[1]))
   resp <- projID(assignment, token, server, owned = TRUE, search = search)
 
   if (resp$status != "OKAY") {
@@ -900,21 +899,20 @@ collect_work <- function(
 #' @param token GitLab token
 #' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
 #' @param page Number of the results page to select
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-fetch_work <- function(
-                       token, assignment, page = 1,
-                       server = "https://gitlab.com/api/v4/"
-) {
-
+fetch_work <- function(token, assignment, page = 1,
+                       server = "https://gitlab.com/api/v4/") {
   resp <- connect(token, server)
-  if (resp$status != 'OKAY')
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   token <- resp$token
 
-  search <- strsplit(assignment, "/")[[1]] %>% {ifelse(length(.) > 1, .[2], .[1])}
+  search <- strsplit(assignment, "/")[[1]] %>%
+    (function(x) ifelse(length(x) > 1, x[2], x[1]))
   resp <- projID(assignment, token, server, owned = TRUE, search = search)
 
   if (resp$status != "OKAY") {
@@ -951,7 +949,7 @@ fetch_work <- function(
     arrange(un, desc(id)) %>%
     group_by(un) %>%
     slice(1) %>%
-    ungroup %>%
+    ungroup() %>%
     mutate(id = as.character(id)) ## needed to ensure there are no spaces in branch name
 
   system("git fetch origin +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
@@ -1009,7 +1007,7 @@ remove_projects <- function(token, server) {
 #'
 #' @param token GitLab token
 #' @param id Project ID
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
 remove_project <- function(token, id, server) {
@@ -1029,13 +1027,10 @@ remove_student_projects <- function(userfile, server) {
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param userfile A csv file with student information (i.e., username, token, and email)
-#' @param server The gitlab API server
+#' @param server The GitLab API server
 #'
 #' @export
-check_tokens <- function(
-                         userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
-) {
-
+check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")) {
   students <- read_ufile(userfile, cols = c("userid", "token", "email"))
 
   ## testing if student tokens work

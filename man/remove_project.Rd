@@ -11,7 +11,7 @@ remove_project(token, id, server)
 
 \item{id}{Project ID}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Remove a project

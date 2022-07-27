@@ -13,7 +13,7 @@ fetch_work(token, assignment, page = 1, server = "https://gitlab.com/api/v4/")
 
 \item{page}{Number of the results page to select}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Fetch all merge requests as local branches and link to a remote

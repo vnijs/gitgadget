@@ -12,7 +12,7 @@ check_tokens(
 \arguments{
 \item{userfile}{A csv file with student information (i.e., username, token, and email)}
 
-\item{server}{The gitlab API server}
+\item{server}{The GitLab API server}
 }
 \description{
 Check student tokens
