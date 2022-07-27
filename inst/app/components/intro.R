@@ -9,8 +9,8 @@
 
 observeEvent(input$intro_git, {
 
-  # set default branch to 'main'
-  cmd <- "git config --global init.defaultBranch 'main'"
+  # set default branch to 'main' and set rebase to false ... for now
+  cmd <- "git config --global init.defaultBranch 'main'\ngit config --global pull.rebase false"
   resp <- system(cmd, intern = TRUE)
   cat("Used:", cmd, "\n")
 
@@ -286,8 +286,8 @@ observeEvent(input$intro_restart, {
   }
   if (getOption("gitgadget.jupyter", default = FALSE)) {
     show_in_modal(mess)
-  # } else  if ((exists("launch.browser") && is.logical(launch.browser) FALSE)) {
-  } else  if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
+    # } else  if ((exists("launch.browser") && is.logical(launch.browser) FALSE)) {
+  } else if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
     show_in_modal(mess)
   } else if (Sys.getenv("SHINY_PORT") == "") {
     stopApp(cat("\nAfter restarting Git Gadget your settings will have been updated\nand Git Gadget will be ready to clone, create, etc. repos\n\n"))
@@ -315,7 +315,7 @@ observeEvent(input$intro_check, {
   }
   if (getOption("gitgadget.jupyter", default = FALSE)) {
     show_in_modal()
-  } else  if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
+  } else if ((exists("launch.browser") && is.logical(launch.browser) && !launch.browser)) {
     show_in_modal()
   } else if (Sys.getenv("SHINY_PORT") == "") {
     usethis::edit_r_environ()
