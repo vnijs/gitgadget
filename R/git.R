@@ -703,9 +703,11 @@ create_repo <- function(username = Sys.getenv("git.user"), token = Sys.getenv("g
     system("git config --add remote.origin.fetch +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*")
   }
 
+  current_branch <- system("git branch --show-current", intern = TRUE)
+
   system2("git", c("add", ".", ">>", mess_file, "2>&1"))
   system2("git", c("commit", "-m", '"Upload repo using gitgadget"', ">>", mess_file, "2>&1"))
-  system2("git", c("push", "-u", "origin", "main", ">>", mess_file, "2>&1"))
+  system2("git", c("push", "-u", "origin", current_branch, ">>", mess_file, "2>&1"))
 
   # return messages
   paste0(readLines(mess_file), collapse = "\n")
