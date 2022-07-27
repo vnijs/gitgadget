@@ -172,7 +172,7 @@ output$ui_intro_buttons <- renderUI({
     ),
     actionButton(
       "intro_git", "Introduce",
-      title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>\ngit config --global init.defaultBranch 'main'"
+      title = "Introduce yourself to git\n\nGit commands:\ngit config --global --replace-all user.name <username>\ngit config --global --replace-all user.email <useremail>\ngit config --global credential.helper <credential helper>\ngit config --global init.defaultBranch 'main'\ngit config --global pull.rebase false\n"
     ),
     actionButton(
       "intro_ssh", "SSH key",
