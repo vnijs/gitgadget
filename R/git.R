@@ -651,7 +651,9 @@ create_repo <- function(username = Sys.getenv("git.user"), token = Sys.getenv("g
   mess_file <- tempfile()
 
   ## initialize git repo if it doesn't exist yet
-  if (!dir.exists(".git")) system2("git", "init", "-b", "main", ">>", mess_file, "2>&1")
+  if (!dir.exists(".git")) {
+    system2("git", c("init", "-b", "main", ">>", mess_file, "2>&1"))
+  }
 
   ## make sure .gitignore is added before create
   if (!file.exists(".gitignore")) {
