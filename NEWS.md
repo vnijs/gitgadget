@@ -1,4 +1,4 @@
-# gitgadget 0.7.0.0
+# gitgadget 0.7.5.0
 
 * Setting `main` as the default branch
 

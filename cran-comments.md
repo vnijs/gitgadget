@@ -1,6 +1,6 @@
 ## Resubmission
 
-This is a resubmission. In this version I have update the app to use `main` as the default branch and fixed a URL issue identified by CRAN.
+This is a resubmission. In this version I have fixed several issues that surfaced after moving to use `main` as the default branch. This version can also work fully independently of Rstudio. 
 
 ## Test environments
 
@@ -25,6 +25,32 @@ URL: https://gitlab.com/-/profile/personal_access_tokens
 ```
 
 ## Previous cran-comments
+
+## Resubmission
+
+This is a resubmission. In this version I have update the app to use `main` as the default branch and fixed a URL issue identified by CRAN.
+
+## Test environments
+
+* macOS R 4.2.1
+* win-builder (devel)
+* Rhub
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab accout. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/-/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/-/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
 
 ## Resubmission
 
