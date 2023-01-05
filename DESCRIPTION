@@ -30,7 +30,7 @@ Suggests:
 URL: URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Language: en-US
 VignetteBuilder: knitr
