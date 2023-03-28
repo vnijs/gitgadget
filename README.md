@@ -1,7 +1,5 @@
 # Git Gadget
 
-[![Build Status](https://travis-ci.org/vnijs/gitgadget.png?branch=master)](https://travis-ci.org/vnijs/gitgadget)
-
 `gitgadget` is an R-studio addin for version control and assignment management using git. The assignment management functions currently support the [GitLab](https://about.gitlab.com/) API. PRs for use with GitHub are welcome. For alternative that uses GitHub see https://github.com/rundel/ghclass although this does not (currently) have a shiny user interface.
 
 `gitgadget` is not intended as a tool for all-things-git. For that you need something like <a href="https://www.gitkraken.com" target="_blank">gitkraken</a>. `gitgadget` provides a few additional features not (yet) available in R-studio that can be useful to students and faculty using git for classes. For an excellent discussion of this level of functionality see [happy git with R](https://happygitwithr.com/) and [talk about version control](https://peerj.com/preprints/3159/) by Jenny Bryan and [git for humans](https://speakerdeck.com/alicebartlett/git-for-humans/) by Alice Bartlett.

@@ -9,3 +9,4 @@ gitgadget.code-workspace
 cran-comments.md
 .vscode
 ^CRAN-SUBMISSION$
+^R/interactive_testing.R

@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: 'Rstudio' Addin for Version Control and Assignment Management using Git
-Version: 0.7.5
-Date: 2022-8-13
+Version: 0.7.6
+Date: 2023-3-27
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")

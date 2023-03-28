@@ -349,16 +349,25 @@ projID <- function(path_with_namespace, token, server, owned = TRUE, search = ""
   }
 }
 
-forkRepo <- function(token, project_id, server) {
+forkRepo <- function(token, project_id, server, turn = 1) {
   h <- new_handle()
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "projects/", project_id, "/fork/")
   resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
-    message("Problem forking")
-    message(rawToChar(resp$content))
-    list(status = "SERVER_ERROR", message = rawToChar(resp$content))
+    if (turn < 6) {
+      message("SERVER_ERROR: Problem forking project")
+      message("Sleeping for 5 seconds and then trying again")
+      Sys.sleep(5)
+      return(forkRepo(token, project_id, server, turn = turn + 1))
+    } else {
+      message("****************************************************************************")
+      message("Tried 5 times and failed to fork project. GitLab message shown below")
+      message("****************************************************************************")
+      message(rawToChar(resp$content))
+      list(status = "SERVER_ERROR", message = rawToChar(resp$content))
+    }
   } else {
     content <- fromJSON(rawToChar(resp$content))
     list(status = "OKAY", content = content)
@@ -383,13 +392,15 @@ renameRepo <- function(project_id, token, newname, server) {
 setupteam <- function(token, leader, others, git_leader, git_others,
                       project_id, server, search = "") {
   ## fork if needed for team lead
-  resp <- get_allprojects(token, server, everything = TRUE, owned = TRUE, search = search)
+  ## reset "everything" to FALSE to limit amount of information to pull (1/14/2023)
+  resp <- get_allprojects(token, server, everything = FALSE, owned = TRUE, search = search)
 
-  if (!"forked_from_project" %in% names(resp$repos) ||
-    is_empty(resp$repos$forked_from_project) ||
-    !project_id %in% resp$repos$forked_from_project$id) {
+  if (!"forked_from_project" %in% names(resp$repos) &&
+    is_empty(resp$repos$forked_from_project) &&
+    !project_id %in% resp$repos$forked_from_project$id &&
+    !search %in% resp$repos$name ## added on 1/14/2023
+  ) {
     message("Creating fork for ", leader)
-
     resp <- forkRepo(token, project_id, server)
     if (resp$status != "OKAY") {
       message("\nError forking for ", leader)
@@ -400,9 +411,20 @@ setupteam <- function(token, leader, others, git_leader, git_others,
     leader_project_name <- resp$content$name
     upstream_name <- resp$content$name
   } else {
-    message("Assignment was already forked for ", leader)
-    id <- which(resp$repos$forked_from_project$id == project_id)
-    if (length(id) == 0) {
+    id <- length(which(resp$repos$forked_from_project$id == project_id))
+    if (id == 0 && !is_empty(search)) {
+      # for some reason the API is not returning "forked_from_project"
+      # but (1) the project is still there but (2) the id is different
+      # seems likely this will cause problems when fetching submissions
+      # 1/14/2023
+      if (length(which((resp$repos$name == search)) > 0)) {
+        message("Project not in 'forked_from' but ", search, " still exists for ", leader, " ", resp$repos$id)
+        id <- id + 1
+      }
+    }
+    if (id > 0) {
+      message("Assignment was already forked for ", leader)
+    } else {
       message("Can't find repo ID for ", leader)
       return()
     }
@@ -513,7 +535,6 @@ assign_work <- function(token, groupname, assignment, userfile,
   teams <- unique(student_data$team)
   vars <- c("token", "userid", "git_id")
   setup <- function(dat) {
-
     ## adding access to the main repo
     resp <- dat %>%
       group_by_at(.vars = "git_id") %>%
@@ -984,6 +1005,8 @@ fetch_work <- function(token, assignment, page = 1,
     fetch_work(token, assignment, server = server, page = page + 1)
     message(paste0("Finished fetch attempt for page ", page, "\n"))
   } else {
+    # useful if some branches are, for some reason, not available on the remote
+    system("git push --all origin")
     message("Finished fetch attempt. Check the console for messages\n")
   }
 }
