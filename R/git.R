@@ -13,7 +13,7 @@ is_empty <- function(x, empty = "\\s*") {
 pressed <- function(x) !is.null(x) && (is.list(x) || x > 0)
 not_pressed <- function(x) !pressed(x)
 
-connect <- function(token = Sys.getenv("git.token"), server = "https://gitlab.com/api/v4/") {
+connect <- function(token = Sys.getenv("GITHUB_PAT"), server = "https://api.github.com/") {
   if (is_empty(token)) {
     stop("Token not available")
   } else {
@@ -106,7 +106,7 @@ groupr <- function(groupname, path, token, server) {
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token GitLab token
+#' @param token GitHub token
 #' @param repo Repo to update
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param permission Permission setting for the repo (default is 20, i.e., reporter)
@@ -114,7 +114,7 @@ groupr <- function(groupname, path, token, server) {
 #'
 #' @export
 add_users_repo <- function(token, repo, userfile, permission = 20,
-                           server = "https://gitlab.com/api/v4/") {
+                           server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -171,7 +171,7 @@ add_user_repo <- function(user_id, repo_id, token, permission, server) {
 #' @param server The GitLab API server
 #'
 #' @export
-remove_users_repo <- function(token, repo, userfile, server = "https://gitlab.com/api/v4/") {
+remove_users_repo <- function(token, repo, userfile, server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -224,7 +224,7 @@ remove_user_repo <- function(user_id, repo_id, token, server) {
 #'
 #' @export
 create_group <- function(token, groupname = "", userfile = "",
-                         permission = 20, server = "https://gitlab.com/api/v4/") {
+                         permission = 20, server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -483,7 +483,7 @@ add_team <- function(proj_id, token, team_mates, server) {
 #' @export
 assign_work <- function(token, groupname, assignment, userfile,
                         tafile = "", type = "individual", pre = "",
-                        server = "https://gitlab.com/api/v4/") {
+                        server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -630,7 +630,7 @@ maker <- function(repo_name, token, server, namespace = "") {
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
 #' @param username Username
-#' @param token Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))
+#' @param token Token (e.g., Sys.getenv("GITHUB_PAT") or Sys.getenv("GITHUB_PAT"))
 #' @param repo Name of the repo (assignment)
 #' @param base_dir Base directory for the repo. file.path(directory, assignment) should exist
 #' @param groupname Group to create on GitLab (defaults to user's namespace)
@@ -639,9 +639,9 @@ maker <- function(repo_name, token, server, namespace = "") {
 #' @param server The GitLab API server
 #'
 #' @export
-create_repo <- function(username = Sys.getenv("git.user"), token = Sys.getenv("git.token"),
+create_repo <- function(username = Sys.getenv("git.user"), token = Sys.getenv("GITHUB_PAT"),
                         repo = basename(getwd()), base_dir = dirname(getwd()), groupname = "",
-                        pre = "", ssh = FALSE, server = "https://gitlab.com/api/v4/") {
+                        pre = "", ssh = FALSE, server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check username/token/server")
@@ -785,7 +785,7 @@ merger <- function(token, to, search = "", server,
 
 check_status <- function(token, assignment, userfile,
                          type = "individual",
-                         server = "https://gitlab.com/api/v4/") {
+                         server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -853,7 +853,7 @@ check_status <- function(token, assignment, userfile,
 #'
 #' @details See \url{https://github.com/vnijs/gitgadget} for additional documentation
 #'
-#' @param token GitLab token
+#' @param token GitHub token
 #' @param assignment Name of the assignment (e.g., "class345/class345-assignment1")
 #' @param userfile A csv file with student information (i.e., username, token, and email)
 #' @param type Individual or Team work
@@ -862,7 +862,7 @@ check_status <- function(token, assignment, userfile,
 #' @export
 collect_work <- function(token, assignment, userfile,
                          type = "individual",
-                         server = "https://gitlab.com/api/v4/") {
+                         server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -928,7 +928,7 @@ collect_work <- function(token, assignment, userfile,
 #'
 #' @export
 fetch_work <- function(token, assignment, page = 1,
-                       server = "https://gitlab.com/api/v4/") {
+                       server = "https://api.github.com/") {
   resp <- connect(token, server)
   if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
@@ -1057,7 +1057,7 @@ remove_student_projects <- function(userfile, server) {
 #' @param server The GitLab API server
 #'
 #' @export
-check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")) {
+check_tokens <- function(userfile, server = Sys.getenv("git.server", "https://api.github.com/")) {
   students <- read_ufile(userfile, cols = c("userid", "token", "email"))
 
   ## testing if student tokens work

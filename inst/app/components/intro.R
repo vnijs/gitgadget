@@ -8,7 +8,6 @@
 # })
 
 observeEvent(input$intro_git, {
-
   # set default branch to 'main' and set rebase to false ... for now
   cmd <- "git config --global init.defaultBranch 'main'\ngit config --global pull.rebase false"
   resp <- system(cmd, intern = TRUE)
@@ -61,27 +60,44 @@ observeEvent(input$intro_git, {
     }
   }
 
-  if (!is_empty(input$intro_token_gl)) {
-    renvir <- file.path(renvirdir, ".Renviron")
-    if (file.exists(renvir)) {
-      envir <- readLines(renvir, warn = FALSE)
-      token_ind <- which(grepl("^\\s*git.token\\s*=", envir))
-      if (length(token_ind) > 0) {
-        envir[token_ind] <- paste0("# ", envir[token_ind])
-      }
-      renv <- paste0(envir, collapse = "\n") %>%
-        paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n")
-      cat(renv, file = renvir)
-    }
-  }
+  # if (!is_empty(input$intro_token_gl)) {
+  #   renvir <- file.path(renvirdir, ".Renviron")
+  #   if (file.exists(renvir)) {
+  #     envir <- readLines(renvir, warn = FALSE)
+  #     token_ind <- which(grepl("^\\s*git.token\\s*=", envir))
+  #     if (length(token_ind) > 0) {
+  #       envir[token_ind] <- paste0("# ", envir[token_ind])
+  #     }
+  #     renv <- paste0(envir, collapse = "\n") %>%
+  #       paste0(., "\ngit.token = \"", input$intro_token_gl, "\"\n")
+  #     cat(renv, file = renvir)
+  #   }
+  # }
 
   if (!is_empty(input$intro_token_gh)) {
     renvir <- file.path(renvirdir, ".Renviron")
     if (file.exists(renvir)) {
+      print("Storing to ~/.Renviron file")
       renv <- readLines(renvir, warn = FALSE) %>%
         .[!grepl("^\\s*GITHUB_PAT\\s*=", .)] %>%
         paste0(collapse = "\n") %>%
         paste0(., "\nGITHUB_PAT = \"", input$intro_token_gh, "\"\n")
+      cat(renv, file = renvir)
+    }
+    renvir <- file.path(renvirdir, ".zshrc")
+    if (file.exists(renvir)) {
+      print("Storing to ~/.zshrc file")
+      renv <- readLines(renvir, warn = FALSE) %>%
+        paste0(collapse = "\n") %>%
+        paste0(., "\nexport GITHUB_PAT=\"", input$intro_token_gh, "\"\n")
+      cat(renv, file = renvir)
+    }
+    renvir <- file.path("~/.rsm-msba/zsh/.zshrc")
+    if (file.exists(renvir)) {
+      print("Storing to RSM-MSBA .zshrc file")
+      renv <- readLines(renvir, warn = FALSE) %>%
+        paste0(collapse = "\n") %>%
+        paste0(., "\nexport GITHUB_PAT=\"", input$intro_token_gh, "\"\n")
       cat(renv, file = renvir)
     }
   }
@@ -136,19 +152,20 @@ shinyFiles::shinyDirChoose(input, "intro_git_home_open", roots = gg_volumes)
 
 server_url <- reactive({
   init <- input$intro_server
-  if (is_empty(init)) init <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
-  sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init)
+  if (is_empty(init)) init <- Sys.getenv("git.server", "https://api.github.com/")
+  sub("\\s*(https://|http://)?([^/]+).*", "\\1\\2", init) %>%
+    sub("api\\.", "", .)
 })
 
-output$ui_intro_get_token <- renderUI({
-  url <- server_url()
-  actionButton(
-    "intro_token_gl_get", "Create",
-    title = "Browse to git server to get a PAT",
-    style = "margin-top: 25px;",
-    onclick = paste0("window.open('", url, "/-/profile/personal_access_tokens', '_blank')")
-  )
-})
+# output$ui_intro_get_token <- renderUI({
+#   url <- server_url()
+#   actionButton(
+#     "intro_token_gl_get", "Create",
+#     title = "Browse to git server to get a PAT",
+#     style = "margin-top: 25px;",
+#     onclick = paste0("window.open('", url, "/-/profile/personal_access_tokens', '_blank')")
+#   )
+# })
 
 output$ui_intro_git_home <- renderUI({
   init <- Sys.getenv("git.home", basedir)
@@ -164,6 +181,12 @@ output$ui_intro_git_home <- renderUI({
 
 output$ui_intro_buttons <- renderUI({
   url <- server_url()
+  if (grepl("github", url)) {
+    addon <- "/settings/ssh/new"
+  } else {
+    addon <- "/-/profile/keys"
+  }
+
   tagList(
     fillRow(
       height = "70px", width = "300px",
@@ -177,7 +200,7 @@ output$ui_intro_buttons <- renderUI({
     actionButton(
       "intro_ssh", "SSH key",
       title = "Create an SSH key and copy the public-key to the clipboard",
-      onclick = paste0("window.open('", url, "/-/profile/keys', '_blank')")
+      onclick = paste0("window.open('", url, addon, "', '_blank')")
     ),
     actionButton("intro_restart", "Restart", title = "Restart GitGadget"),
     actionButton("intro_check", "Check", title = "Check settings")
@@ -186,8 +209,14 @@ output$ui_intro_buttons <- renderUI({
 
 intro_ssh <- eventReactive(input$intro_ssh, {
   url <- server_url()
-  url_keys <- paste0(url, "/-/profile/keys")
-  url_short <- sub("\\s*(https://|http://)?([^/]+).*", "\\2", url)
+  if (grepl("github", url)) {
+    url_keys <- paste0(url, "/settings/ssh/new")
+  } else {
+    url_keys <- paste0(url, "/-/profile/keys")
+  }
+  url_short <- sub("\\s*(https://|http://)?([^/]+).*", "\\2", url) %>%
+    sub("api\\.", "", .)
+
   if (os_type != "Windows") {
     email <- system("git config --global --list", intern = TRUE) %>%
       .[grepl("^user.email", .)] %>%

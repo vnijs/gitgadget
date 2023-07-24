@@ -13,7 +13,7 @@ add_user_group <- function(user_id, group_id, token, permission, server) {
   handle_setopt(h, customrequest = "POST")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "groups/", group_id, "/members?user_id=", user_id, "&access_level=", permission)
-  resp <- curl_fetch_memory(murl,h)
+  resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     mess <- fromJSON(rawToChar(resp$content))$message
     if (length(mess) > 0 && grepl("already exists", mess, ignore.case = TRUE)) {
@@ -28,12 +28,12 @@ add_user_group <- function(user_id, group_id, token, permission, server) {
   list(status = "OKAY")
 }
 
-remove_members_group <- function(token, groupname = "", userfile = "", server = "https://gitlab.com/api/v4/") {
-
+remove_members_group <- function(token, groupname = "", userfile = "", server = "https://api.github.com/") {
   resp <- connect(token, server)
 
-  if (resp$status != "OKAY")
+  if (resp$status != "OKAY") {
     stop("Error connecting to server: check token/server")
+  }
 
   token <- resp$token
   resp <- groupID(groupname, groupname, token, server)
@@ -63,7 +63,7 @@ remove_user_group <- function(user_id, group_id, token, server) {
   handle_setopt(h, customrequest = "DELETE")
   handle_setheaders(h, "PRIVATE-TOKEN" = token)
   murl <- paste0(server, "groups/", group_id, "/members/", user_id)
-  resp <- curl_fetch_memory(murl,h)
+  resp <- curl_fetch_memory(murl, h)
   if (checkerr(resp$status_code) == FALSE) {
     message("User ", user_id, " was not a member of group ", group_id, "\n")
     list(status = "SERVER_ERROR")

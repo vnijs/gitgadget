@@ -9,11 +9,11 @@ collect_work(
   assignment,
   userfile,
   type = "individual",
-  server = "https://gitlab.com/api/v4/"
+  server = "https://api.github.com/"
 )
 }
 \arguments{
-\item{token}{GitLab token}
+\item{token}{GitHub token}
 
 \item{assignment}{Name of the assignment (e.g., "class345/class345-assignment1")}
 

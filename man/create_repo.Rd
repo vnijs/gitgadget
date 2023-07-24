@@ -6,19 +6,19 @@
 \usage{
 create_repo(
   username = Sys.getenv("git.user"),
-  token = Sys.getenv("git.token"),
+  token = Sys.getenv("GITHUB_PAT"),
   repo = basename(getwd()),
   base_dir = dirname(getwd()),
   groupname = "",
   pre = "",
   ssh = FALSE,
-  server = "https://gitlab.com/api/v4/"
+  server = "https://api.github.com/"
 )
 }
 \arguments{
 \item{username}{Username}
 
-\item{token}{Token (e.g., Sys.getenv("git.token") or Sys.getenv("GITHUB_PAT"))}
+\item{token}{Token (e.g., Sys.getenv("GITHUB_PAT") or Sys.getenv("GITHUB_PAT"))}
 
 \item{repo}{Name of the repo (assignment)}
 

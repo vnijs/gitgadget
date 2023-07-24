@@ -6,7 +6,7 @@
 \usage{
 check_tokens(
   userfile,
-  server = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+  server = Sys.getenv("git.server", "https://api.github.com/")
 )
 }
 \arguments{

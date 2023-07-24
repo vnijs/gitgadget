@@ -2,17 +2,17 @@
 # main_git__ <- TRUE
 main_git__ <- FALSE
 if (main_git__) {
-
   library(curl)
   library(jsonlite)
   library(dplyr)
   source("./R/git.R")
 
   ## settings
-  # server <- Sys.getenv("git.server", "https://gitlab.com/api/v4/")
-  server <- Sys.getenv("git.server", "https://rsm-gitlab.ucsd.edu/api/v4/")
+  # server <- Sys.getenv("git.server", "https://rsm-gitlab.ucsd.edu/api/v4/")
+  server <- Sys.getenv("git.server", "https://api.github.com/")
   username <- Sys.getenv("git.user")
-  token <- Sys.getenv("git.token")
+  # token <- Sys.getenv("git.token")
+  token <- Sys.getenv("GITHUB_PAT")
   # groupname <- "rady-mgta-bc-2016"
   groupname <- Sys.getenv("git.group")
   userfile <- "~/git/msba-test-gitlab.csv"
@@ -55,10 +55,11 @@ if (main_git__) {
   for (i in seq_len(nrow(students))) {
     i <- 1
     token <- students[i, "token"]
-    if (token != "")
+    if (token != "") {
       id <- get_allprojects(token, server)
-    else
+    } else {
       id$status <- "EMPTY"
+    }
 
     if (id$status == "OKAY") {
       print(paste0("OKAY: ", students[i, "userid"], " ", token))
@@ -73,7 +74,8 @@ if (main_git__) {
 
     ## create a group for a course where all assignments and cases will be posted
     create_group(
-      token, groupname, userfile, permission = permission, server = server
+      token, groupname, userfile,
+      permission = permission, server = server
     )
 
     ## get or create a repo for assignments and cases
@@ -83,10 +85,10 @@ if (main_git__) {
     )
 
     assign_work(
-      token, groupname, assignment, userfile, type = type,
+      token, groupname, assignment, userfile,
+      type = type,
       pre = pre, server = server
     )
-
   } else {
     cat("Assignment does not exist")
   }
@@ -104,7 +106,8 @@ if (main_git__) {
     )
 
     assign_work(
-      token, groupname, assignment, userfile, type = type,
+      token, groupname, assignment, userfile,
+      type = type,
       pre = pre, server = server
     )
   } else {
@@ -116,12 +119,14 @@ if (main_git__) {
   type <- "individual"
   if (file.exists(file.path(directory, assignment))) {
     collect_work(
-      token, groupname, assignment, userfile, type = type,
+      token, groupname, assignment, userfile,
+      type = type,
       pre = pre, server = server
     )
 
     fetch_work(
-      token, groupname, assignment, pre = pre, server = server
+      token, groupname, assignment,
+      pre = pre, server = server
     )
   } else {
     cat("Assignment does not exist")

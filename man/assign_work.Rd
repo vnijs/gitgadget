@@ -12,7 +12,7 @@ assign_work(
   tafile = "",
   type = "individual",
   pre = "",
-  server = "https://gitlab.com/api/v4/"
+  server = "https://api.github.com/"
 )
 }
 \arguments{

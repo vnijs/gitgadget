@@ -9,7 +9,7 @@ create_group(
   groupname = "",
   userfile = "",
   permission = 20,
-  server = "https://gitlab.com/api/v4/"
+  server = "https://api.github.com/"
 )
 }
 \arguments{

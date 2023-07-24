@@ -19,27 +19,31 @@ gitgadget_ui <- function() {
           textInput(
             "intro_user_name", "User name:",
             value = Sys.getenv("git.user"),
-            placeholder = "Provide GitLab/GitHub user name"
+            placeholder = "Provide GitHub user name"
           ),
           textInput(
             "intro_user_email", "User email:",
             value = Sys.getenv("git.email"),
-            placeholder = "Provide GitLab/GitHub user email"
+            placeholder = "Provide GitHub user email"
           ),
-          textInput("intro_server", "Server API:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")),
+          textInput("intro_server", "Server API:", value = Sys.getenv("git.server", "https://api.github.com/")),
+          # fillRow(
+          #   height = "70px", width = "475px",
+          #   passwordInput("intro_token_gl", "GitHub token:", value = Sys.getenv("git.token")),
+          #   uiOutput("ui_intro_get_token")
+          # ),
           fillRow(
             height = "70px", width = "475px",
-            passwordInput("intro_token_gl", "GitLab token:", value = Sys.getenv("git.token")),
-            uiOutput("ui_intro_get_token")
+            passwordInput("intro_token_gh", "GitHub token:", value = Sys.getenv("GITHUB_PAT")),
+            actionButton(
+              "intro_token_gh_get", "Create",
+              title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;",
+              # onclick = "window.open('https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT', '_blank')"
+              # onclick = "window.open('https://github.com/settings/personal-access-tokens/new
+              # onclick = "window.open('https://github.com/settings/tokensw
+              onclick = "window.open('https://github.com/settings/tokens/new?scopes=repo,workflow&description=RSM-MSBA', '_blank')"
+            )
           ),
-          # fillRow(height = "70px", width = "475px",
-          #   passwordInput("intro_token_gh","GitHub token:", value = Sys.getenv("GITHUB_PAT")),
-          #   actionButton(
-          #     "intro_token_gh_get", "Create",
-          #     title = "Browse to GitHub to get a PAT", style = "margin-top: 25px;",
-          #     onclick = "window.open('https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT', '_blank')"
-          #   )
-          # ),
           radioButtons(
             "intro_user_type", "User type:", c("student", "faculty"),
             Sys.getenv("git.user.type", "student"),
@@ -62,13 +66,11 @@ gitgadget_ui <- function() {
       miniTabPanel("Create",
         value = "create", icon = icon("git", verify_fa = FALSE),
         miniContentPanel(
-          # HTML("<h2>Create a repo on GitLab or GitHub</h2>"),
-          HTML("<h2>Create a repo on GitLab</h2>"),
-          selectInput("create_remote", NULL, choices = "GitLab", selected = "GitLab"),
-          # selectInput("create_remote", NULL, choices = c("GitLab", "GitHub"), selected = "GitLab"),
+          HTML("<h2>Create a repo on GitHub</h2>"),
+          selectInput("create_remote", NULL, choices = "GitHub", selected = "GitHub"),
           conditionalPanel(
-            "input.create_remote == 'GitLab'",
-            textInput("create_server", "API server:", value = Sys.getenv("git.server", "https://gitlab.com/api/v4/"))
+            "input.create_remote == 'GitHub'",
+            textInput("create_server", "API server:", value = Sys.getenv("git.server", "https://api.github.com/"))
           ),
           radioButtons("create_ssh", "Authentication type:", c("ssh", "https"), "ssh", inline = TRUE),
           fillRow(
@@ -77,7 +79,7 @@ gitgadget_ui <- function() {
             uiOutput("ui_create_token")
           ),
           conditionalPanel(
-            "input.create_remote == 'GitLab'",
+            "input.create_remote == 'GitHub'",
             fillRow(
               height = "70px", width = "300px",
               textInput("create_group", "Group name:", value = Sys.getenv("git.group")),
@@ -94,7 +96,7 @@ gitgadget_ui <- function() {
             )
           ),
           conditionalPanel(
-            "input.intro_user_type == 'faculty' && input.create_remote == 'GitLab'",
+            "input.intro_user_type == 'faculty' && input.create_remote == 'GitHub'",
             fillRow(
               height = "70px", width = "475px",
               uiOutput("ui_create_user_file"),
@@ -116,7 +118,7 @@ gitgadget_ui <- function() {
             ),
             conditionalPanel(
               "input.intro_user_type == 'faculty' && input.create_user_file != ''",
-              actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitLab"),
+              actionButton("create_check_tokens", "Check tokens", title = "Check student token information on GitHub"),
               radioButtons("create_type", "Assignment type:", c("individual", "team"), "individual", inline = TRUE)
             )
           ),
@@ -168,7 +170,7 @@ gitgadget_ui <- function() {
           },
           actionButton(
             "clone", "Clone",
-            title = "Clone a repo from, e.g., github or gitlab over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github or gitlab, run 'git clone <remote url>' from the command line"
+            title = "Clone a repo from, e.g., github over HTTPS or SSH. By default, the name of the remote repo and the local clone will be the same. To change the name for the local repo to create, provide an alternative in the 'Custom directory' input\n\nGit command:\ngit clone <remote url>\n\nNote: To activate a credential helper the first time you clone a (private) repo from, e.g., github, run 'git clone <remote url>' from the command line"
           ),
           hr(),
           verbatimTextOutput("clone_output")
@@ -302,7 +304,7 @@ gitgadget_ui <- function() {
           conditionalPanel(
             "input.intro_user_type == 'faculty'",
             HTML("<h2>Collect assignments</h2>"),
-            passwordInput("collect_token", "Token:", value = Sys.getenv("git.token")),
+            passwordInput("collect_token", "Token:", value = Sys.getenv("GITHUB_PAT")),
             uiOutput("ui_collect_assignment"),
             conditionalPanel(
               "input.collect_assignment != undefined && input.collect_assignment != null &&
@@ -338,12 +340,12 @@ gitgadget_ui <- function() {
               ),
               textInput(
                 "collect_server", "API server:",
-                value = Sys.getenv("git.server", "https://gitlab.com/api/v4/")
+                value = Sys.getenv("git.server", "https://api.github.com/")
               ),
               radioButtons("collect_type", "Assignment type:", c("individual", "team"), "individual", inline = TRUE),
               actionButton(
                 "collect", "Collect",
-                title = "Create merge requests from all student forks using the gitlab API. Used for assignment management by instructors"
+                title = "Create merge requests from all student forks using the GitHub API. Used for assignment management by instructors"
               ),
               actionButton(
                 "collect_fetch", "Fetch",

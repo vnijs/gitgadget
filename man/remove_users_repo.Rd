@@ -4,7 +4,7 @@
 \alias{remove_users_repo}
 \title{Remove users from a repo}
 \usage{
-remove_users_repo(token, repo, userfile, server = "https://gitlab.com/api/v4/")
+remove_users_repo(token, repo, userfile, server = "https://api.github.com/")
 }
 \arguments{
 \item{token}{GitLab token}

@@ -9,11 +9,11 @@ add_users_repo(
   repo,
   userfile,
   permission = 20,
-  server = "https://gitlab.com/api/v4/"
+  server = "https://api.github.com/"
 )
 }
 \arguments{
-\item{token}{GitLab token}
+\item{token}{GitHub token}
 
 \item{repo}{Repo to update}
 
