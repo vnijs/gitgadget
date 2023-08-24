@@ -2,7 +2,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^.*\.sublime-project$
-^\.travis\.yml$
 ^docs$
 ^pkgbuild$
 gitgadget.code-workspace

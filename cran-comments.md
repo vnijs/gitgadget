@@ -1,5 +1,32 @@
 ## Resubmission
 
+This is a resubmission. In this version I have fixed issues connected to travis and the vignette. 
+
+## Test environments
+
+* macOS R 4.3.j
+* win-builder (devel)
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. There was one note related to the two links below. This occurs because access requires a gitlab account. I'd prefer to keep these links in the documentation if possible
+
+```
+URL: https://gitlab.com/-/profile/keys
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+  Message: Service Unavailable
+URL: https://gitlab.com/-/profile/personal_access_tokens
+  From: inst/doc/gitgadget.html
+        README.md
+  Status: 503
+```
+
+## Previous cran-comments
+
+## Resubmission
+
 This is a resubmission. In this version I have fixed issues connected to travis and vignette. 
 
 ## Test environments
@@ -25,7 +52,6 @@ URL: https://gitlab.com/-/profile/personal_access_tokens
   Status: 503
 ```
 
-## Previous cran-comments
 
 ## Resubmission
 
