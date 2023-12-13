@@ -27,7 +27,7 @@ Imports:
 Suggests:
     knitr,
     rmarkdown
-URL: URL: https://github.com/vnijs/gitgadget
+URL: https://vnijs.github.io/gitgadget/, https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
 RoxygenNote: 7.2.3
