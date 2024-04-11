@@ -3,7 +3,7 @@
 # })
 
 # observeEvent(input$intro_token_gh_get, {
-#   ## based on usethis::browse_github_pat
+#   ## based on usethis::create_github_token
 #   utils::browseURL("https://github.com/settings/tokens/new?scopes=repo,gist&description=R:GITHUB_PAT")
 # })
 
