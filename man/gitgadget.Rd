@@ -2,6 +2,7 @@
 % Please edit documentation in R/aaa.R, R/gadget.R
 \docType{package}
 \name{gitgadget}
+\alias{gitgadget-package}
 \alias{gitgadget}
 \title{gitgadget}
 \usage{
@@ -15,8 +16,27 @@ gitgadget(port = get_port(), host = "127.0.0.1", launch.browser = TRUE)
 \item{launch.browser}{Launch app in viewer (browsers) or only show the URL}
 }
 \description{
+An 'Rstudio' addin for version control that allows users to clone repositories, create and delete branches, and sync forks on GitHub, GitLab, etc. Furthermore, the addin uses the GitLab API to allow instructors to create forks and merge requests for all students/teams with one click of a button.
+
 Run gitgadget in the Rstudio viewer if available
 }
 \details{
 See \url{https://github.com/vnijs/gitgadget} for documentation
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/vnijs/gitgadget}
+  \item Report bugs at \url{https://github.com/vnijs/gitgadget/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Vincent Nijs \email{vnijs@ucsd.edu}
+
+Authors:
+\itemize{
+  \item Sanjiv Erat \email{serat@ucsd.edu}
+}
+
 }

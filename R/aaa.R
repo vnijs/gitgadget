@@ -4,7 +4,6 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server", "team", "gitga
 #' gitgadget
 #'
 #' @name gitgadget
-#' @docType package
 #' @import shiny miniUI curl dplyr
 #' @importFrom jsonlite fromJSON
 #' @importFrom rstudioapi isAvailable getActiveProject openProject restartSession
@@ -15,4 +14,4 @@ globalVariables(c(".", "un", "directory", "base64_enc", "server", "team", "gitga
 #' @importFrom usethis edit_r_environ edit_r_profile use_git use_github
 #' @importFrom shinyFiles shinyDirButton shinyFilesButton parseDirPath
 #'   parseFilePaths shinyFileChoose shinyDirChoose
-NULL
+"_PACKAGE"

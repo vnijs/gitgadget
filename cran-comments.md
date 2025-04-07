@@ -1,5 +1,18 @@
 ## Resubmission
 
+This is a resubmission. In this version I have fixed an issue with the URL in the DESCRIPTION file 
+
+## Test environments
+
+* macOS R 4.4.3
+* win-builder (devel)
+
+## R CMD check results
+
+There were no ERRORs or WARNINGs. 
+
+## Resubmission
+
 This is a resubmission. In this version I have fixed issues connected to travis and vignette. 
 
 ## Test environments

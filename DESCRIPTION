@@ -1,8 +1,8 @@
 Package: gitgadget
 Type: Package
 Title: 'Rstudio' Addin for Version Control and Assignment Management using Git
-Version: 0.8.0
-Date: 2023-7-4
+Version: 0.8.2
+Date: 2025-4-6
 Authors@R: c(
     person("Vincent", "Nijs", , "vnijs@ucsd.edu", c("aut", "cre")),
     person("Sanjiv", "Erat", , "serat@ucsd.edu", "aut")
@@ -27,10 +27,10 @@ Imports:
 Suggests:
     knitr,
     rmarkdown
-URL: URL: https://github.com/vnijs/gitgadget
+URL: https://github.com/vnijs/gitgadget
 BugReports: https://github.com/vnijs/gitgadget/issues
 License: GPL-3
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 Language: en-US
 VignetteBuilder: knitr

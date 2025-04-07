@@ -1,3 +1,8 @@
+# gitgadget 0.8.1.0
+
+* Fix URL specification in the DESCRIPTION file
+* Use "_PACKAGE" for documentation
+
 # gitgadget 0.7.5.0
 
 * Setting `main` as the default branch
